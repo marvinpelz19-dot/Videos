@@ -16,7 +16,7 @@ Format 1080x1920 (9:16), 30 fps, 19,8 s, H.264 + AAC.
 | prompt | `Und du, Paula?` (nur einmal im Code als `PROMPT` deklariert) |
 | surface_labels | Terminal · Panel · Dokument · Chat (neutrale eigene Oberflächen, keine fremden Marken) |
 | reel_captions | keine |
-| command | `› gutschein einlösen --mit paula` |
+| command | `› axtwerfen --mit paula` |
 
 ## Bewegungen
 
@@ -40,8 +40,8 @@ Format 1080x1920 (9:16), 30 fps, 19,8 s, H.264 + AAC.
 | 4 | o03 Gutschein für Jan | 5 | 10,300 |
 | 5 | o06 Eine Axt | 6 | 10,867 |
 | 6 | o04 Axt fliegt | 7 | 11,433 |
-| 7 | o07 Eine Axt. Ein Ziel. | 8 | 12,000 |
-| 8 | o08 Paula! | 9 | 12,567 |
+| 7 | o07 Eine Axt. Ein Ziel. | 8 | 12,033 |
+| 8 | o08 Paula! | 9 | 12,600 |
 | 9 | o10 Detail Paula-Axt | 10 | 13,167 |
 | 10 | o11 Detail Axt-ion | 10,5 | 13,433 |
 | 11 | o12 Detail Happy Birthday | 11 | 13,733 |
@@ -55,5 +55,9 @@ Rhythmus: zuerst halbes Tempo, dann ein Schnitt pro Beat, die letzten vier im do
 - 9:16 statt 1920x1080 und 19,8 s statt 24–45 s, wie gewünscht passend zum Original.
 - Gerendert mit einem eigenen deterministischen Renderer (`render.mjs`: Playwright + FFmpeg) statt mit der HyperFrames-CLI. `npx` für externe Pakete ist in dieser Sitzung blockiert. Darum gibt es auch keine `hyperframes check`-Ausgabe. Animiert ist alles in reinem JS statt mit GSAP.
 - Das Reel zeigt keine Produkt-Outputs, sondern Bilder aus deinem eigenen Originalvideo.
-- Ohne Tipp-Geräusche: Es wird nur die Originalmusik verwendet.
+- Ohne Tipp-Geräusche: Die Audiospur ist 1:1 aus dem Originalvideo übernommen (Stream-Kopie, MD5-identisch).
 - Der Schlussbefehl ist ein augenzwinkernder Fake-Befehl, kein echter Befehl.
+
+## Prüfung
+
+Die Frame-Differenzen im fertigen MP4 zeigen jeden der 14 Schnitte genau auf seinem Raster-Frame (224, 258, 292, 309, 326, 343, 361, 378, 395, 403, 412, 420, 429, 480).
