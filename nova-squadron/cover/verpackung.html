@@ -1,0 +1,32 @@
+<!doctype html><html lang="de"><meta charset="utf-8"><title>Trade Force Verpackung</title>
+<style>
+@page { size: A4; margin: 0; } * { box-sizing: border-box; } html, body { margin: 0; }
+body { font-family: "Liberation Sans", "DejaVu Sans", Arial, sans-serif; color: #14131a; }
+.sheet { width: 210mm; height: 297mm; position: relative; page-break-after: always; display: grid; place-items: center; }
+.note { position: absolute; top: 12mm; left: 0; right: 0; text-align: center; font-size: 9pt; color: #666; }
+.panel { width: 130mm; height: 183mm; position: relative; overflow: hidden; }
+.cut { position: absolute; width: 130mm; height: 183mm; pointer-events: none; }
+.cut i { position: absolute; background: #000; } .cut i:nth-child(-n+4) { width: 6mm; height: 0.2mm; } .cut i:nth-child(n+5) { width: 0.2mm; height: 6mm; }
+.cut i:nth-child(1) { left: -9mm; top: 0; } .cut i:nth-child(2) { right: -9mm; top: 0; } .cut i:nth-child(3) { left: -9mm; bottom: 0; } .cut i:nth-child(4) { right: -9mm; bottom: 0; }
+.cut i:nth-child(5) { left: 0; top: -9mm; } .cut i:nth-child(6) { right: 0; top: -9mm; } .cut i:nth-child(7) { left: 0; bottom: -9mm; } .cut i:nth-child(8) { right: 0; bottom: -9mm; }
+.front img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.back { background: #0b1330; color: #f4ead2; padding: 9mm 9mm 7mm; display: grid; grid-template-rows: auto auto 1fr auto; gap: 4mm; background-image: radial-gradient(rgba(255,255,255,.08) 0.25mm, transparent 0.32mm); background-size: 3mm 3mm; }
+.back h1 { margin: 0; font-size: 27pt; font-style: italic; font-weight: 900; letter-spacing: .5pt; color: #ffb02e; text-shadow: 0.6mm 0.6mm 0 #c8281e; transform: rotate(-2deg); transform-origin: left; }
+.back .sub { margin: -2mm 0 0; font-size: 9pt; letter-spacing: 2pt; text-transform: uppercase; color: #ff8a3c; font-weight: 700; }
+.blurb { margin: 0; font-size: 9.6pt; line-height: 1.42; }
+.blurb b { color: #ffd84a; }
+.qrbox { display: grid; grid-template-columns: 52mm 1fr; gap: 6mm; align-items: center; background: #f4ead2; color: #14131a; border: 0.8mm solid #14131a; box-shadow: 1.6mm 1.6mm 0 #c8281e; padding: 4mm; }
+.qrbox img { width: 52mm; height: 52mm; display: block; }
+.qrbox h2 { margin: 0 0 2mm; font-size: 13pt; font-style: italic; font-weight: 900; color: #c8281e; text-transform: uppercase; }
+.qrbox ol { margin: 0; padding-left: 4.6mm; font-size: 8.8pt; line-height: 1.38; } .qrbox li { margin-bottom: 1.1mm; }
+.url { font-size: 8pt; font-weight: 700; margin-top: 2mm; word-break: break-all; }
+.foot { display: flex; justify-content: space-between; align-items: end; font-size: 7.4pt; color: #aeb6d6; gap: 4mm; }
+.foot b { color: #ffd84a; font-size: 8.4pt; }
+</style>
+<section class="sheet"><p class="note">Vorderseite · 130 × 183 mm · an den Marken schneiden</p><div class="cut"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="panel front"><img src="trade-force-cover.jpg" alt=""></div></section>
+<section class="sheet"><p class="note">Rückseite mit QR-Code · 130 × 183 mm · an den Marken schneiden</p><div class="cut"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="panel back"><div><h1>TRADE FORCE</h1></div><p class="sub">Nova Squadron · Der Krieg um Essen</p>
+<p class="blurb">Der Unternehmerverband will den Wettbewerb abschaffen. Mit freundlichen Grüßen.<br><br><b>Marc Heistermann</b> steigt selbst ins Cockpit. An seiner Seite: Sicherheitschef <b>Charlie</b>, Co-Pilot <b>Mini</b> und die ganze Familie. Acht Einsätze, ein Comic, der mit jedem Sieg weitergeht, und ein Wellen-Gefecht ohne Ende.<br><br><b>Unendlich Leben. Unendlich Munition. Ein Essen.</b></p>
+<div class="qrbox"><img src="qr.svg" alt="QR-Code"><div><h2>So startest du</h2><ol><li>QR-Code mit dem Tablet scannen und die Seite einmal ganz laden lassen.</li><li><b>iPad:</b> in Safari auf Teilen tippen, dann „Zum Home-Bildschirm“.<br><b>Android:</b> im Chrome-Menü „App installieren“.</li><li>Das Symbol „Trade Force“ antippen. Ab jetzt läuft das Spiel auch ohne Internet.</li></ol><p class="url">trade-force-essen.netlify.app</p></div></div>
+<div class="foot"><span><b>Für Marc.</b><br>Der Spielstand bleibt auf deinem Tablet gespeichert.</span><span>Tablet im Querformat · Ton an</span></div></div></section>
+</html>
