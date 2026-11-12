@@ -55,7 +55,7 @@ export const ENVS = {
 // Galaxis an sich reißen. Die Nova Squadron fliegt für den Handelsverband. Am Ende führt der Handelsverband alle Verbände.
 // Phasen: spawn = [Typ, Anzahl]. Ziel ist immer: alle Ziel-Objekte der Phase zerstören.
 export const STORY = {
-  intro: 'Du bist Marc Heistermann, Kommandant der Nova Squadron und Stimme des Handelsverbands. An Bord: Co-Pilot Vex und Sicherheitschef Charlie. Im Essen-System greift der Unternehmerverband nach jedem Markt und jeder Station.',
+  intro: 'Du bist Marc Heistermann, Kommandant der Nova Squadron und Stimme des Handelsverbands. An Bord: Co-Pilot Mini und Sicherheitschef Charlie. Im Essen-System greift der Unternehmerverband nach jedem Markt und jeder Station.',
   outro: 'Das Flaggschiff Monopol ist Geschichte, Hauptgeschäftsführer Kanders hat kapituliert. Alle Verbände des Systems haben Marc Heistermann und den Handelsverband zu ihrem Vorsitz gewählt. Essen gehört dem Handel.',
 };
 // Comic zum Durchklicken: vor jedem Einsatz (pre) und nach dem Sieg (post). Jedes Bild hat einen Erzählkasten (cap),
@@ -71,72 +71,72 @@ export const COMICS = {
     { img: 'n_kord_screen', cap: 'Dann kam Gegner Nummer vier.', lines: [['Hauptgeschäftsführer Kanders', 'Bürger von Essen! Der Unternehmerverband hat eine frohe Botschaft: Ich kaufe alles.'], ['Hauptgeschäftsführer Kanders', 'Auch das, was nicht zu verkaufen ist.']] },
     { img: 'n_baker', cap: 'Kanders’ Heuschrecken-Drohnen arbeiteten schnell.', fx: 'RATSCH!', lines: [['Bäcker Bolle', 'Der hat meinen Stand gekauft, während ich noch Brötchen verkauft habe!'], ['Kunde', 'Darf ich das hier noch aufessen?']] },
     { img: 'x_coffee', cap: 'Am Abend kam Post.', fx: 'PRUUUST!', lines: [['Marc Heistermann', '„Wettbewerb wird zum Monatsende abgeschafft. Mit freundlichen Grüßen, Kanders.“'], ['Marc Heistermann', 'MIT FREUNDLICHEN GRÜSSEN?!'], ['Charlie', 'WAFF?!']] },
-    { img: 'f_dinner', cap: 'Noch am selben Abend: Krisensitzung. Am Küchentisch, wo bei Heistermanns alles Wichtige entschieden wird.', lines: [['Astrid', 'Kanders will den Wettbewerb abschaffen? Nicht mit dieser Familie.'], ['Nick', 'Ich fliege mit. Linker Flügel.'], ['Marina', 'Dann nehme ich den rechten. Einer muss ja treffen.'], ['Jan', 'Ich schraube. Paula navigiert.'], ['Paula', 'Sonst landet ihr wieder in Bottrop.']] },
-    { img: 'f_dinner', cap: 'Bleibt noch ein Tagesordnungspunkt.', lines: [['Marvin', 'Ich hätte da eine Erfindung …'], ['Marina', 'Die letzte hat den Toaster gekostet, Marvin.'], ['Marc Heistermann', 'Einstimmig. Charlie kriegt ein Käseleckerli, wir haben einen Plan.']] },
+    { img: 'f_dinner', cap: 'Noch am selben Abend: Krisensitzung. Am Küchentisch, wo bei Heistermanns alles Wichtige entschieden wird.', lines: [['Astrid', 'Kanders will den Wettbewerb abschaffen? Nicht mit mir und nicht mit uns.'], ['Nick', 'Ich fliege mit. Linker Flügel.'], ['Marina', 'Dann nehme ich den rechten. Einer muss ja treffen.'], ['Jan', 'Ich schraube. Paula navigiert.'], ['Paula', 'Sonst landet ihr am Ende noch in Bottrop.']] },
+    { img: 'f_dinner', cap: 'Bleibt noch ein Tagesordnungspunkt.', lines: [['Marvin', 'Ich hätte da eine Idee …'], ['Marina', 'Marvin, dein Kanu, dein Paddel und dein Ball helfen uns hier im Weltraum nicht.'], ['Marc Heistermann', 'Einstimmig. Charlie kriegt ein Käseleckerli. Und dann fliegen wir los.']] },
     { img: 'f_astrid', cap: 'Astrid Heistermann übernimmt die Leitstelle. Ab jetzt hört die ganze Staffel auf ihr Kommando. Marc übrigens auch.', lines: [['Astrid', 'Leitstelle an alle: Wer zu spät zum Start kommt, räumt die Spülmaschine aus.'], ['Charlie', 'Wuff.'], ['Astrid', 'Du nicht, Charlie. Du hast Bereitschaft.']] },
-    { img: 'x_vex', cap: 'Im Hangar der Nova Squadron wartete Verstärkung.', lines: [['Vex', 'VEX-1, ehemals Einkaufswagen. Ich habe ein klemmendes Rad und zu allem eine Meinung.'], ['Marc Heistermann', 'Perfekt. Du bist mein Co-Pilot.'], ['Charlie', 'Grrr.'], ['Vex', 'Er mag mein Rad nicht. Niemand mag mein Rad.']] },
+    { img: 'x_vex', cap: 'Im Hangar der Nova Squadron wartete Verstärkung.', lines: [['Mini', 'Mini, ehemals Vorführwagen. Ich habe eine klemmende Hecktür und zu allem eine Meinung.'], ['Marc Heistermann', 'Perfekt. Du bist mein Co-Pilot.'], ['Charlie', 'Grrr.'], ['Mini', 'Er mag meine Hecktür nicht. Niemand mag meine Hecktür.']] },
   ] },
   m0: { title: 'Kapitel 1 · Der Kommandant steigt ein', pre: [
-    { img: 'c_m0_1', cap: 'Die Arkaden der Kernstadt. Laden um Laden schließt.', lines: [['Vex', 'Hier habe ich früher gearbeitet. Gang sieben, Konserven.'], ['Marc Heistermann', 'Du kriegst deinen Gang zurück, Vex.']] },
-    { img: 'x_m0_2', cap: 'Hangar. Die HV-7 „Pfeil“ steht bereit.', lines: [['Marc Heistermann', 'Ich habe lange genug nur geredet. Jetzt fliege ich selbst.'], ['Vex', 'Darf ich erinnern, dass dein letzter Flug ein Linienflug war?'], ['Charlie', 'Wuff!'], ['Marc Heistermann', 'Charlie fliegt mit. Einer muss ja aufpassen.']] },
-    { img: 'f_hangar', cap: 'Jan und Marvin machen die Pfeil startklar.', fx: 'BRZZL!', lines: [['Jan', 'Triebwerk läuft. Das Klappern ist neu, das gehört so.'], ['Marvin', 'Ich habe noch eine Kleinigkeit eingebaut. Bitte nicht den roten Knopf drücken.'], ['Marc Heistermann', 'Welchen roten Knopf?'], ['Marvin', 'Genau.']] },
+    { img: 'c_m0_1', cap: 'Die Arkaden der Kernstadt. Laden um Laden schließt.', lines: [['Mini', 'Hier stand ich früher und wurde angeboten. Es gab Probefahrten.'], ['Marc Heistermann', 'Dann wird das heute deine längste Probefahrt, Mini.']] },
+    { img: 'x_m0_2', cap: 'Hangar. Die HV-7 „Pfeil“ steht bereit.', lines: [['Marc Heistermann', 'Ich habe lange genug nur geredet. Jetzt fliege ich selbst.'], ['Mini', 'Darf ich erinnern, dass dein letzter Urlaub, ich meine natürlich Flug, nur innerhalb Deutschlands war?'], ['Charlie', 'Wuff!'], ['Marc Heistermann', 'Kein Kommentar, bitte.']] },
+    { img: 'f_hangar', cap: 'Jan und Marvin machen die Pfeil startklar.', fx: 'BRZZL!', lines: [['Jan', 'Triebwerk läuft. Das Klappern ist neu, das gehört so.'], ['Marvin', 'Ich habe noch ein Kanupolo-Tor ans Heck geschraubt. Für die Aerodynamik.'], ['Marina', 'Im All gibt es keine Luft, Marvin. Ich mache einen Raketenhalter daraus.'], ['Marvin', 'Das war Plan B.']] },
   ], post: [
-    { img: 'x_m0_post', cap: 'Flugschule bestanden.', lines: [['Vex', 'Sieben von zehn. Der Looping war eine Vier, die Landung war ein Parkversuch.'], ['Marc Heistermann', 'Ich nehme die Sieben.'], ['Vex', 'Charlie gibt eine Zwei. Er ist strenger als ich.']] },
+    { img: 'x_m0_post', cap: 'Flugschule bestanden.', lines: [['Mini', 'Sieben von zehn. Der Looping war eine Vier, die Landung war ein Parkversuch.'], ['Marc Heistermann', 'Ich nehme die Sieben.'], ['Mini', 'Charlie gibt eine Zwei. Er ist strenger als ich.']] },
   ] },
   m1: { title: 'Kapitel 2 · Feuertaufe über Rüttenscheid', pre: [
     { img: 'c_m1_1', cap: 'Die Marktstation Rüttenscheid. Wer sie hält, setzt die Preise.', lines: [['Astrid', 'Heuschrecken-Drohnen im Anflug! Hunderte!']] },
     { img: 'f_wing', cap: 'An Marcs Flügeln: Nick links, Marina rechts.', lines: [['Nick', 'Wer die meisten Drohnen holt, sucht heute Abend den Film aus!'], ['Marina', 'Dann such dir schon mal was Schönes aus. Für mich.'], ['Marc Heistermann', 'Kinder. Konzentration.'], ['Astrid', 'Das gilt auch für dich, Marc.']] },
-    { img: 'n_m1_mid', cap: 'Die Händler wehren sich mit allem, was die Auslage hergibt.', fx: 'KLATSCH!', lines: [['Fischhändlerin', 'Der Dorsch ist von heute Morgen! Der hält was aus!']] },
-    { img: 'c_m1_2', cap: 'Hinter dem Schwarm: die Korvette Vollstrecker.', lines: [['Marc Heistermann', 'Sechs Geschütze? Gut. Dann weiß ich, wohin ich zielen muss.'], ['Vex', 'Ich wüsste gern, wohin ich mich ducken muss.']] },
+    { img: 'n_m1_mid', cap: 'Die Händler wehren sich mit allem, was die Auslage hergibt.', fx: 'KLATSCH!', lines: [['Fischhändlerin', 'Die Surimi und die Lachspastete sind von heute Morgen! Die halten schon noch was aus!']] },
+    { img: 'c_m1_2', cap: 'Hinter dem Schwarm: die Korvette Vollstrecker.', lines: [['Marc Heistermann', 'Sechs Geschütze? Gut. Dann weiß ich, wohin ich zielen muss.'], ['Mini', 'Ich wüsste gern, wohin ich mich ducken muss.']] },
   ], post: [
-    { img: 'x_m1_post', cap: 'Rüttenscheid ist frei.', lines: [['Händler', 'Geht aufs Haus, Kommandant. Mit Zwiebeln.'], ['Charlie', 'Wuff! Wuff!'], ['Marc Heistermann', 'Die Currywurst ist für mich, Charlie. Für dich habe ich Käseleckerlis dabei.'], ['Charlie', 'WUFF!']] },
+    { img: 'x_m1_post', cap: 'Rüttenscheid ist frei. Das Frittenwerk hat wieder geöffnet.', lines: [['Händler', 'Geht aufs Haus, Kommandant. Doppelte Pommes, Currywurst, ohne Zwiebeln.'], ['Charlie', 'Wuff! Wuff!'], ['Marc Heistermann', 'Die Currywurst ist für mich, Charlie. Für dich habe ich Käseleckerlis dabei.'], ['Charlie', 'WUFF!']] },
   ] },
   m2: { title: 'Kapitel 3 · Zeche Zollverein', pre: [
     { img: 'c_m2_1', cap: 'Der alte Bergbaugürtel. Kanders’ Werbebojen senden auf allen Kanälen.', lines: [['Astrid', 'Komm… krrz… alles muss raus… krrz… nur heute…']] },
-    { img: 'f_paula', cap: 'Paula lotst die Staffel durch den Bergbaugürtel.', lines: [['Paula', 'Hinter dem dritten Förderturm links. Dann immer dem Schacht nach.'], ['Jan', 'Und bitte keine Kratzer. Ich habe gerade poliert.'], ['Charlie', 'Wuff.'], ['Paula', 'Charlie sagt rechts. Charlie hat unrecht.']] },
-    { img: 'x_m2_mid', cap: 'Im Cockpit.', fx: 'DÜDELDÜ!', lines: [['Marc Heistermann', 'Vex, kannst du die Werbung wegklicken?'], ['Vex', 'Ich habe es versucht. Jetzt habe ich drei Zeitschriften abonniert.'], ['Charlie', 'Auuuuuuuuu!']] },
-    { img: 'c_m2_2', cap: 'Zwischen den Fördertürmen wartet einer, der Firmen abwickelt wie andere Leute Post.', lines: [['Der Liquidator', 'Heistermann. Ich wickle Sie ab. Sachlich, aber endgültig.']] },
+    { img: 'f_paula', cap: 'Paula lotst die Staffel durch den Bergbaugürtel.', lines: [['Paula', 'Hinter dem dritten Förderturm links. Dann immer dem Schacht nach.'], ['Jan', 'Und bitte keine Kratzer. Ich habe gerade poliert.'], ['Charlie', 'Wuff.'], ['Paula', 'Charlie sagt rechts. Charlie hat immer recht. Ich habe mich wohl vertan.']] },
+    { img: 'x_m2_mid', cap: 'Im Cockpit.', fx: 'DÜDELDÜ!', lines: [['Marc Heistermann', 'Mini, kannst du die Werbung wegklicken?'], ['Mini', 'Ich habe es versucht. Jetzt habe ich drei Zeitschriften abonniert. 10,99 € im Monat.'], ['Mini', 'Das ist mehr, als der Oura-Ring im Monat kosten würde.'], ['Charlie', 'Auuuuuuuuu!']] },
+    { img: 'c_m2_2', cap: 'Zwischen den Fördertürmen wartet einer, der Firmen abwickelt wie andere Leute Post.', lines: [['Der Liquidator', 'Heistermann. Ich wickle Sie ab. Sachlich, aber endgültig.'], ['Marina', 'Ohne Gesellschafterbeschluss? Das ficht jedes Erstsemester an.']] },
   ], post: [
-    { img: 'n_m2_post', cap: 'Funkstille. Die gute Sorte.', lines: [['Vex', 'Tschüss! Und denken Sie an die Belege!'], ['Der Liquidator', '… ich hasse Außentermine.']] },
+    { img: 'n_m2_post', cap: 'Funkstille. Die gute Sorte.', lines: [['Mini', 'Tschüss! Und denken Sie an die Belege!'], ['Der Liquidator', '… ich hasse Außentermine.']] },
   ] },
   m3: { title: 'Kapitel 4 · Geleit auf dem Hellweg', pre: [
     { img: 'c_m3_1', cap: 'Der Hellweg, älteste Handelsroute des Systems. Drei Frachter mit Ware für die Läden von Essen.', lines: [['Astrid', 'Konvoi vollzählig. Baustelle umflogen. Ein Wunder.']] },
     { img: 'n_m3_mid', cap: 'Brücke der „Ruhrperle“. Kapitänin Erna Kowalski, vierzig Dienstjahre.', fx: 'KLICKER-KLACKER', lines: [['Käpt’n Erna', 'Bomber auf dem Schirm, Jungchen. Mach hin, ich bin gleich an der Ferse.']] },
-    { img: 'c_m3_2', cap: 'Kanders schickt seine Abmahner.', lines: [['Marc Heistermann', 'Niemand mahnt meine Frachter ab!'], ['Vex', 'Juristisch ist das Unsinn, aber es klingt gut.']] },
+    { img: 'c_m3_2', cap: 'Kanders schickt seine Abmahner.', lines: [['Marc Heistermann', 'Niemand mahnt meine Frachter ab!'], ['Marina', 'Juristisch ist das Unsinn, Papa. Aber es klingt gut.']] },
   ], post: [
     { img: 'x_m3_post', cap: 'Sprungtor Kettwig. Die Regale füllen sich.', lines: [['Käpt’n Erna', 'Der Schal ist für Charlie. Im All zieht’s.'], ['Marc Heistermann', 'Und ich, Erna?'], ['Käpt’n Erna', 'Du kriegst Kaffee, Jungchen.']] },
   ] },
   m3b: { title: 'Kapitel 5 · Die Geisterarkaden', pre: [
-    { img: 'c_m4_1', cap: 'Limbecker Ring. Das größte Kaufhaus des Systems treibt dunkel im All.', lines: [['Vex', 'Früher hat man hier einen ganzen Tag verbummelt.']] },
-    { img: 'x_m4_mid', cap: 'Drinnen.', fx: 'KNARZ …', lines: [['Vex', 'Die Puppe da hat sich bewegt.'], ['Marc Heistermann', 'Das ist eine Schaufensterpuppe, Vex.'], ['Vex', 'Sie trägt eine Drohne als Hut, Marc!'], ['Charlie', 'GRRRR-WUFF!'], ['Marc Heistermann', 'Siehst du. Charlie klärt das.']] },
+    { img: 'c_m4_1', cap: 'Limbecker Ring. Das größte Kaufhaus des Systems treibt dunkel im All.', lines: [['Mini', 'Früher hat man hier einen ganzen Tag verbummelt.']] },
+    { img: 'x_m4_mid', cap: 'Drinnen.', fx: 'KNARZ …', lines: [['Mini', 'Die Puppe da hat sich bewegt.'], ['Marc Heistermann', 'Das ist eine Schaufensterpuppe, Mini.'], ['Mini', 'Sie trägt eine Drohne als Hut, Marc!'], ['Charlie', 'GRRRR-WUFF!'], ['Marc Heistermann', 'Siehst du. Charlie klärt das.']] },
     { img: 'c_m4_2', cap: 'Störer decken den Abzug. Goldtransporter schaffen die letzten Werte fort.', lines: [['Marc Heistermann', 'Leerstand ist kein Schicksal. Wir holen die Arkaden zurück.']] },
   ], post: [
-    { img: 'x_m4_post', cap: 'Die Rollläden gehen hoch. Zum ersten Mal seit Jahren. Charlie hält das Band.', fx: 'SCHNIPP!', lines: [['Marc Heistermann', 'Hiermit eröffne ich … alles.'], ['Vex', 'Gang sieben, Konserven. Ich bin zu Hause.']] },
+    { img: 'x_m4_post', cap: 'Die Rollläden gehen hoch. Zum ersten Mal seit Jahren. Charlie hält das Band.', fx: 'SCHNIPP!', lines: [['Marc Heistermann', 'Hiermit eröffne ich … alles.'], ['Mini', 'Gang sieben, die Autoabteilung. Endlich bin ich wieder zu Hause.']] },
   ] },
   m4: { title: 'Kapitel 6 · Kreuzer Rendite', pre: [
     { img: 'c_m5_1', cap: 'Werft Borbeck. Hier liegt, was jede Besetzung deckt: der Kreuzer Rendite.', lines: [['Astrid', 'Vierhundert Meter Stahl, Marc. Heute ohne Eskorte.']] },
-    { img: 'x_m5_mid', cap: 'Einsatzbesprechung. Die ganze Staffel ist da.', lines: [['Marc Heistermann', 'Erst die Türme. Dann die Schildkuppeln. Dann der Tresorkern am Heck.'], ['Nick', 'Papa, ist das ein Baguette?'], ['Marc Heistermann', 'Der Zeigestock steckt in der Baustelle fest. Und Charlie: nein. Das ist kein Dentalstick.']] },
+    { img: 'x_m5_mid', cap: 'Einsatzbesprechung. Die ganze Staffel ist da.', lines: [['Marc Heistermann', 'Erst die Türme. Dann die Schildkuppeln. Dann der Tresorkern am Heck.'], ['Nick', 'Papa, ist das ein Dentalstick?'], ['Marc Heistermann', 'Der Zeigestock steckt in der Baustelle fest. Und Charlie: nein. Erst nach dem Einsatz.'], ['Marina', 'Ob ein Dentalstick ein Zeigestock ist? Es kommt darauf an.']] },
     { img: 'c_m5_2', cap: 'Tiefflug über den Rücken der Rendite.', lines: [['Marc Heistermann', 'Auch die größte Rendite hat ein Heck.']] },
   ], post: [
     { img: 'n_m5_post', cap: 'Unternehmerverband, Chefetage.', fx: 'KRACKS!', lines: [['Hauptgeschäftsführer Kanders', 'Die Rendite ist … NEGATIV?!'], ['Assistent', 'Wir könnten es „Wachstumspause“ nennen, Herr Hauptgeschäftsführer.']] },
   ] },
   m5: { title: 'Kapitel 7 · Sturm über Hochofen', pre: [
     { img: 'c_m6_1', cap: 'Über der Lavawelt Hochofen sammelt Kanders seine Elite.', lines: [['Astrid', 'Drei Liquidatoren. Und sie sind nachtragend.']] },
-    { img: 'f_marvin', cap: 'In der Werkstatt. Marvin hat etwas gebaut.', fx: 'BZZZT!', lines: [['Marvin', 'Die Nova-Welle 2.0! Ein Ring aus purer Energie. Theoretisch.'], ['Marina', 'Und praktisch?'], ['Marvin', 'Praktisch riecht es noch nach Toast.'], ['Marc Heistermann', 'Bau es ein. Schlimmer als die Formulare kann es nicht werden.']] },
+    { img: 'f_marvin', cap: 'In der Werkstatt. Marvin hat etwas gebaut. Aus seiner Kanupolo-Ausrüstung.', fx: 'BZZZT!', lines: [['Marvin', 'Die Nova-Welle 2.0! Paddel, Ball, Helm. Ein Ring aus purer Energie. Theoretisch.'], ['Marina', 'Und praktisch?'], ['Marvin', 'Praktisch paddelt sie im Kreis.'], ['Marina', 'Gib her. Paddel umdrehen, Ball als Kondensator. So. Jetzt geht sie.'], ['Marc Heistermann', 'Bau es ein. Also das von Marina.']] },
     { img: 'c_m6_2', cap: 'Auf der Brücke des Flaggschiffs.', lines: [['Hauptgeschäftsführer Kanders', 'Heistermann. Immer wieder Heistermann. Beendet das.']] },
-    { img: 'x_m6_mid', cap: 'Im Cockpit.', lines: [['Vex', 'Drei Liquidatoren, eine Korvette, zwei Goldtransporter. Und ich habe nur ein gutes Rad.'], ['Marc Heistermann', 'Dann roll halt auf dem.'], ['Vex', 'Und Charlie döst. Im Anflug auf drei Liquidatoren. Ich will seine Nerven.']] },
+    { img: 'x_m6_mid', cap: 'Im Cockpit.', lines: [['Mini', 'Drei Liquidatoren, eine Korvette, zwei Goldtransporter. Und meine Hecktür klemmt immer noch.'], ['Marc Heistermann', 'Dann steigen wir halt vorne aus.'], ['Mini', 'Und Charlie döst. Im Anflug auf drei Liquidatoren. Ich will seine Nerven.']] },
   ], post: [
-    { img: 'n_m6_post', cap: 'Die Elite. Ordentlich verschnürt.', lines: [['Vex', 'Drei Stück, frisch abgewickelt. Mit Schleife.'], ['Liquidator', 'Das wird ein Nachspiel haben. Schriftlich.']] },
+    { img: 'n_m6_post', cap: 'Die Elite. Ordentlich verschnürt.', lines: [['Mini', 'Drei Stück, frisch abgewickelt. Mit Schleife.'], ['Liquidator', 'Das wird ein Nachspiel haben. Schriftlich.'], ['Marina', 'Gern. Frist zwei Wochen, dreifache Ausfertigung.']] },
   ] },
   m6: { title: 'Kapitel 8 · Flaggschiff Monopol', pre: [
-    { img: 'c_m7_1', cap: 'Über Essen Prime. Das Hauptgeschütz der Monopol lädt.', lines: [['Hauptgeschäftsführer Kanders', 'Ein Markt braucht keinen Wettbewerb. Er braucht einen Besitzer.']] },
+    { img: 'c_m7_1', cap: 'Über Essen Prime. Das Hauptgeschütz der Monopol lädt.', lines: [['Hauptgeschäftsführer Kanders', 'Ein Markt braucht keinen Wettbewerb. Er braucht einen Besitzer.'], ['Marina', 'Das Kartellamt sieht das anders. Und wir auch.']] },
     { img: 'n_m7_mid', cap: 'Brücke der Monopol.', lines: [['Hauptgeschäftsführer Kanders', 'Noch einen Espresso. Dann drücke ich den Knopf.'], ['Offizier', 'Herr Hauptgeschäftsführer, da kommt ein einzelner Jäger.'], ['Hauptgeschäftsführer Kanders', 'Lassen Sie mich raten.']] },
-    { img: 'y_m7_charlie', cap: 'Im Cockpit der Pfeil.', fx: 'WUFF!', lines: [['Charlie', 'WUFF! WUFF! WUFF!'], ['Vex', 'Er sagt: Kern voraus. Oder er will einen Dentalstick. Die Betonung ist dieselbe.']] },
-    { img: 'c_m7_2', cap: 'Ein einzelner Jäger unter dem Rumpf.', lines: [['Marc Heistermann', 'Ein Markt braucht Händler, Kanders. Viele. Und jetzt halt dich fest.'], ['Vex', 'Ich halte mich schon seit Kapitel 2 fest!']] },
+    { img: 'y_m7_charlie', cap: 'Im Cockpit der Pfeil.', fx: 'WUFF!', lines: [['Charlie', 'WUFF! WUFF! WUFF!'], ['Mini', 'Er sagt: Kern voraus. Oder er will einen Dentalstick. Die Betonung ist dieselbe.']] },
+    { img: 'c_m7_2', cap: 'Ein einzelner Jäger unter dem Rumpf.', lines: [['Marc Heistermann', 'Ein Markt braucht Händler, Kanders. Viele. Und jetzt halt dich fest.'], ['Mini', 'Ich halte mich schon seit Kapitel 2 fest!']] },
   ], post: [
-    { img: 'c_out_1', cap: 'Die Monopol zerbricht.', fx: 'KAWUMMS!', lines: [['Vex', 'Das war sie, Marc! Die ganze Flotte!']] },
-    { img: 'y_out_mid', cap: 'Kanders kapituliert. Der Handelsverband hat eine Stelle frei.', lines: [['Vex', 'Gang sieben muss gefegt werden. Die Schürze steht Ihnen.'], ['Charlie', 'Grrr.'], ['Hauptgeschäftsführer Kanders', '… mit freundlichen Grüßen.']] },
-    { img: 'x_out_2', cap: 'Alle Verbände wählen den Handelsverband zu ihrem Vorsitz. Die Läden öffnen wieder. Sogar sonntags. Familie Heistermann steht auf dem Balkon. Charlie bekommt einen Orden. Und einen Dentalstick.', lines: [['Marc Heistermann', 'Dann machen wir Essen wieder auf. Alle zusammen.'], ['Astrid', 'Und sonntags wird trotzdem zu Hause gefrühstückt.'], ['Marvin', 'Ich hätte da übrigens schon die nächste Erfindung …'], ['Alle', 'NEIN, MARVIN!'], ['Charlie', 'WUFF!']] },
+    { img: 'c_out_1', cap: 'Die Monopol zerbricht.', fx: 'KAWUMMS!', lines: [['Mini', 'Das war sie, Marc! Die ganze Flotte!']] },
+    { img: 'y_out_mid', cap: 'Kanders kapituliert. Der Handelsverband hat eine Stelle frei.', lines: [['Mini', 'Der Ausstellungsraum muss gefegt werden. Die Schürze steht Ihnen.'], ['Marina', 'Die Kapitulation bitte schriftlich. Mündliche Nebenabreden gelten nicht.'], ['Charlie', 'Grrr.'], ['Hauptgeschäftsführer Kanders', '… mit freundlichen Grüßen.']] },
+    { img: 'x_out_2', cap: 'Alle Verbände wählen den Handelsverband zu ihrem Vorsitz. Die Läden öffnen wieder. Sogar sonntags. Familie Heistermann steht auf dem Balkon. Charlie bekommt einen Orden. Und einen Dentalstick.', lines: [['Marc Heistermann', 'Dann machen wir Essen wieder auf. Alle zusammen.'], ['Astrid', 'Und sonntags wird trotzdem zu Hause gefrühstückt.'], ['Marvin', 'Ich hätte da übrigens noch eine Idee. Mit einem Kajak …'], ['Alle', 'NEIN, MARVIN!'], ['Charlie', 'WUFF!']] },
   ] },
 };
 export const MISSIONS = [
@@ -146,10 +146,10 @@ export const MISSIONS = [
     phases: [
       { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · Fadenkreuz-Taste halten', spawn: [['target', 3]], comms: [['Astrid', 'Willkommen zurück im Cockpit, Kommandant Heistermann. Erst mal die Übungsziele.']] },
       { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste mit dem Kreispfeil', comms: [['Astrid', 'In der Rolle trifft dich nichts. Merk dir das.']] },
-      { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'Pfeile hoch halten, dann Pfeile runter halten', comms: [['Vex', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
-      { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste mit der Schleife', comms: [['Vex', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
+      { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'Pfeile hoch halten, dann Pfeile runter halten', comms: [['Mini', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
+      { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste mit der Schleife', comms: [['Mini', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
       { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste mit dem Umkehrpfeil', comms: [['Astrid', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
-      { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffensymbol unten antippen', comms: [['Vex', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
+      { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffensymbol unten antippen', comms: [['Mini', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
       { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste mit den Ringen', comms: [['Astrid', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
       { label: 'Ernstfall: Heuschrecken abschießen', spawn: [['drone', 4]], comms: [['Astrid', 'Kein Übungsziel mehr. Der Unternehmerverband hat uns gefunden. Zeig, was du gelernt hast.']] },
     ],
@@ -159,7 +159,7 @@ export const MISSIONS = [
     brief: 'Der Unternehmerverband schickt Heuschrecken-Drohnen gegen die Marktstation über Rüttenscheid. Wer sie besetzt, diktiert dort die Preise. Fang den Schwarm ab.',
     phases: [
       { label: 'Heuschrecken abfangen', spawn: [['drone', 6]], comms: [['Astrid', 'Marc, der Schwarm ist da. Waffen frei. Und pass auf dich auf.']] },
-      { label: 'Zweite Welle zerstören', spawn: [['drone', 8]], comms: [['Vex', 'Die wollen die Marktstation. Ich bleibe an deinem Flügel.']] },
+      { label: 'Zweite Welle zerstören', spawn: [['drone', 8]], comms: [['Mini', 'Die wollen die Marktstation. Ich bleibe an deinem Flügel.']] },
       { label: 'Kurshaie ausschalten', spawn: [['drone', 5], ['inter', 4]], comms: [['Astrid', 'Schnelle Signaturen. Das sind Kurshaie. Halt sie dir vom Heck.']] },
       { label: 'Korvette Vollstrecker zerstören', spawn: [['corvette', 1], ['drone', 4]], comms: [['Astrid', 'Da kommt ihr Führungsschiff: die Korvette Vollstrecker. Sechs Geschütze, dicke Panzerung. Bleib in Bewegung und nimm sie auseinander.']] },
     ],
@@ -169,7 +169,7 @@ export const MISSIONS = [
     brief: 'Im alten Bergbaugürtel Zollverein senden Werbebojen des Unternehmerverbands auf allen Kanälen und legen unseren Funk lahm. Zerstöre alle fünf. Ein Liquidator bewacht sie.',
     phases: [
       { label: 'Werbebojen zerstören', spawn: [['buoy', 5], ['drone', 6]], comms: [['Astrid', 'Fünf Bojen zwischen den Felsen. Achte auf die Asteroiden.']] },
-      { label: 'Verstärkung abwehren', spawn: [['inter', 5], ['drone', 5], ['kami', 6]], comms: [['Vex', 'Funk ist wieder da. Die Verstärkung des Verbands leider auch.']] },
+      { label: 'Verstärkung abwehren', spawn: [['inter', 5], ['drone', 5], ['kami', 6]], comms: [['Mini', 'Funk ist wieder da. Die Verstärkung des Verbands leider auch.']] },
       { label: 'Den Liquidator stellen', spawn: [['ace', 1], ['drone', 4]], comms: [['Liquidator', 'Ein einzelner Händler? Ich wickle dich ab wie jede andere Firma.']] },
     ],
   },
@@ -178,7 +178,7 @@ export const MISSIONS = [
     brief: 'Drei Frachter bringen Waren für die Märkte von Essen über den Hellweg. Abmahner-Bomber des Unternehmerverbands wollen die Lieferung stoppen. Je heiler die Frachter ankommen, desto besser die Wertung.',
     phases: [
       { label: 'Abmahner abfangen', spawn: [['bomber', 4], ['drone', 4]], comms: [['Frachter Ruhrperle', 'Nova Squadron, Bomber auf dem Schirm. Wir haben Ware für halb Essen an Bord.']] },
-      { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 4], ['kami', 5]], comms: [['Vex', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
+      { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 4], ['kami', 5]], comms: [['Mini', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
       { label: 'Korvette und letzte Welle zerstören', spawn: [['corvette', 1], ['bomber', 5], ['drone', 5]], comms: [['Frachter Ruhrperle', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
     ],
   },
@@ -187,7 +187,7 @@ export const MISSIONS = [
     brief: 'Am Limbecker Ring treibt das größte Kaufhaus des Systems dunkel im All. Störer und Schildträger des Unternehmerverbands halten es besetzt, Goldtransporter schaffen die letzten Werte fort. Hol die Arkaden zurück.',
     phases: [
       { label: 'Störer ausschalten', spawn: [['jammer', 3], ['drone', 5]], comms: [['Astrid', 'Störer voraus. Ihre violetten Kugeln legen deine Waffe lahm. Weich aus oder wechsle die Waffe.']] },
-      { label: 'Schildträger und Abmahner zerstören', spawn: [['shielder', 2], ['bomber', 4], ['inter', 3]], comms: [['Vex', 'Die Schildträger decken alles um sich herum. Die zuerst, Marc!']] },
+      { label: 'Schildträger und Abmahner zerstören', spawn: [['shielder', 2], ['bomber', 4], ['inter', 3]], comms: [['Mini', 'Die Schildträger decken alles um sich herum. Die zuerst, Marc!']] },
       { label: 'Goldtransporter stoppen', spawn: [['hauler', 2], ['kami', 5], ['drone', 4]], comms: [['Astrid', 'Zwei Transporter legen ab. Da drin steckt, was den Händlern gehört.']] },
     ],
   },
@@ -196,7 +196,7 @@ export const MISSIONS = [
     brief: 'Der Kreuzer Rendite liegt ohne Eskorte vor der Werft Borbeck. Zerstöre seine Türme, dann die Schildgeneratoren auf dem Rücken. Erst danach liegt der Tresorkern am Heck frei.',
     phases: [
       { label: 'Geschütztürme zerstören', spawn: [['cruiser', 1], ['drone', 6]], goal: 'turret', comms: [['Astrid', 'Das ist die Rendite. Vierhundert Meter Stahl. Fang mit den Türmen an.']] },
-      { label: 'Schildgeneratoren zerstören', spawn: [['inter', 5]], goal: 'gen', comms: [['Vex', 'Türme sind still. Die Kuppeln auf dem Rücken speisen den Kernschild.']] },
+      { label: 'Schildgeneratoren zerstören', spawn: [['inter', 5]], goal: 'gen', comms: [['Mini', 'Türme sind still. Die Kuppeln auf dem Rücken speisen den Kernschild.']] },
       { label: 'Tresorkern am Heck zerstören', spawn: [['drone', 6]], goal: 'core', comms: [['Astrid', 'Schild ist unten! Der Tresorkern am Heck liegt frei. Alles drauf!']] },
     ],
   },
@@ -205,9 +205,9 @@ export const MISSIONS = [
     brief: 'Über der Lavawelt Hochofen sammelt der Unternehmerverband seine Elite. Drei Liquidatoren führen sie an. Brich ihnen das Rückgrat, dann steht das Flaggschiff allein.',
     phases: [
       { label: 'Vorhut zerschlagen', spawn: [['corvette', 1], ['inter', 6], ['drone', 6]], comms: [['Astrid', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
-      { label: 'Goldtransporter abfangen', spawn: [['hauler', 2], ['drone', 6], ['kami', 4]], comms: [['Vex', 'Zwei Goldtransporter! Damit bezahlt Kanders seine Flotte. Hol sie dir, das gibt fette Prämie.']] },
+      { label: 'Goldtransporter abfangen', spawn: [['hauler', 2], ['drone', 6], ['kami', 4]], comms: [['Mini', 'Zwei Goldtransporter! Damit bezahlt Kanders seine Flotte. Hol sie dir, das gibt fette Prämie.']] },
       { label: 'Ersten Liquidator stellen', spawn: [['ace', 1], ['inter', 6]], comms: [['Liquidator', 'Du hast meinen Partner in Zollverein abgeschrieben. Das wird teuer.']] },
-      { label: 'Die Doppelspitze brechen', spawn: [['ace', 2], ['drone', 8], ['bomber', 2]], comms: [['Vex', 'Zwei auf einmal. Ich nehme dir die Kleinen ab.']] },
+      { label: 'Die Doppelspitze brechen', spawn: [['ace', 2], ['drone', 8], ['bomber', 2]], comms: [['Mini', 'Zwei auf einmal. Ich nehme dir die Kleinen ab.']] },
     ],
   },
   {
@@ -216,7 +216,7 @@ export const MISSIONS = [
     phases: [
       { label: 'Türme der Monopol zerstören', spawn: [['dread', 1], ['drone', 8]], goal: 'turret', comms: [['Astrid', 'Alle Staffeln, das ist der Tag. Nova Eins führt den Angriff. Für Essen!']] },
       { label: 'Drei Schildgeneratoren zerstören', spawn: [['inter', 8], ['ace', 1]], goal: 'gen', comms: [['Hauptgeschäftsführer Kanders', 'Ihr kratzt an einem Konzern. Hauptgeschütz laden.']] },
-      { label: 'Kern der Monopol vernichten', spawn: [['drone', 8], ['inter', 6]], goal: 'core', comms: [['Vex', 'Der Kern liegt frei! Unter dem Rumpf, in der Mitte!']] },
+      { label: 'Kern der Monopol vernichten', spawn: [['drone', 8], ['inter', 6]], goal: 'core', comms: [['Mini', 'Der Kern liegt frei! Unter dem Rumpf, in der Mitte!']] },
     ],
   },
 ];
@@ -266,5 +266,5 @@ export function wavePhase(n) {
     ['Gemischter Verband', [['drone', c(3)], ['inter', c(2)], ['shielder', 1], ['jammer', 1]], 'Von allem etwas. Schildträger und Störer zuerst.'],
   ];
   const [name, spawn, tip] = themes[n <= 4 ? n - 1 : (n * 3 + (n >> 2)) % themes.length];
-  return { label: `Welle ${n}: ${name}`, spawn, comms: n <= 9 || n % 3 === 0 ? [['Vex', tip]] : [] };
+  return { label: `Welle ${n}: ${name}`, spawn, comms: n <= 9 || n % 3 === 0 ? [['Mini', tip]] : [] };
 }
