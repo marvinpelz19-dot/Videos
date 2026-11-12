@@ -7,7 +7,7 @@ import { OutputPass } from '../vendor/addons/postprocessing/OutputPass.js';
 import { WEAPONS, UPGRADES, SHIPS, ENEMIES, ENVS, MISSIONS, ENDLESS, wavePhase, RUN_UPS, BOSS_UPS } from './data.js';
 import { MATS, ROCK_MATS, buildPlayerShip, buildEnemy, buildCapital, buildAsteroidGeos, buildStation, buildSatellite } from './ships.js';
 import { Blast } from './blast.js';
-import { FX, BoltMesh } from './fx.js';
+import { FX, BoltMesh, MissileMesh } from './fx.js';
 import { sfx, initAudio, startMusic, setIntensity, setScene, musicInfo, audioState, applyAudioState, suspendAudio } from './audio.js';
 import { createUI } from './ui.js';
 
@@ -24,7 +24,13 @@ try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s) { O
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* egal */ } };
 const up = (id) => (save.up[id] || 0) + (G.run?.up[id] || 0);   // Hangar-Upgrades plus Upgrades des laufenden Wellen-Gefechts
 const doneCount = () => MISSIONS.filter((m) => !m.tutorial && save.done[m.id]).length;
-const weaponOpen = (i) => !!WEAPONS[i] && (G.run ? G.run.weapons.has(i) : WEAPONS[i].unlock <= doneCount() || !!G.mission?.tutorial);
+// Bewaffnung je Schiff: jedes Schiff hat eine feste Zahl Waffenplätze, die im Hangar belegt werden
+const SLOTS = { pfeil: 3, wespe: 2, bastion: 4 };
+const slots = (id = save.ship) => SLOTS[id] || 3;
+function loadout(id = save.ship) { const open = WEAPONS.map((w, i) => i).filter((i) => WEAPONS[i].unlock <= doneCount()); let l = ((save.loadout || {})[id] || []).filter((i) => open.includes(i)).slice(0, slots(id)); if (!l.length) l = open.slice(0, slots(id)); return l; }
+function toggleLoadout(i) { const id = save.ship, l = loadout(id), k = l.indexOf(i); if (k >= 0) { if (l.length < 2) return false; l.splice(k, 1); } else { if (WEAPONS[i].unlock > doneCount()) return false; if (l.length >= slots(id)) l.shift(); l.push(i); } l.sort((a, b) => a - b); save.loadout = save.loadout || {}; save.loadout[id] = l; persist(); return true; }
+const weaponOpen = (i) => !!WEAPONS[i] && (G.run ? G.run.weapons.has(i) : G.mission?.tutorial ? true : loadout().includes(i));
+let lastFly = 0;
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 if (save.set.autofire === null) save.set.autofire = isTouch;
 if (isTouch && !localStorage.getItem?.(SAVE_KEY)) save.set.quality = 'medium';
@@ -72,7 +78,7 @@ skyMat.color.setRGB(0.62, 0.62, 0.62);
 const sky = new THREE.Mesh(new THREE.SphereGeometry(8000, 48, 24), skyMat); sky.renderOrder = -10; sky.frustumCulled = false; scene.add(sky);
 const far = new THREE.Group(); scene.add(far);       // Planet, Sonne: folgen der Kamera (unendlich weit weg)
 const world = new THREE.Group(); scene.add(world);   // alles, was pro Mission neu entsteht
-const fx = new FX(scene, save.set.quality), boltMesh = new BoltMesh(scene), blast = new Blast(scene, save.set.quality);
+const fx = new FX(scene, save.set.quality), boltMesh = new BoltMesh(scene), missileMesh = new MissileMesh(scene), blast = new Blast(scene, save.set.quality);
 // Explosion: Blitz, Druckring, wenige heiße Funken, dazu Feuerball, Feuerring, Rauch und Trümmer aus blast.js
 function explode(pos, size = 1, tint = [1, 0.55, 0.2], inherit, o = {}) {
   fx.flash(pos, 13 * size + 9, [1.7, 1.4, 1.0], 0.14 + size * 0.02); if (o.ring) fx.ring(pos, 30 * size, tint, 0.5 + size * 0.08);
@@ -223,6 +229,7 @@ function startMission(m) {
   P.mesh = new THREE.Group(); P.inner = buildPlayerShip(P.def.id); P.mesh.add(P.inner); world.add(P.mesh);
   P.pos.set(0, 0, 0); P.yaw = P.pitch = 0;   recalcShield(true); P.invuln = 2; P.nova = 40; P.rollT = 0; P.weapon = Math.min(P.weapon, 4);
   if (!weaponOpen(P.weapon) || m.tutorial || m.waves) P.weapon = 0;
+  if (!weaponOpen(P.weapon)) P.weapon = Math.max(0, WEAPONS.findIndex((w, i) => weaponOpen(i)));
   camFwd.set(0, 0, 1);
   for (let i = 0; i < 1 + up('wing'); i++) addAlly();
   for (let i = 0; i < Math.max(14, env.asteroids); i++) {   // Asteroiden treiben durch jedes Kampfgebiet
@@ -298,7 +305,7 @@ function roll(dir) { if (G.mode !== 'play' || P.rollCd > 0 || P.man) return; P.r
 // Kunstflug: Looping (voller Kreis, danach gleiche Richtung) und Wende (halber Looping mit Rolle, danach Gegenrichtung). Unverwundbar dabei.
 function maneuver(type) { if (G.mode !== 'play' || P.man || P.rollT > 0 || P.manCd > 0) return; P.man = { type, t: 0, dur: type === 'loop' ? 1.7 : 1.2, base: P.quat.clone() }; P.manCd = (type === 'loop' ? 1.7 : 1.2) + 0.3; sfx.loop(); G.did[type] = true; ui.banner(type === 'loop' ? 'LOOPING' : 'WENDE', ''); }
 function setWeapon(i) { if (P.jam && P.jam.w === i) return sfx.deny(); if (weaponOpen(i) && i !== P.weapon) { P.weapon = i; sfx.click(); G.did.weapon = true; ui.weaponChanged(true); ui.toast(WEAPONS[i].name + ' · Munition ∞'); } }
-function cycleWeapon(d) { const n = WEAPONS.filter((w, i) => weaponOpen(i)).length; setWeapon((P.weapon + d + n) % n); }
+function cycleWeapon(d) { const l = WEAPONS.map((w, i) => i).filter((i) => weaponOpen(i)); if (l.length < 2) return; setWeapon(l[(l.indexOf(P.weapon) + d + l.length) % l.length]); }
 function nova() {   // Nova-Welle: ein Ring aus Energie läuft vom Schiff nach außen und trifft, was er erreicht
   if (G.mode !== 'play' || P.nova < 100) return; P.nova = 0; G.did.nova = true; sfx.nova(); G.shake = 1.6; ui.flash('nova');
   G.wave = { pos: P.pos.clone(), r: 8, max: 520 * (1 + 0.12 * up('nova')) * (1 + (G.run?.up.super || 0)), dmg: 380 * (1 + 0.35 * up('nova')), hit: new Set() };
@@ -464,6 +471,7 @@ function updateFighter(e, dt) {
     } else e.cd = 0.15;
   }
   if (e.team === 1 && e.hp < e.maxHp * 0.6 && Math.random() < dt * (e.def.big ? 26 : 14)) { const k = e.hp / e.maxHp, o = e.def.big ? 14 : 2; blast.puff(e.pos.x + rand(-o, o), e.pos.y + rand(-o * 0.3, o * 0.3), e.pos.z + rand(-o, o), 0, 0, 0, (e.def.big ? 9 : 4) * rand(0.7, 1.3), 0.9, k < 0.3 ? 1.1 : 0.2, 0.9, 1.5); }   // unter 60 % Rauch, unter 30 % Flammen
+  if (e.team === 1 && !e.def.big) { const near = e.pos.distanceToSquared(P.pos) < 5200; if (near && !e.near && performance.now() - lastFly > 420) { lastFly = performance.now(); sfx.flyby(e.kind); } e.near = near; }   // Vorbeiflug hörbar
   if (e.team === 1 && (e.trailT = (e.trailT || 0) - dt) < 0) { e.trailT = 0.045; fx.p(e.pos.x - e.dir.x * 4, e.pos.y - e.dir.y * 4, e.pos.z - e.dir.z * 4, 0, 0, 0, 0.35, 2.2, e.kind === 'ace' ? 1.2 : 1.6, 0.3, e.kind === 'ace' ? 2 : 0.2); }
   if (e.pos.distanceToSquared(P.pos) < (e.r + P.r) * (e.r + P.r) && e.team === 1) { hitPlayer(e.kind === 'kami' ? 28 : 18, e.pos); damage(e, 60, true); }
 }
@@ -691,7 +699,7 @@ function frame(now) {
     else if (G.endT > 0 && !(G.cap && !G.cap.dead)) { G.endT -= dt; if (G.endT <= 0) finishMission(false); }
     const threat = G.ents.some((e) => e.team === 1 && e.alive); G.intensity += ((threat ? 1 : 0.4) - G.intensity) * dt; setIntensity(G.intensity * (G.cap && !G.cap.dead ? 1.25 : G.ents.some((e) => e.def.big && e.alive) ? 1.1 : 0.85));
     updateWave(dt); if (G.hitT > 0) G.hitT -= dt;
-    updateCamera(dt); fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts);
+    updateCamera(dt); fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts); missileMesh.draw(G.bolts);
     if ((hudT -= dt) < 0) { hudT = 0.06; sfx.engine(1 + P.boost - P.brake * 0.7 + (P.man ? 0.6 : 0)); ui.hud({ P, G, remaining: remaining(), outside: G.outside }); }
   } else if (G.mode !== 'pause' && G.mode !== 'choice') {
     // Hangar und Titel: langsamer Kameraschwenk durch den Himmel
@@ -701,7 +709,7 @@ function frame(now) {
       showcase.position.set(0, tall ? 4.6 : 3.4, tall ? -40 : -22).applyMatrix4(camera.matrixWorld); showcase.rotation.set(0.28, showcase.rotation.y + dt * 0.5, 0.1);
       camera.getWorldDirection(t1); fill.position.copy(t1).multiplyScalar(-1).addScaledVector(UP, 0.6); rim.position.copy(t1).addScaledVector(UP, 0.9);
     }
-    fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts);
+    fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts); missileMesh.draw(G.bolts);
   }
   drawMarks();
   if (composer) composer.render(); else renderer.render(scene, camera);
@@ -721,7 +729,7 @@ const ui = createUI({
   settings: () => { audioState.sound = save.set.sound; audioState.music = save.set.music; applyAudioState(); persist(); },
   quality: () => { persist(); setupQuality(); },
   act: { rollAuto: () => roll(P.sx < -0.15 ? -1 : 1), roll, nova, setWeapon, cycleWeapon, maneuver, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; }, brake: (v) => { input.brake = v; } },
-  weaponOpen,
+  weaponOpen, loadout, slots, toggleLoadout,
   audio: () => { initAudio(); startMusic(); setScene('music_hangar'); },
   getJam: () => (P.jam ? P.jam.w : -1), getOver: () => P.over.map((v) => (v > 0 ? 1 : 0)).join(''),
   fullscreen: toggleFullscreen,

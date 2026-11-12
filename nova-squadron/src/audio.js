@@ -137,6 +137,7 @@ export const sfx = {
   down() { tone('sawtooth', 600, 80, 0.7, 0.35); noise(0.9, 0.6, 3000, 80); play(bank?.boom, 0.8, 0.8, 0, 0.6); },
   boost() { noise(0.7, 0.26, 260, 2600, 1.2, 'bandpass'); tone('sawtooth', 70, 130, 0.6, 0.12, sfxBus, 0, 0.1); },
   roll() { noise(0.35, 0.2, 1400, 380, 1.5, 'bandpass'); },
+  flyby(kind) { const f = kind === 'ace' ? 1.35 : kind === 'bomber' ? 0.6 : 1; noise(0.6, 0.2, 2400 * f, 420 * f, 5, 'bandpass'); tone('sawtooth', 300 * f, 95 * f, 0.55, 0.045); },
   click() { tone('sine', 880, 1320, 0.07, 0.12); },
   radio() { noise(0.07, 0.12, 3000, 2600, 4, 'bandpass'); tone('square', 1250, 1250, 0.05, 0.05, sfxBus, 0.06); },
   buy() { tone('sine', 660, 660, 0.1, 0.16); tone('sine', 990, 990, 0.16, 0.16, sfxBus, 0.09); tone('sine', 1320, 1320, 0.26, 0.14, sfxBus, 0.18); },

@@ -22,6 +22,10 @@ const ICON = {
   turn: svg('<path d="M7 21V9.500a5 5 0 0 1 10 0V17"/><path d="M13 13.500l4 4 4-4"/>'),
   pause: svg('<path d="M8.500 5v14M15.500 5v14" stroke-width="3"/>'),
   full: svg('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+  play: svg('<path d="M8 4.500v15l12-7.500z" fill="currentColor"/>'),
+  book: svg('<path d="M3 5.500C5.500 4 9 4 12 6c3-2 6.500-2 9-.5v13c-2.500-1.500-6-1.500-9 .5-3-2-6.500-2-9-.5z"/><path d="M12 6v13.500"/>'),
+  gear: svg('<circle cx="12" cy="12" r="3.200"/><path d="M12 2.500v3M12 18.500v3M2.500 12h3M18.500 12h3M5.300 5.300l2.100 2.100M16.600 16.600l2.100 2.100M18.700 5.300l-2.100 2.100M7.400 16.600l-2.100 2.100"/>'),
+  home: svg('<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>'),
   nova: svg('<circle cx="12" cy="12" r="2.200" fill="currentColor"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3.200"/>'),
 };
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -30,7 +34,7 @@ const stars = (n, of = 3) => '<span class="stars">' + '★'.repeat(n) + '<i>' + 
 
 export function createUI(api) {
   const { save } = api, screen = $('screen'), hud = $('hud'), touch = $('touch');
-  let tab = 'missions', sel = null, bannerT = 0, commsT = 0, lastWeaponKey = '';
+  let tab = 'missions', home = true, sel = null, bannerT = 0, commsT = 0, lastWeaponKey = '';
   document.body.classList.toggle('touch', api.isTouch);
 
   const unlockedW = () => WEAPONS.filter((w, i) => api.weaponOpen(i));
@@ -39,12 +43,11 @@ export function createUI(api) {
   function showTitle() {
     hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen title';
     screen.innerHTML = `<div class="title-art"></div><div class="title-box">
-      <p class="eyebrow">Handelsverband gegen Unternehmerverband · Der Krieg um Essen</p>
-      <h1>NOVA<br>SQUADRON</h1>
-      <p class="lede">${STORY.intro}</p><p class="lede small">Sechs Einsätze, fünf Waffen. Unendlich Munition, unendlich Leben.</p>
-      <button class="btn big" id="b-start">Zum Hangar</button>
-      <p class="hint">${api.isTouch ? 'Linker Daumen steuert, rechts feuern.' : 'Maus oder WASD steuern · Leertaste oder Maustaste feuert'}</p></div>`;
-    $('b-start').onclick = () => { api.audio(); sfx.click(); if (save.seenIntro) api.toHangar(); else showIntro(); };
+      <h1>TRADE FORCE</h1>
+      <p class="eyebrow">Nova Squadron · Der Krieg um Essen</p></div>
+      <p class="lede tlede">${STORY.intro}</p>
+      <button class="playtile" id="b-start" aria-label="Spielen"><i></i><i></i>${ICON.play}<b>Spielen</b></button>`;
+    $('b-start').onclick = () => { api.audio(); sfx.click(); home = true; if (save.seenIntro) api.toHangar(); else showIntro(); };
   }
 
   // Story-Einstieg: drei Karten, danach geht es in den Hangar mit der Flugschule als erstem Einsatz
@@ -79,19 +82,35 @@ export function createUI(api) {
   function showIntro() { showComic(COMICS.intro.pre, COMICS.intro.title, () => { save.seenIntro = true; api.persist(); api.toHangar(); }); }
 
   function showHangar() {
-    hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen hangar' + (tab === 'ship' ? ' view' : ''); api.showcase(tab === 'ship' ? save.ship : null);
+    hud.hidden = touch.hidden = true; screen.hidden = false;
     if (!sel) sel = save.done.m0 ? ENDLESS : MISSIONS[0];
-    const tabs = [['missions', 'Spielen'], ['ship', 'Schiff & Waffen'], ['upgrades', 'Upgrades'], ['settings', 'Einstellungen']];
-    screen.innerHTML = `<header class="bar"><div class="brand">NOVA SQUADRON</div>
-      <div class="credits"><span>Credits</span><b>${fmt(save.credits)}</b><button class="ibtn" id="b-full" aria-label="Vollbild" title="Vollbild">${ICON.full}</button></div></header>
+    if (tab === 'upgrades') tab = 'missions';
+    if (home) {   // Hauptmenü: vier große Kacheln
+      screen.className = 'screen home'; api.showcase(null);
+      const nOpen = 1 + MISSIONS.filter((m, i) => missionOpen(i)).length, shipName = (SHIPS.find((s) => s.id === save.ship) || SHIPS[0]).name;
+      const tile = (k, icon, name, sub, cls = '') => `<button class="htile ${cls}" data-go="${k}"><span class="hic">${icon}</span><b>${name}</b><small>${sub}</small></button>`;
+      screen.innerHTML = `<div class="title-art"></div><div class="horbit" aria-hidden="true"><i></i><i></i><i></i></div>
+        <header class="bar"><div class="brand">TRADE FORCE</div><button class="ibtn" id="b-full" aria-label="Vollbild" title="Vollbild">${ICON.full}</button></header>
+        <div class="hwrap"><p class="eyebrow">Der Krieg um Essen</p><div class="htiles">
+          ${tile('missions', ICON.play, 'Spielen', save.bestWave ? `Wellen-Gefecht · Rekord Welle ${save.bestWave}` : 'Wellen-Gefecht und Story', 'main')}
+          ${tile('comic', ICON.book, 'Comic', `${nOpen} von ${MISSIONS.length + 1} Kapiteln frei`)}
+          ${tile('ship', ICON.wing, 'Schiff & Waffen', esc(shipName))}
+          ${tile('settings', ICON.gear, 'Einstellungen', 'Grafik, Ton, Tempo')}</div></div>`;
+      screen.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => { tab = b.dataset.go; home = false; sfx.click(); showHangar(); }));
+      $('b-full').onclick = () => api.fullscreen(); return;
+    }
+    screen.className = 'screen hangar' + (tab === 'ship' ? ' view' : ''); api.showcase(tab === 'ship' ? save.ship : null);
+    const tabs = [['missions', 'Spielen'], ['comic', 'Comic'], ['ship', 'Schiff & Waffen'], ['settings', 'Einstellungen']];
+    screen.innerHTML = `<header class="bar"><button class="ibtn" id="b-home" aria-label="Hauptmenü" title="Hauptmenü">${ICON.home}</button><div class="brand">TRADE FORCE</div>
+      <button class="ibtn" id="b-full" aria-label="Vollbild" title="Vollbild">${ICON.full}</button></header>
       <nav class="tabs">${tabs.map(([k, n]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${n}</button>`).join('')}</nav>
-      <main class="pane">${{ missions, ship, upgrades, settings }[tab]()}</main>`;
+      <main class="pane">${{ missions, comic, ship, settings }[tab]()}</main>`;
+    $('b-home').onclick = () => { home = true; sfx.click(); showHangar(); };
+    screen.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => { const c = chapters()[+b.dataset.k]; if (!c || !c.open) return sfx.deny(); sfx.click(); showComic(c.panels, c.t, () => showHangar()); }));
+    const all = $('b-allcomic'); if (all) all.onclick = () => { sfx.click(); showComic(chapters().filter((c) => c.open).flatMap((c) => c.panels), 'Trade Force · Der ganze Comic', () => showHangar()); };
+    screen.querySelectorAll('[data-wp]').forEach((b) => (b.onclick = () => { if (api.toggleLoadout(+b.dataset.wp)) sfx.click(); else sfx.deny(); showHangar(); }));
     screen.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; sfx.click(); showHangar(); }));
     screen.querySelectorAll('[data-m]').forEach((b) => (b.onclick = () => { sel = b.dataset.m === 'endless' ? ENDLESS : MISSIONS[+b.dataset.m]; sfx.click(); showHangar(); }));
-    screen.querySelectorAll('[data-up]').forEach((b) => (b.onclick = () => {
-      const u = UPGRADES.find((x) => x.id === b.dataset.up), l = api.up(u.id), c = upgradeCost(l);
-      if (l < u.max && save.credits >= c) { save.credits -= c; save.up[u.id] = l + 1; api.persist(); sfx.buy(); showHangar(); } else sfx.deny();
-    }));
     screen.querySelectorAll('[data-ship]').forEach((b) => (b.onclick = () => { save.ship = b.dataset.ship; api.persist(); sfx.click(); showHangar(); }));
     screen.querySelectorAll('[data-set]').forEach((b) => (b.onclick = () => {
       const k = b.dataset.set; if (k === 'quality') { save.set.quality = b.dataset.v; api.quality(); } else if (k === 'pace') { save.set.pace = +b.dataset.v; api.settings(); } else { save.set[k] = !save.set[k]; api.settings(); } sfx.click(); showHangar();
@@ -117,6 +136,15 @@ export function createUI(api) {
       <p class="reward"><span>Wertung</span> ★★★ ohne Notschild · ★★ bis drei · ★ darüber</p>
       <button class="btn big" id="b-go">Starten</button></section></div>`;
   }
+  // Comic-Bibliothek: Prolog und Kapitel; die Fortsetzung eines Kapitels wird mit dem Einsatz freigeschaltet
+  function chapters() {
+    return [{ t: COMICS.intro.title, open: true, panels: COMICS.intro.pre, full: true }].concat(MISSIONS.map((m, i) => { const c = COMICS[m.id], done = !!save.done[m.id]; return { t: c.title, open: missionOpen(i), panels: c.pre.concat(done ? c.post || [] : []), full: done, n: i + 1 }; }));
+  }
+  function comic() {
+    const ch = chapters(), pages = ch.filter((c) => c.open).reduce((a, c) => a + c.panels.length, 0);
+    return `<div class="khead"><p>Der Comic wächst mit jedem Einsatz: Wer einen Einsatz schafft, schaltet die Fortsetzung und das nächste Kapitel frei.</p><button class="btn big" id="b-allcomic">Alles lesen · ${pages} Seiten</button></div>
+      <div class="kgrid">${ch.map((c, i) => `<button class="kcard${c.open ? '' : ' locked'}" data-k="${i}" ${c.open ? '' : 'disabled'}>${c.open ? `<img src="${asset(c.panels[0].img)}" alt="" loading="lazy">` : '<span class="klock">▣</span>'}<b>${esc(c.t)}</b><small>${c.open ? `${c.panels.length} Seiten · ${c.full ? 'vollständig' : `Fortsetzung nach Einsatz ${c.n}`}` : `Gesperrt · erst Einsatz ${c.n - 1} abschließen`}</small></button>`).join('')}</div>`;
+  }
   function ship() {
     const n = api.doneCount();
     const ships = SHIPS.map((s) => {
@@ -126,15 +154,9 @@ export function createUI(api) {
         <dl><dt>Tempo</dt><dd>${bar(s.speed)}</dd><dt>Wendigkeit</dt><dd>${bar(s.turn)}</dd><dt>Feuerkraft</dt><dd>${bar(s.dmg)}</dd><dt>Schild</dt><dd>${bar(s.shield)}</dd></dl>
         <span class="pick">${save.ship === s.id ? 'Gewählt' : open ? 'Wählen' : 'Gesperrt'}</span></button>`;
     }).join('');
-    const weapons = WEAPONS.map((w, i) => `<li class="${w.unlock <= n ? '' : 'locked'}"><span class="key">${i + 1}</span><b>${w.name}</b><small>${w.unlock <= n ? w.desc : `Nach Einsatz ${w.unlock}`}</small><em>∞</em></li>`).join('');
-    return `<div class="viewer" aria-hidden="true"></div><h2 class="sec">Schiff</h2><div class="ships">${ships}</div><h2 class="sec">Waffen <small>alle mit unendlich Munition</small></h2><ul class="wlist">${weapons}</ul>`;
-  }
-  function upgrades() {
-    return `<div class="ups">${UPGRADES.map((u) => {
-      const l = api.up(u.id), c = upgradeCost(l), full = l >= u.max, can = !full && save.credits >= c;
-      return `<div class="ucard"><div><b>${u.name}</b><small>${u.desc}</small><span class="pips">${Array.from({ length: u.max }, (_, i) => `<i class="${i < l ? 'on' : ''}"></i>`).join('')}</span></div>
-        <button class="btn${can ? '' : ' off'}" data-up="${u.id}" ${full ? 'disabled' : ''}>${full ? 'Maximal' : fmt(c) + ' Cr'}</button></div>`;
-    }).join('')}</div><p class="note">Credits gibt es für jeden Abschuss und jeden Einsatz. Serien ohne Pause erhöhen den Ertrag.</p>`;
+    const lo = api.loadout(), sl = api.slots(), cur = SHIPS.find((s) => s.id === save.ship) || SHIPS[0];
+    const weapons = WEAPONS.map((w, i) => { const open = w.unlock <= n, on = lo.includes(i); return `<li class="${open ? (on ? 'on' : '') : 'locked'}"><span class="key wic">${ICON[w.id]}</span><b>${w.name}</b><small>${open ? w.desc : `Nach Einsatz ${w.unlock}`}</small><button class="btn${on ? '' : ' ghost'}" data-wp="${i}" ${open ? '' : 'disabled'}>${!open ? 'Gesperrt' : on ? 'An Bord' : 'Einbauen'}</button></li>`; }).join('');
+    return `<div class="viewer" aria-hidden="true"></div><h2 class="sec">Schiff</h2><div class="ships">${ships}</div><h2 class="sec">Bewaffnung der ${esc(cur.name)} <small>${lo.length} von ${sl} Waffenplätzen belegt · alle mit unendlich Munition</small></h2><ul class="wlist">${weapons}</ul><p class="note">Jedes Schiff hat seine eigene Ausstattung. Ist kein Platz mehr frei, ersetzt die neue Waffe die älteste. Im Wellen-Gefecht kommen die Waffen über die Upgrades.</p>`;
   }
   function settings() {
     const s = save.set, tg = (k, n, d) => `<div class="ucard"><div><b>${n}</b><small>${d}</small></div><button class="btn" data-set="${k}">${s[k] ? 'An' : 'Aus'}</button></div>`;

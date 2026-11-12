@@ -6,7 +6,7 @@
 <link rel="icon" href="data:,">
 </head>
 <body style="margin:0">
-<title>Nova Squadron</title>
+<title>Trade Force</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=Bangers&family=Comic+Neue:wght@700&display=swap">
 <style>
@@ -193,7 +193,13 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
 .btn.off { background: transparent; color: var(--dim); border-color: var(--line); }
 .btn:disabled { background: transparent; color: var(--ok); border-color: transparent; cursor: default; }
 
-.title { justify-content: flex-end; }
+.title { justify-content: flex-start; }
+.title .title-art::after { background: radial-gradient(ellipse at 50% 50%, rgba(4, 6, 12, 0.15), rgba(4, 6, 12, 0.82) 80%), linear-gradient(180deg, rgba(4, 6, 12, 0.75), transparent 34%, transparent 70%, rgba(4, 6, 12, 0.92)); }
+.title .title-box { max-width: none; width: 100%; justify-items: center; text-align: center; padding: calc(var(--gt) + 4vh) var(--gr) 0 var(--gl); gap: 8px; }
+.title h1 { font-size: clamp(40px, 11vw, 120px); white-space: nowrap; }
+.tlede { position: absolute; left: 50%; bottom: calc(var(--gb) + 3vh); transform: translateX(-50%); width: min(92%, 640px); margin: 0; text-align: center; }
+.title .playtile { top: 56%; }
+@media (max-height: 480px) { .tlede { display: none; } .title .playtile { top: 62%; } }
 .title-art { position: absolute; inset: 0; background: url("./assets/keyart.jpg") 68% center / cover no-repeat; animation: drift 30s ease-in-out infinite alternate; }
 .title-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4, 6, 12, 0.94) 0%, rgba(4, 6, 12, 0.5) 46%, transparent 72%), linear-gradient(0deg, rgba(4, 6, 12, 0.9), transparent 45%); }
 @keyframes drift { from { transform: scale(1.04); } to { transform: scale(1.12) translateX(-1.5%); } }
@@ -204,6 +210,32 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
 .unlock.outro { color: var(--gold); line-height: 1.5; text-wrap: balance; }
 .hint { margin: 0; font-size: 13px; color: var(--dim); }
 
+/* Startkachel und Hauptmenü */
+.playtile { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: clamp(150px, 24vmin, 230px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; align-content: center; gap: 6px; background: radial-gradient(circle at 35% 30%, rgba(255, 170, 90, 0.95), var(--ember) 55%, #a8430a); color: #1a0d02; border: 2px solid rgba(255, 255, 255, 0.55); box-shadow: 0 0 60px rgba(255, 120, 30, 0.55), inset 0 0 30px rgba(255, 255, 255, 0.25); font-family: var(--display); }
+.playtile svg { width: 42%; height: 42%; margin-left: 6%; } .playtile b { font-size: clamp(15px, 2.6vmin, 22px); letter-spacing: 0.16em; text-transform: uppercase; }
+.playtile i { position: absolute; inset: -14%; border-radius: 50%; border: 1px solid rgba(255, 190, 130, 0.5); animation: orbit 2.6s ease-out infinite; pointer-events: none; } .playtile i + i { animation-delay: 1.3s; }
+@keyframes orbit { from { transform: scale(0.82); opacity: 0.9; } to { transform: scale(1.45); opacity: 0; } }
+.playtile:active { transform: translate(-50%, -50%) scale(0.96); }
+.home { justify-content: flex-start; } .home .title-art::after { background: radial-gradient(ellipse at 50% 60%, rgba(4, 6, 12, 0.55), rgba(4, 6, 12, 0.93) 75%); }
+.home .bar { position: relative; }
+.horbit { position: absolute; inset: 0; overflow: hidden; pointer-events: none; } .horbit i { position: absolute; left: 50%; top: 58%; width: 120vmax; height: 34vmax; border: 1px solid rgba(120, 190, 255, 0.16); border-radius: 50%; transform: translate(-50%, -50%) rotate(-9deg); } .horbit i:nth-child(2) { width: 86vmax; height: 24vmax; border-color: rgba(255, 150, 70, 0.2); } .horbit i:nth-child(3) { width: 56vmax; height: 15vmax; border-color: rgba(120, 190, 255, 0.22); }
+.hwrap { position: relative; flex: 1; min-height: 0; display: grid; align-content: center; justify-items: center; gap: 18px; padding: 0 var(--gr) var(--gb) var(--gl); overflow-y: auto; }
+.htiles { display: grid; grid-template-columns: 1.35fr 1fr 1fr 1fr; gap: clamp(10px, 1.8vw, 20px); width: min(100%, 1120px); align-items: stretch; }
+.htile { position: relative; display: grid; justify-items: center; align-content: center; gap: 8px; min-height: clamp(150px, 34vh, 280px); padding: 18px 12px; text-align: center; color: var(--ink); background: linear-gradient(160deg, rgba(40, 70, 120, 0.42), rgba(8, 12, 24, 0.82)); border: 1px solid rgba(130, 190, 255, 0.35); border-radius: 18px; box-shadow: 0 0 34px rgba(60, 140, 255, 0.16), inset 0 0 26px rgba(120, 190, 255, 0.08); backdrop-filter: blur(6px); transition: transform 0.14s, box-shadow 0.14s; }
+.htile:hover { transform: translateY(-4px); box-shadow: 0 0 44px rgba(60, 140, 255, 0.32), inset 0 0 26px rgba(120, 190, 255, 0.12); } .htile:active { transform: scale(0.97); }
+.htile .hic { width: clamp(54px, 9vmin, 84px); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(130, 190, 255, 0.45); background: rgba(10, 20, 40, 0.6); } .htile .hic svg { width: 54%; height: 54%; }
+.htile b { font-family: var(--display); font-size: clamp(16px, 2.2vw, 24px); letter-spacing: 0.1em; text-transform: uppercase; } .htile small { color: var(--dim); font-size: 13px; }
+.htile.main { background: linear-gradient(160deg, rgba(255, 140, 50, 0.4), rgba(40, 14, 4, 0.85)); border-color: rgba(255, 170, 100, 0.7); box-shadow: 0 0 44px rgba(255, 120, 30, 0.3), inset 0 0 26px rgba(255, 170, 100, 0.12); } .htile.main .hic { background: var(--ember); color: #1a0d02; border-color: #fff; } .htile.main b { font-size: clamp(20px, 3vw, 32px); }
+@media (orientation: portrait), (max-width: 700px) { .htiles { grid-template-columns: 1fr 1fr; } .htile.main { grid-column: 1 / -1; } .htile { min-height: 130px; } }
+@media (max-height: 480px) and (orientation: landscape) { .htile { min-height: 120px; padding: 10px; } .hwrap { gap: 8px; } }
+.bar .ibtn + .brand { margin-right: auto; margin-left: 12px; }
+/* Comic-Bibliothek und Bewaffnung */
+.khead { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; max-width: 1100px; margin: 0 auto 14px; } .khead p { margin: 0; color: var(--dim); max-width: 60ch; font-size: 14px; line-height: 1.4; }
+.kgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; max-width: 1100px; margin: 0 auto; }
+.kcard { display: grid; gap: 6px; align-content: start; text-align: left; padding: 0 0 10px; background: var(--panel); border: 1px solid var(--line); color: var(--ink); overflow: hidden; } .kcard img, .kcard .klock { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; } .kcard .klock { display: grid; place-items: center; font-size: 34px; color: var(--dim); background: rgba(255, 255, 255, 0.04); }
+.kcard b { font-family: var(--display); font-size: 15px; padding: 0 10px; line-height: 1.2; } .kcard small { color: var(--dim); font-size: 12.5px; padding: 0 10px; } .kcard.locked { opacity: 0.5; cursor: default; } .kcard:not(.locked):hover { border-color: var(--ember); }
+.wlist .wic { border: 0; display: grid; place-items: center; } .wlist .wic svg { width: 22px; height: 22px; } .wlist li.on { border-color: var(--ember); } .wlist .btn { padding: 8px 12px; font-size: 11px; clip-path: none; min-width: 96px; } .wlist .locked .btn { color: var(--dim); }
+@media (prefers-reduced-motion: reduce) { .playtile i { animation: none; } }
 .hangar { background: linear-gradient(180deg, rgba(4, 6, 12, 0.86), rgba(4, 6, 12, 0.6) 40%, rgba(4, 6, 12, 0.9)); }
 .hangar.view { background: linear-gradient(180deg, rgba(4, 6, 12, 0.7), rgba(4, 6, 12, 0.05) 16%, rgba(4, 6, 12, 0.05) 40%, rgba(4, 6, 12, 0.92) 62%); }
 .viewer { height: 36vh; pointer-events: none; }

@@ -92,10 +92,42 @@ export class BoltMesh {
   draw(bolts) {
     let n = 0; const m = this.mesh;
     for (const b of bolts) {
-      if (n >= this.cap) break;
+      if (n >= this.cap) break; if (b.kind === 1) continue;   // Raketen zeichnet MissileMesh
       _v.copy(b.vel).normalize(); _q.setFromUnitVectors(_z, _v); _s.set(b.w, b.w, b.len); _m.compose(b.pos, _q, _s);
       m.setMatrixAt(n, _m); m.setColorAt(n, _c.setRGB(b.c[0], b.c[1], b.c[2])); n++;
     }
     m.count = n; m.instanceMatrix.needsUpdate = true; if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  }
+}
+
+// Raketen als kleine 3D-Modelle: Rumpf, Spitze, vier Leitflossen, Düse und Triebwerksflamme
+function mergeColored(parts) {
+  const pos = [], nor = [], col = [];
+  for (const [g, c] of parts) { const n = g.toNonIndexed(); pos.push(...n.attributes.position.array); nor.push(...n.attributes.normal.array); for (let i = 0; i < n.attributes.position.count; i++) col.push(c[0], c[1], c[2]); }
+  const out = new THREE.BufferGeometry(); out.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); out.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); out.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); return out;
+}
+export class MissileMesh {
+  constructor(scene, cap = 96) {
+    this.cap = cap; const X = Math.PI / 2, parts = [
+      [new THREE.CylinderGeometry(0.5, 0.5, 4, 12).rotateX(X), [0.86, 0.87, 0.9]],
+      [new THREE.CylinderGeometry(0.53, 0.53, 0.45, 12).rotateX(X).translate(0, 0, 1.2), [1, 0.42, 0.08]],
+      [new THREE.CylinderGeometry(0.53, 0.53, 0.22, 12).rotateX(X).translate(0, 0, -0.6), [0.1, 0.16, 0.38]],
+      [new THREE.ConeGeometry(0.5, 1.5, 12).rotateX(X).translate(0, 0, 2.75), [1, 0.42, 0.08]],
+      [new THREE.CylinderGeometry(0.3, 0.44, 0.6, 10).rotateX(X).translate(0, 0, -2.3), [0.13, 0.13, 0.15]],
+    ];
+    for (let i = 0; i < 4; i++) parts.push([new THREE.BoxGeometry(0.09, 1.25, 1.3).translate(0, 0.85, -1.45).rotateZ(i * X), [0.1, 0.16, 0.38]]);
+    this.mesh = new THREE.InstancedMesh(mergeColored(parts), new THREE.MeshStandardMaterial({ vertexColors: true, metalness: 0.45, roughness: 0.38, emissive: 0x222222 }), cap);
+    const fg = new THREE.ConeGeometry(0.42, 3.4, 8).rotateX(-X).translate(0, 0, -4.2);
+    this.flame = new THREE.InstancedMesh(fg, new THREE.MeshBasicMaterial({ color: new THREE.Color(4.5, 2.2, 0.5), toneMapped: false, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true }), cap);
+    for (const m of [this.mesh, this.flame]) { m.frustumCulled = false; m.count = 0; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(m); }
+  }
+  draw(bolts) {
+    let n = 0;
+    for (const b of bolts) {
+      if (b.kind !== 1 || n >= this.cap) continue;
+      _v.copy(b.vel).normalize(); _q.setFromUnitVectors(_z, _v); _s.set(1.5, 1.5, 1.5); _m.compose(b.pos, _q, _s); this.mesh.setMatrixAt(n, _m);
+      const f = 1.2 + Math.random() * 0.7; _s.set(1.5, 1.5, 1.5 * f); _m.compose(b.pos, _q, _s); this.flame.setMatrixAt(n, _m); n++;
+    }
+    for (const m of [this.mesh, this.flame]) { m.count = n; m.instanceMatrix.needsUpdate = true; }
   }
 }

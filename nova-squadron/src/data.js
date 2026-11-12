@@ -61,7 +61,7 @@ export const STORY = {
 // Comic zum Durchklicken: vor jedem Einsatz (pre) und nach dem Sieg (post). Jedes Bild hat einen Erzählkasten (cap),
 // Sprechblasen, die nacheinander aufploppen (lines: [Sprecher, Text]), und manchmal ein Geräuschwort (fx). Bilder: assets/c_*.jpg und n_*.jpg.
 export const COMICS = {
-  intro: { title: 'Nova Squadron · Der Krieg um Essen', pre: [
+  intro: { title: 'Trade Force · Der Krieg um Essen', pre: [
     { img: 'x_c0_1', cap: 'Es begab sich im Essen-System, gleich hinter dem Ruhrnebel …', lines: [['Erzähler', 'Hier schlug das Herz des Handels. Märkte, Arkaden, Buden. Und ein Mann, der sie alle kannte.']] },
     { img: 'x_desk', cap: 'Marc Heistermann vom Handelsverband. Gegner Nummer eins: der Formularstapel.', lines: [['Marc Heistermann', 'Antrag auf Genehmigung eines Antrags. In dreifacher Ausfertigung. Klar.'], ['Marc Heistermann', 'Und dann noch eine Rede für das nächste Händlertreffen schreiben.'], ['Marc Heistermann', 'Wenigstens ist der Kaffee noch heiß. Und ich habe meinen Rote-Bete-Saft.'], ['Charlie', 'Zzz …']] },
     { img: 'y_charlie', cap: 'Sein wichtigster Mitarbeiter: Charlie, Chihuahua-Dackel, Sicherheitschef. Zuständig für Alarm. Bezahlung: Käseleckerlis.', lines: [['Charlie', 'Wuff.'], ['Erzähler', 'Übersetzung: „Wir gehen jetzt spazieren.“ Niemand hat sich je getraut, das zu hinterfragen.']] },

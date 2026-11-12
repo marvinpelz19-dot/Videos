@@ -13,7 +13,7 @@ MISSIONS.forEach((m, i) => {
   out += (c.post || []).map(panel).join('\n');
 });
 out += '<p class="end">Ende</p>';
-const html = `<title>Nova Squadron Comic</title>
+const html = `<title>Trade Force Comic</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@700&display=swap">
 <style>
@@ -46,7 +46,7 @@ h1 { font-family: "Bangers", Impact, sans-serif; font-weight: 400; font-size: cl
 @media (max-width: 760px) { .panel { grid-template-columns: 1fr; transform: none !important; } .panel img { height: auto; border-right: 0; border-bottom: 4px solid var(--ink); } main { gap: 20px; } }
 </style>
 <main>
-<h1>Nova Squadron</h1>
+<h1>Trade Force</h1>
 <p class="sub">Der Krieg um Essen · der ganze Comic zum Durchscrollen, mit den Einsätzen dazwischen</p>
 ${out}
 </main>

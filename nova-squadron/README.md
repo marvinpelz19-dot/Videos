@@ -1,4 +1,4 @@
-# Nova Squadron
+# Trade Force (Nova Squadron)
 
 3D-Weltraum-Shooter im Browser (three.js). Handelsverband gegen Unternehmerverband: der Krieg um das Essen-System.
 
@@ -15,7 +15,7 @@
 
     node serve.mjs        # http://127.0.0.1:8188/
 
-Zum Spielen ohne Server: `dist/Nova-Squadron.html` (eine Datei, erzeugt mit `node build-standalone.mjs`, braucht esbuild).
+Zum Spielen ohne Server: `dist/Trade-Force.html` (eine Datei, erzeugt mit `node build-standalone.mjs`, braucht esbuild).
 
 `page.html` ist die Quelle (auch für die Artifact-Fassung), `node build.mjs` erzeugt daraus `index.html`.
 
