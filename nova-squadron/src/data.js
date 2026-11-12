@@ -55,44 +55,81 @@ export const ENVS = {
 // Galaxis an sich reißen. Die Nova Squadron fliegt für den Handelsverband. Am Ende führt der Handelsverband alle Verbände.
 // Phasen: spawn = [Typ, Anzahl]. Ziel ist immer: alle Ziel-Objekte der Phase zerstören.
 export const STORY = {
-  intro: 'Das Essen-System ist das Herz des galaktischen Handels. Der Unternehmerverband will es ganz für sich: jede Route, jeden Markt, jede Station. Nur der Handelsverband stellt sich ihm entgegen. Du fliegst seine beste Staffel.',
-  cards: [
-    ['Das Essen-System', 'Zwischen Rüttenscheid, dem Trümmergürtel Zollverein und dem Hellweg fließt der Handel der halben Galaxis. Wer Essen hält, bestimmt, was die Dinge kosten.'],
-    ['Der Unternehmerverband', 'Generaldirektor Kord will keinen Markt mehr, sondern einen Besitzer. Seine Heuschrecken-Drohnen besetzen Stationen, seine Liquidatoren wickeln ab, wer sich wehrt. Über Essen Prime wartet sein Flaggschiff Monopol.'],
-    ['Die Nova Squadron', 'Der Handelsverband hat nur eine Staffel, aber die beste. Du fliegst als Nova Eins. Erst die Flugschule, dann sechs Einsätze: Schwarm abfangen, Funk befreien, Konvoi schützen, den Kreuzer Rendite versenken, die Elite schlagen, die Monopol vernichten. Danach führt der Handelsverband alle Verbände.'],
-  ],
-  outro: 'Das Flaggschiff Monopol ist Geschichte, Generaldirektor Kord hat kapituliert. Alle Verbände des Systems haben den Handelsverband zu ihrem Vorsitz gewählt. Essen gehört dem Handel.',
+  intro: 'Du bist Marc Heistermann, Kommandant der Nova Squadron und Stimme des Handelsverbands. Im Essen-System greift der Unternehmerverband nach jedem Markt und jeder Station.',
+  outro: 'Das Flaggschiff Monopol ist Geschichte, Generaldirektor Kord hat kapituliert. Alle Verbände des Systems haben Marc Heistermann und den Handelsverband zu ihrem Vorsitz gewählt. Essen gehört dem Handel.',
+};
+// Comic vor jedem Story-Einsatz: zwei Bilder mit Erzählkasten und Sprechblase, dazu ein Zielfeld. Bilder liegen in assets/c_*.jpg.
+export const COMICS = {
+  intro: { title: 'Nova Squadron · Der Krieg um Essen', panels: [
+    { img: 'c_c0_1', cap: 'Es begab sich im Essen-System, gleich hinter dem Ruhrnebel …', who: 'Erzähler', say: 'Hier schlug einst das Herz des Handels. Dann kam der Unternehmerverband. Und einer stand auf: Marc Heistermann vom Handelsverband.' },
+  ] },
+  m0: { title: 'Kapitel 1 · Der Kommandant steigt ein', panels: [
+    { img: 'c_m0_1', cap: 'Die Arkaden der Kernstadt. Laden um Laden schließt.', who: 'Händlerin', say: 'Generaldirektor Kord kauft alles auf, was leer steht. Und dann lässt er es leer.' },
+    { img: 'c_m0_2', cap: 'Hangar der Nova Squadron.', who: 'Marc Heistermann', say: 'Dann rede ich nicht mehr nur. Dann fliege ich selbst. Macht die Pfeil startklar!' },
+  ] },
+  m1: { title: 'Kapitel 2 · Feuertaufe über Rüttenscheid', panels: [
+    { img: 'c_m1_1', cap: 'Die Marktstation Rüttenscheid. Wer sie hält, setzt die Preise.', who: 'Leitstelle', say: 'Heuschrecken-Drohnen im Anflug! Hunderte!' },
+    { img: 'c_m1_2', cap: 'Und hinter dem Schwarm: die Korvette Vollstrecker.', who: 'Marc Heistermann', say: 'Sechs Geschütze? Gut. Dann weiß ich, wohin ich zielen muss.' },
+  ] },
+  m2: { title: 'Kapitel 3 · Zeche Zollverein', panels: [
+    { img: 'c_m2_1', cap: 'Der alte Bergbaugürtel. Kords Werbebojen brüllen auf allen Kanälen.', who: 'Vex', say: 'Ich höre nur noch „Alles muss raus“. Unser Funk ist tot, Marc!' },
+    { img: 'c_m2_2', cap: 'Zwischen den Fördertürmen wartet einer, der Firmen abwickelt wie andere Leute Post.', who: 'Der Liquidator', say: 'Ein Händler im Cockpit. Wie rührend.' },
+  ] },
+  m3: { title: 'Kapitel 4 · Geleit auf dem Hellweg', panels: [
+    { img: 'c_m3_1', cap: 'Der Hellweg, die älteste Handelsroute des Systems. Drei Frachter voller Ware für die Läden von Essen.', who: 'Frachter Ruhrperle', say: 'Wir haben Ware für halb Essen an Bord. Ohne uns bleiben die Regale leer.' },
+    { img: 'c_m3_2', cap: 'Kord schickt seine Abmahner.', who: 'Marc Heistermann', say: 'Nicht mit meinen Frachtern. Vex, wir nehmen die Bomber zuerst!' },
+  ] },
+  m3b: { title: 'Kapitel 5 · Die Geisterarkaden', panels: [
+    { img: 'c_m4_1', cap: 'Limbecker Ring. Das größte Kaufhaus des Systems treibt dunkel im All.', who: 'Vex', say: 'Früher hat man hier einen ganzen Tag verbummelt. Jetzt hausen Schildträger darin.' },
+    { img: 'c_m4_2', cap: 'Störer decken den Abzug. Goldtransporter schaffen die letzten Werte fort.', who: 'Marc Heistermann', say: 'Leerstand ist kein Schicksal. Wir holen die Arkaden zurück.' },
+  ] },
+  m4: { title: 'Kapitel 6 · Kreuzer Rendite', panels: [
+    { img: 'c_m5_1', cap: 'Werft Borbeck. Hier liegt, was jede Besetzung deckt: der Kreuzer Rendite.', who: 'Leitstelle', say: 'Vierhundert Meter Stahl, Kommandant. Und heute ohne Eskorte.' },
+    { img: 'c_m5_2', cap: 'Erst die Türme. Dann die Schildkuppeln. Dann der Tresorkern.', who: 'Marc Heistermann', say: 'Auch die größte Rendite hat ein Heck.' },
+  ] },
+  m5: { title: 'Kapitel 7 · Sturm über Hochofen', panels: [
+    { img: 'c_m6_1', cap: 'Über der Lavawelt Hochofen sammelt Kord seine Elite.', who: 'Vex', say: 'Drei Liquidatoren. Und sie wissen, wer ihren Kollegen in Zollverein erwischt hat.' },
+    { img: 'c_m6_2', cap: 'Auf der Brücke des Flaggschiffs.', who: 'Generaldirektor Kord', say: 'Heistermann. Immer wieder Heistermann. Beendet das.' },
+  ] },
+  m6: { title: 'Kapitel 8 · Flaggschiff Monopol', panels: [
+    { img: 'c_m7_1', cap: 'Über Essen Prime. Das Hauptgeschütz der Monopol lädt.', who: 'Generaldirektor Kord', say: 'Ein Markt braucht keinen Wettbewerb. Er braucht einen Besitzer.' },
+    { img: 'c_m7_2', cap: 'Ein einzelner Jäger unter dem Rumpf.', who: 'Marc Heistermann', say: 'Ein Markt braucht Händler, Kord. Viele. Und jetzt halt dich fest.' },
+  ] },
+  outro: { title: 'Epilog · Essen gehört dem Handel', panels: [
+    { img: 'c_out_1', cap: 'Die Monopol zerbricht. Kord kapituliert.', who: 'Vex', say: 'Das war sie, Marc. Das war die ganze Flotte!' },
+    { img: 'c_out_2', cap: 'Alle Verbände wählen den Handelsverband zu ihrem Vorsitz. Die Arkaden füllen sich wieder.', who: 'Marc Heistermann', say: 'Dann machen wir die Läden wieder auf. Alle.' },
+  ] },
 };
 export const MISSIONS = [
   {
     id: 'm0', aim: 'Lerne dein Schiff zu beherrschen', why: 'Der Handelsverband schickt niemanden unvorbereitet gegen Kords Flotte.', station: true, n: 0, tutorial: true, name: 'Flugschule', place: 'Übungsraum über Essen Prime', env: 'kerasis',
-    brief: 'Bevor du gegen den Unternehmerverband fliegst, zeigt dir der Verbandschef dein Schiff: schießen, rollen, Schub und Bremse, Looping, Wende, Waffenwechsel und die Nova-Welle. Zum Üben sind alle fünf Waffen freigeschaltet.',
+    brief: 'Bevor du gegen den Unternehmerverband fliegst, frischst du mit der Leitstelle deine Flugkünste auf: schießen, rollen, Schub und Bremse, Looping, Wende, Waffenwechsel und die Nova-Welle. Zum Üben sind alle fünf Waffen freigeschaltet.',
     phases: [
-      { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · Fadenkreuz-Taste halten', spawn: [['target', 3]], comms: [['Verbandschef', 'Willkommen in der Nova Squadron. Zeig mir zuerst, dass du triffst.']] },
-      { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste mit dem Kreispfeil', comms: [['Verbandschef', 'In der Rolle trifft dich nichts. Merk dir das.']] },
+      { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · Fadenkreuz-Taste halten', spawn: [['target', 3]], comms: [['Leitstelle', 'Willkommen zurück im Cockpit, Kommandant Heistermann. Erst mal die Übungsziele.']] },
+      { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste mit dem Kreispfeil', comms: [['Leitstelle', 'In der Rolle trifft dich nichts. Merk dir das.']] },
       { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'Pfeile hoch halten, dann Pfeile runter halten', comms: [['Vex', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
       { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste mit der Schleife', comms: [['Vex', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
-      { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste mit dem Umkehrpfeil', comms: [['Verbandschef', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
+      { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste mit dem Umkehrpfeil', comms: [['Leitstelle', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
       { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffensymbol unten antippen', comms: [['Vex', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
-      { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste mit den Ringen', comms: [['Verbandschef', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
-      { label: 'Ernstfall: Heuschrecken abschießen', spawn: [['drone', 4]], comms: [['Verbandschef', 'Kein Übungsziel mehr. Der Unternehmerverband hat uns gefunden. Zeig, was du gelernt hast.']] },
+      { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste mit den Ringen', comms: [['Leitstelle', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
+      { label: 'Ernstfall: Heuschrecken abschießen', spawn: [['drone', 4]], comms: [['Leitstelle', 'Kein Übungsziel mehr. Der Unternehmerverband hat uns gefunden. Zeig, was du gelernt hast.']] },
     ],
   },
   {
     id: 'm1', aim: 'Verteidige die Marktstation Rüttenscheid und zerstöre die Korvette Vollstrecker', why: 'Wer die Marktstation hält, setzt die Preise im ganzen Sektor. Fällt sie an den Unternehmerverband, zahlen alle Händler seinen Zoll.', station: true, n: 1, name: 'Feuertaufe über Rüttenscheid', place: 'Orbit von Rüttenscheid', env: 'kerasis',
     brief: 'Der Unternehmerverband schickt Heuschrecken-Drohnen gegen die Marktstation über Rüttenscheid. Wer sie besetzt, diktiert dort die Preise. Fang den Schwarm ab.',
     phases: [
-      { label: 'Heuschrecken abfangen', spawn: [['drone', 6]], comms: [['Verbandschef', 'Nova Eins, hier spricht der Handelsverband. Der Schwarm ist da. Waffen frei.']] },
+      { label: 'Heuschrecken abfangen', spawn: [['drone', 6]], comms: [['Leitstelle', 'Kommandant Heistermann, der Schwarm ist da. Waffen frei.']] },
       { label: 'Zweite Welle zerstören', spawn: [['drone', 8]], comms: [['Vex', 'Die wollen die Marktstation. Ich bleibe an deinem Flügel.']] },
-      { label: 'Kurshaie ausschalten', spawn: [['drone', 5], ['inter', 4]], comms: [['Verbandschef', 'Schnelle Signaturen. Das sind Kurshaie. Halt sie dir vom Heck.']] },
-      { label: 'Korvette Vollstrecker zerstören', spawn: [['corvette', 1], ['drone', 4]], comms: [['Verbandschef', 'Da kommt ihr Führungsschiff: die Korvette Vollstrecker. Sechs Geschütze, dicke Panzerung. Bleib in Bewegung und nimm sie auseinander.']] },
+      { label: 'Kurshaie ausschalten', spawn: [['drone', 5], ['inter', 4]], comms: [['Leitstelle', 'Schnelle Signaturen. Das sind Kurshaie. Halt sie dir vom Heck.']] },
+      { label: 'Korvette Vollstrecker zerstören', spawn: [['corvette', 1], ['drone', 4]], comms: [['Leitstelle', 'Da kommt ihr Führungsschiff: die Korvette Vollstrecker. Sechs Geschütze, dicke Panzerung. Bleib in Bewegung und nimm sie auseinander.']] },
     ],
   },
   {
     id: 'm2', aim: 'Zerstöre alle fünf Werbebojen und den Liquidator, der sie bewacht', why: 'Solange die Bojen senden, kann der Handelsverband seine Frachter nicht warnen.', n: 2, name: 'Zeche Zollverein', place: 'Trümmergürtel Zollverein', env: 'belt',
     brief: 'Im alten Bergbaugürtel Zollverein senden Werbebojen des Unternehmerverbands auf allen Kanälen und legen unseren Funk lahm. Zerstöre alle fünf. Ein Liquidator bewacht sie.',
     phases: [
-      { label: 'Werbebojen zerstören', spawn: [['buoy', 5], ['drone', 6]], comms: [['Verbandschef', 'Fünf Bojen zwischen den Felsen. Achte auf die Asteroiden.']] },
+      { label: 'Werbebojen zerstören', spawn: [['buoy', 5], ['drone', 6]], comms: [['Leitstelle', 'Fünf Bojen zwischen den Felsen. Achte auf die Asteroiden.']] },
       { label: 'Verstärkung abwehren', spawn: [['inter', 5], ['drone', 5], ['kami', 6]], comms: [['Vex', 'Funk ist wieder da. Die Verstärkung des Verbands leider auch.']] },
       { label: 'Den Liquidator stellen', spawn: [['ace', 1], ['drone', 4]], comms: [['Liquidator', 'Ein einzelner Händler? Ich wickle dich ab wie jede andere Firma.']] },
     ],
@@ -107,29 +144,38 @@ export const MISSIONS = [
     ],
   },
   {
-    id: 'm4', aim: 'Versenke den Kreuzer Rendite: Türme, Schildgeneratoren, Tresorkern', why: 'Die Rendite deckt jede Besetzung des Unternehmerverbands. Ohne sie sind seine Stationen schutzlos.', station: true, n: 4, name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
-    brief: 'Der Kreuzer Rendite liegt ohne Eskorte vor der Werft Borbeck. Zerstöre seine Türme, dann die Schildgeneratoren auf dem Rücken. Erst danach liegt der Tresorkern am Heck frei.',
+    id: 'm3b', aim: 'Vertreibe die Besatzer aus den Geisterarkaden und stoppe die Goldtransporter', why: 'Kord kauft leere Arkaden auf und lässt sie verfallen, damit dort niemand mehr handeln kann. Sind die Besatzer weg, ziehen wieder Händler ein.', station: true, n: 4, name: 'Die Geisterarkaden', place: 'Limbecker Ring', env: 'deep',
+    brief: 'Am Limbecker Ring treibt das größte Kaufhaus des Systems dunkel im All. Störer und Schildträger des Unternehmerverbands halten es besetzt, Goldtransporter schaffen die letzten Werte fort. Hol die Arkaden zurück.',
     phases: [
-      { label: 'Geschütztürme zerstören', spawn: [['cruiser', 1], ['drone', 6]], goal: 'turret', comms: [['Verbandschef', 'Das ist die Rendite. Vierhundert Meter Stahl. Fang mit den Türmen an.']] },
-      { label: 'Schildgeneratoren zerstören', spawn: [['inter', 5]], goal: 'gen', comms: [['Vex', 'Türme sind still. Die Kuppeln auf dem Rücken speisen den Kernschild.']] },
-      { label: 'Tresorkern am Heck zerstören', spawn: [['drone', 6]], goal: 'core', comms: [['Verbandschef', 'Schild ist unten! Der Tresorkern am Heck liegt frei. Alles drauf!']] },
+      { label: 'Störer ausschalten', spawn: [['jammer', 3], ['drone', 5]], comms: [['Leitstelle', 'Störer voraus. Ihre violetten Kugeln legen deine Waffe lahm. Weich aus oder wechsle die Waffe.']] },
+      { label: 'Schildträger und Abmahner zerstören', spawn: [['shielder', 2], ['bomber', 4], ['inter', 3]], comms: [['Vex', 'Die Schildträger decken alles um sich herum. Die zuerst, Marc!']] },
+      { label: 'Goldtransporter stoppen', spawn: [['hauler', 2], ['kami', 5], ['drone', 4]], comms: [['Leitstelle', 'Zwei Transporter legen ab. Da drin steckt, was den Händlern gehört.']] },
     ],
   },
   {
-    id: 'm5', aim: 'Kapere Kords Gold und schlage seine drei Liquidatoren', why: 'Mit dem Gold bezahlt Kord seine Flotte, mit den Liquidatoren führt er sie. Beides verliert er heute.', n: 5, name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
+    id: 'm4', aim: 'Versenke den Kreuzer Rendite: Türme, Schildgeneratoren, Tresorkern', why: 'Die Rendite deckt jede Besetzung des Unternehmerverbands. Ohne sie sind seine Stationen schutzlos.', station: true, n: 5, name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
+    brief: 'Der Kreuzer Rendite liegt ohne Eskorte vor der Werft Borbeck. Zerstöre seine Türme, dann die Schildgeneratoren auf dem Rücken. Erst danach liegt der Tresorkern am Heck frei.',
+    phases: [
+      { label: 'Geschütztürme zerstören', spawn: [['cruiser', 1], ['drone', 6]], goal: 'turret', comms: [['Leitstelle', 'Das ist die Rendite. Vierhundert Meter Stahl. Fang mit den Türmen an.']] },
+      { label: 'Schildgeneratoren zerstören', spawn: [['inter', 5]], goal: 'gen', comms: [['Vex', 'Türme sind still. Die Kuppeln auf dem Rücken speisen den Kernschild.']] },
+      { label: 'Tresorkern am Heck zerstören', spawn: [['drone', 6]], goal: 'core', comms: [['Leitstelle', 'Schild ist unten! Der Tresorkern am Heck liegt frei. Alles drauf!']] },
+    ],
+  },
+  {
+    id: 'm5', aim: 'Kapere Kords Gold und schlage seine drei Liquidatoren', why: 'Mit dem Gold bezahlt Kord seine Flotte, mit den Liquidatoren führt er sie. Beides verliert er heute.', n: 6, name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
     brief: 'Über der Lavawelt Hochofen sammelt der Unternehmerverband seine Elite. Drei Liquidatoren führen sie an. Brich ihnen das Rückgrat, dann steht das Flaggschiff allein.',
     phases: [
-      { label: 'Vorhut zerschlagen', spawn: [['corvette', 1], ['inter', 6], ['drone', 6]], comms: [['Verbandschef', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
+      { label: 'Vorhut zerschlagen', spawn: [['corvette', 1], ['inter', 6], ['drone', 6]], comms: [['Leitstelle', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
       { label: 'Goldtransporter abfangen', spawn: [['hauler', 2], ['drone', 6], ['kami', 4]], comms: [['Vex', 'Zwei Goldtransporter! Damit bezahlt Kord seine Flotte. Hol sie dir, das gibt fette Prämie.']] },
       { label: 'Ersten Liquidator stellen', spawn: [['ace', 1], ['inter', 6]], comms: [['Liquidator', 'Du hast meinen Partner in Zollverein abgeschrieben. Das wird teuer.']] },
       { label: 'Die Doppelspitze brechen', spawn: [['ace', 2], ['drone', 8], ['bomber', 2]], comms: [['Vex', 'Zwei auf einmal. Ich nehme dir die Kleinen ab.']] },
     ],
   },
   {
-    id: 'm6', aim: 'Vernichte das Flaggschiff Monopol', why: 'Fällt die Monopol, kapituliert der Unternehmerverband. Dann führt der Handelsverband alle Verbände von Essen.', n: 6, name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
+    id: 'm6', aim: 'Vernichte das Flaggschiff Monopol', why: 'Fällt die Monopol, kapituliert der Unternehmerverband. Dann führt der Handelsverband alle Verbände von Essen.', n: 7, name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
     brief: 'Die Monopol ist das Flaggschiff von Generaldirektor Kord. Ihr Hauptgeschütz zeichnet vor dem Schuss eine rote Linie: Flieg sofort aus ihr heraus. Türme, Generatoren, Kern. Fällt die Monopol, führt der Handelsverband alle Verbände.',
     phases: [
-      { label: 'Türme der Monopol zerstören', spawn: [['dread', 1], ['drone', 8]], goal: 'turret', comms: [['Verbandschef', 'Alle Staffeln, das ist der Tag. Nova Eins führt den Angriff. Für Essen!']] },
+      { label: 'Türme der Monopol zerstören', spawn: [['dread', 1], ['drone', 8]], goal: 'turret', comms: [['Leitstelle', 'Alle Staffeln, das ist der Tag. Nova Eins führt den Angriff. Für Essen!']] },
       { label: 'Drei Schildgeneratoren zerstören', spawn: [['inter', 8], ['ace', 1]], goal: 'gen', comms: [['Generaldirektor Kord', 'Ihr kratzt an einem Konzern. Hauptgeschütz laden.']] },
       { label: 'Kern der Monopol vernichten', spawn: [['drone', 8], ['inter', 6]], goal: 'core', comms: [['Vex', 'Der Kern liegt frei! Unter dem Rumpf, in der Mitte!']] },
     ],
@@ -166,9 +212,9 @@ export function wavePhase(n) {
   const k = 1 + n * 0.09, c = (x) => Math.max(1, Math.round(x * k));
   if (n % 5 === 0) {
     const b = (n / 5 - 1) % 4, tier = Math.floor(n / 20);
-    if (b === 0) return { boss: true, label: 'Boss: Korvette Vollstrecker', spawn: [['corvette', 1 + tier], ['drone', c(3)]], comms: [['Verbandschef', 'Bosswelle! Eine Korvette führt sie an. Sechs Geschütze, bleib in Bewegung.']] };
+    if (b === 0) return { boss: true, label: 'Boss: Korvette Vollstrecker', spawn: [['corvette', 1 + tier], ['drone', c(3)]], comms: [['Leitstelle', 'Bosswelle! Eine Korvette führt sie an. Sechs Geschütze, bleib in Bewegung.']] };
     if (b === 1) return { boss: true, label: 'Boss: Die Liquidatoren', spawn: [['ace', 2 + tier], ['jammer', 1], ['inter', c(2)]], comms: [['Liquidator', 'Du hast genug Wellen überlebt. Jetzt wickeln wir dich persönlich ab.']] };
-    if (b === 2) return { boss: true, goal: 'core', label: 'Boss: Kreuzer Rendite · Generatoren, dann Kern', spawn: [['cruiser', 1], ['drone', c(3)]], comms: [['Verbandschef', 'Ein Kreuzer! Zerstöre die Schildgeneratoren auf dem Rücken, dann den Kern am Heck.']] };
+    if (b === 2) return { boss: true, goal: 'core', label: 'Boss: Kreuzer Rendite · Generatoren, dann Kern', spawn: [['cruiser', 1], ['drone', c(3)]], comms: [['Leitstelle', 'Ein Kreuzer! Zerstöre die Schildgeneratoren auf dem Rücken, dann den Kern am Heck.']] };
     return { boss: true, goal: 'core', label: 'Boss: Flaggschiff Monopol · Generatoren, dann Kern', spawn: [['dread', 1], ['inter', c(3)]], comms: [['Generaldirektor Kord', 'Genug gespielt. Die Monopol beendet das.']] };
   }
   const themes = [

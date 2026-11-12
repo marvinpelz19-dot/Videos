@@ -1,6 +1,6 @@
 <title>Nova Squadron</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Barlow:wght@400;500;600&family=Bangers&family=Comic+Neue:wght@700&display=swap">
 <style>
 /* Layout: ein Vollbild-Cockpit. Die Spielszene füllt alles, HUD in den vier Ecken, Menüs als Glasflächen darüber. */
 :root {
@@ -38,7 +38,33 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 .score b { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
 .score small { font-size: 12px; color: var(--gold); font-variant-numeric: tabular-nums; }
 #combo { font-size: 13px; color: var(--ember); font-weight: 700; letter-spacing: 0.06em; }
-#b-pause { pointer-events: auto; margin-top: 6px; width: 40px; height: 34px; background: var(--panel); border: 1px solid var(--line); font-size: 13px; letter-spacing: 2px; }
+#b-pause { pointer-events: auto; right: var(--gr); top: var(--gt); width: 48px; height: 48px; border-radius: 50%; background: rgba(9, 14, 26, 0.7); border: 1.5px solid rgba(233, 242, 255, 0.55); color: var(--ink); display: grid; place-items: center; padding: 0; z-index: 3; }
+#b-pause svg { width: 24px; height: 24px; } #b-pause:active { background: rgba(90, 170, 255, 0.4); }
+.score { right: calc(var(--gr) + 60px) !important; }
+.wchip.hot { color: var(--danger); border-color: var(--danger); animation: pulse 0.25s infinite alternate; }
+.ibtn { width: 40px; height: 40px; border-radius: 50%; background: var(--panel); border: 1px solid var(--line); color: var(--ink); display: grid; place-items: center; padding: 0; } .ibtn svg { width: 20px; height: 20px; }
+#mtoast { position: absolute; left: 50%; bottom: calc(var(--gb) + 20px); transform: translateX(-50%); max-width: min(92%, 520px); background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 10px 14px; font-size: 14px; opacity: 0; pointer-events: none; z-index: 5; text-wrap: balance; }
+#mtoast.show { animation: toast 4.5s ease-out; }
+/* ---------- Comic ---------- */
+.comic { background: #0b0d14 radial-gradient(rgba(255, 255, 255, 0.07) 1.2px, transparent 1.6px) 0 0 / 14px 14px; overflow-y: auto; align-items: center; padding: var(--gt) var(--gr) var(--gb) var(--gl); }
+.cpage { --paper: #f4ead2; --ink2: #14131a; width: min(100%, 1180px); margin: auto 0; display: grid; gap: 12px; }
+.ctitle { font-family: "Bangers", "Impact", "Arial Narrow", sans-serif; font-weight: 400; font-size: clamp(26px, 4.6vw, 50px); letter-spacing: 0.04em; color: #ffd84a; text-shadow: 3px 3px 0 #c8281e, 5px 5px 0 #000; transform: rotate(-1.2deg); margin: 0 0 2px 6px; line-height: 1; }
+.cgrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.cgrid.p1 { grid-template-columns: minmax(0, 1fr); } .cgrid.p1 .cpanel img { aspect-ratio: 16 / 8; }
+.cpanel { position: relative; margin: 0; background: var(--paper); border: 4px solid var(--ink2); box-shadow: 6px 6px 0 #000; overflow: hidden; }
+.cpanel.t0 { transform: rotate(-0.5deg); } .cpanel.t1 { transform: rotate(0.6deg); }
+.cpanel img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.ccap { position: absolute; left: 0; top: 0; max-width: 78%; background: #ffd84a; color: var(--ink2); border-right: 3px solid var(--ink2); border-bottom: 3px solid var(--ink2); padding: 6px 10px 5px; font-family: "Comic Neue", "Comic Sans MS", "Trebuchet MS", sans-serif; font-weight: 700; font-size: clamp(12px, 1.5vw, 16px); line-height: 1.25; text-transform: uppercase; }
+.bubble { position: absolute; bottom: 14px; max-width: 70%; background: #fff; color: var(--ink2); border: 3px solid var(--ink2); border-radius: 20px; padding: 8px 14px 9px; font-family: "Comic Neue", "Comic Sans MS", "Trebuchet MS", sans-serif; font-weight: 700; font-size: clamp(13px, 1.6vw, 17px); line-height: 1.25; box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5); }
+.bubble.b0 { left: 14px; border-bottom-left-radius: 2px; } .bubble.b1 { right: 14px; border-bottom-right-radius: 2px; }
+.bubble b { display: block; font-family: "Bangers", "Impact", sans-serif; font-weight: 400; letter-spacing: 0.05em; font-size: 0.95em; color: #c8281e; }
+.cgoal { grid-column: 1 / -1; display: grid; gap: 4px; padding: 14px 18px 14px 150px; color: var(--ink2); font-family: "Comic Neue", "Comic Sans MS", "Trebuchet MS", sans-serif; font-weight: 700; background: var(--paper) radial-gradient(rgba(200, 40, 30, 0.16) 1.4px, transparent 1.8px) 0 0 / 10px 10px; }
+.cgoal .burst { position: absolute; left: 14px; top: 50%; transform: translateY(-50%) rotate(-7deg); font-family: "Bangers", "Impact", sans-serif; font-weight: 400; font-size: 26px; letter-spacing: 0.04em; color: #fff; background: #c8281e; border: 3px solid var(--ink2); padding: 8px 14px; box-shadow: 4px 4px 0 #000; white-space: nowrap; }
+.cgoal b { font-size: clamp(16px, 2.2vw, 22px); line-height: 1.2; text-wrap: balance; } .cgoal p { margin: 0; font-size: clamp(13px, 1.5vw, 15.5px); line-height: 1.35; } .foes i { font-style: normal; font-family: "Bangers", "Impact", sans-serif; font-weight: 400; letter-spacing: 0.06em; color: #c8281e; margin-right: 6px; }
+.crow { justify-content: center; margin-top: 4px; }
+@media (max-width: 760px), (orientation: portrait) { .cgrid { grid-template-columns: minmax(0, 1fr); } .cgoal { padding: 52px 14px 14px; } .cgoal .burst { top: 8px; transform: rotate(-4deg); font-size: 20px; padding: 4px 12px; } .bubble { max-width: 84%; } .comic { align-items: stretch; } }
+@media (prefers-reduced-motion: reduce) { .wchip.hot { animation: none; } }
+
 .objective { left: 50%; top: var(--gt); transform: translateX(-50%); text-align: center; width: min(420px, 46vw); display: grid; gap: 4px; }
 #obj { font-size: 14px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; text-shadow: 0 1px 8px #000; text-wrap: balance; }
 #obj-n { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; }
@@ -212,7 +238,8 @@ body.touch #weapons { left: var(--gl); transform: none; }
       <div id="boss" hidden><span id="boss-name"></span><div class="meter"><i id="boss-fill"></i></div></div>
       <div id="convoy" hidden><span>Konvoi</span><div class="meter"><i id="convoy-fill"></i></div></div>
     </div>
-    <div class="score"><b id="score">0</b><small id="cr">+0</small><span id="combo" hidden></span><button id="b-pause" aria-label="Pause">II</button></div>
+    <div class="score"><b id="score">0</b><small id="cr">+0</small><span id="combo" hidden></span></div>
+    <button id="b-pause" aria-label="Pause"></button>
     <div id="warn" hidden>Kampfgebiet verlassen<br>Autopilot dreht um</div>
     <button id="goal"></button>
     <div id="banner"></div>
@@ -225,6 +252,7 @@ body.touch #weapons { left: var(--gl); transform: none; }
     <button id="t-nova" aria-label="Nova-Welle"></button><button id="t-loop" aria-label="Looping"></button><button id="t-turn" aria-label="Wende"></button><button id="t-rr" aria-label="Ausweichrolle"></button><button id="t-brake" aria-label="Bremse"></button><button id="t-boost" aria-label="Schub"></button><button id="t-fire" aria-label="Feuer"></button>
   </div>
   <div id="choice" hidden></div>
+  <div id="mtoast"></div>
   <div id="screen" class="screen"></div>
 </div>
 <script src="./vendor/jsfxr/riffwave.js"></script>

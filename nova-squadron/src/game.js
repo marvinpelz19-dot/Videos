@@ -112,7 +112,7 @@ function buildEnv(env) {
 
 // ---------- Zustand ----------
 const G = { run: null, locks: [], choiceT: 0, mode: 'title', t: 0, ents: [], bolts: [], freeBolts: [], mission: null, phase: -1, phaseDef: null, phaseT: 0, cap: null, center: V(), stats: null, shake: 0, slow: 0, endT: 0, combo: 0, comboT: 0, lock: null, beamOn: false, intensity: 0 };
-const P = { pos: V(), yaw: 0, pitch: 0, quat: new THREE.Quaternion(), fwd: V(0, 0, 1), right: V(-1, 0, 0), vel: V(), sx: 0, sy: 0, speed: 70, shield: 100, maxShield: 100, regenT: 0, invuln: 0, rollT: 0, rollDir: 1, rollCd: 0, boost: 0, fireCd: 0, weapon: 0, gun: 0, nova: 0, mesh: null, inner: null, def: SHIPS[0], r: 4.5, hullCd: 0, team: 0 };
+const P = { heat: [0, 0, 0, 0, 0], over: [0, 0, 0, 0, 0], heatT: 0, pos: V(), yaw: 0, pitch: 0, quat: new THREE.Quaternion(), fwd: V(0, 0, 1), right: V(-1, 0, 0), vel: V(), sx: 0, sy: 0, speed: 70, shield: 100, maxShield: 100, regenT: 0, invuln: 0, rollT: 0, rollDir: 1, rollCd: 0, boost: 0, fireCd: 0, weapon: 0, gun: 0, nova: 0, mesh: null, inner: null, def: SHIPS[0], r: 4.5, hullCd: 0, team: 0 };
 const CORV_GUNS = [[20, -0.4, 14], [-20, -0.4, 14], [14, 2.4, 24], [-14, 2.4, 24], [3.4, 8.6, 28], [-3.4, 8.6, 28]];
 const qMan = new THREE.Quaternion(), XAX = V(1, 0, 0);
 const camFwd = V(0, 0, 1), eul = new THREE.Euler(0, 0, 0, 'YXZ');
@@ -165,7 +165,7 @@ canvas.addEventListener('touchend', endTouch); canvas.addEventListener('touchcan
 function addEnt(kind, pos, o = {}) {
   const d = ENEMIES[kind] || {};
   const e = { kind, team: 1, pos: pos.clone(), dir: V(0, 0, 1), vel: V(), speed: d.speed || 0, turn: d.turn || 0, hp: d.hp || 1, maxHp: d.hp || 1, r: d.r || 5, def: d, alive: true, state: 'attack', timer: 0, cd: rand(0.5, 2), bank: 0, objective: false, fighter: !!d.speed && !d.static, tgt: null, flashT: 0, ...o };
-  if (!e.mesh) { e.mesh = buildEnemy(kind); }
+  if (!e.mesh) { const v = kind === 'drone' ? ['drone', 'drone2', 'drone3'] : kind === 'inter' ? ['inter', 'inter2'] : [kind]; e.mesh = buildEnemy(v[(Math.random() * v.length) | 0]); }   // mehrere Rumpfformen je Typ
   if (e.team === 1 && e.fighter && !d.big) { e.mesh.scale.setScalar(1.3); e.r *= 1.25; }   // Gegner größer als die eigenen Jäger
   e.mesh.position.copy(e.pos); world.add(e.mesh); G.ents.push(e); return e;
 }
@@ -216,7 +216,7 @@ function clearWorld() {
 
 // ---------- Mission ----------
 function startMission(m) {
-  initAudio(); startMusic(); clearWorld(); setShowcase(null); P.man = null; P.flip = 0; P.brake = 0; P.manCd = 0; G.did = {}; G.mission = m; G.run = m.waves ? { up: {}, weapons: new Set([0]) } : null; G.choiceT = 0; G.locks = []; P.jam = null; P.tailCd = 0; setScene('music_battle'); G.phase = -1; G.phaseDef = null; G.t = 0; G.endT = 0; G.combo = 0; G.center.set(0, 0, 0);
+  initAudio(); startMusic(); clearWorld(); setShowcase(null); P.man = null; P.flip = 0; P.brake = 0; P.manCd = 0; G.did = {}; G.mission = m; G.run = m.waves ? { up: {}, weapons: new Set([0]) } : null; G.choiceT = 0; G.locks = []; P.jam = null; P.tailCd = 0; P.heat = [0, 0, 0, 0, 0]; P.over = [0, 0, 0, 0, 0]; P.heatT = 0; setScene('music_battle'); G.phase = -1; G.phaseDef = null; G.t = 0; G.endT = 0; G.combo = 0; G.center.set(0, 0, 0);
   G.stats = { kills: 0, score: 0, credits: 0, respawns: 0, time: 0, wave: 0, convoy: 1, miles: 0 }; G.wave = null; P.stun = 0;
   const env = ENVS[m.env]; buildEnv(env);
   P.def = SHIPS.find((s) => s.id === save.ship) || SHIPS[0];
@@ -324,13 +324,19 @@ function newBolt(pos, dir, speed, team, dmg, c, kind = 0) {
 }
 const muzzle = V(), aimPt = V(), aimDir = V();
 function gunPos(i) { const g = P.inner.userData.guns; const p = g[i % g.length]; return muzzle.set(p[0], p[1], p[2]).applyQuaternion(P.quat).add(P.pos); }
+const HEAT = { laser: 0.034, spread: 0.15, missile: 0.21, orb: 0.36, beam: 0.34 };   // Wärme je Schuss (Lanze: je Sekunde)
+function addHeat(w, amt) {
+  const h = (P.heat[P.weapon] = (P.heat[P.weapon] || 0) + amt); P.heatT = 0.45;
+  if (h >= 1) { P.over[P.weapon] = 1.8; P.heat[P.weapon] = 1; sfx.overheat(); ui.toast(w.name + ' überhitzt'); ui.weaponChanged(true); for (let i = 0; i < 6; i++) { const p = gunPos(i); blast.puff(p.x, p.y, p.z, 0, 0, 0, 2.6, 0.9, 0.5, 0.9, 1.6); } }
+}
 function fire(dt) {
   if (P.jam && P.jam.w === P.weapon) { beam.visible = false; return; }
+  if (P.over[P.weapon] > 0) { beam.visible = false; if (G.beamOn) { G.beamOn = false; sfx.beam(false); } return; }
   const w = WEAPONS[P.weapon], dm = P.def.dmg * (1 + 0.2 * up('dmg')), multi = up('multi'), L = G.lock;
   // Zielhilfe: liegt das erfasste Ziel nahe am Fadenkreuz, zielen die Bolzen auf den Vorhaltepunkt
   if (L && L.ang < 0.2) { const tt = L.dist / (w.speed || 2000); aimPt.copy(L.e.pos).addScaledVector(L.e.vel, tt); } else aimPt.copy(P.pos).addScaledVector(P.fwd, 420);
-  if (w.id === 'beam') return fireBeam(dt, w.dmg * dm * (1 + 0.25 * multi));
-  if (P.fireCd > 0) return; P.fireCd = 1 / (w.rate * (1 + 0.12 * up('rate')));
+  if (w.id === 'beam') { addHeat(w, HEAT.beam * dt); return fireBeam(dt, w.dmg * dm * (1 + 0.25 * multi)); }
+  if (P.fireCd > 0) return; P.fireCd = 1 / (w.rate * (1 + 0.12 * up('rate'))); addHeat(w, HEAT[w.id]);
   if (w.id === 'laser') {
     for (let i = 0; i <= multi; i++) { const p = gunPos(P.gun++); aimDir.copy(aimPt).sub(p).normalize(); newBolt(p, aimDir, w.speed, 0, w.dmg * dm, w.color).chain = true; fx.flash(p, 5, w.color, 0.07); }
     sfx.laser();
@@ -371,7 +377,7 @@ function damage(e, dmg, silent, cont) {
 function kill(e) {
   e.alive = false; world.remove(e.mesh);
   if (e.kind === 'rock') {   // Asteroiden zerbrechen in Bruchstücke, die auseinandertreiben
-    explode(e.pos, Math.min(3, e.r / 11), [0.6, 0.55, 0.5], e.vel, { heat: 0.35, tint: [0.42, 0.38, 0.34] }); sfx.boom(clamp(e.r / 14, 0.6, 2.4), 0, clamp(1 - e.pos.distanceTo(P.pos) / 900, 0, 1));
+    explode(e.pos, Math.min(3, e.r / 11), [0.6, 0.55, 0.5], e.vel, { heat: 0.35, tint: [0.42, 0.38, 0.34] }); sfx.death('rock', 1, 0, clamp(1 - e.pos.distanceTo(P.pos) / 900, 0, 1));
     if (e.r > 11 && e.gen < 2) for (let i = 0; i < (e.r > 30 ? 4 : 3); i++) { const f = addRock(t1.copy(e.pos).add(randUnit(t2).multiplyScalar(e.r * 0.5)), (e.r / 0.9) * rand(0.32, 0.5), e.gen + 1); f.vel.copy(t2).multiplyScalar(rand(14, 30)).add(e.vel); }
     G.stats.score += 20; G.stats.credits += 8; return;
   }
@@ -379,7 +385,7 @@ function kill(e) {
   if (up('aegis')) { P.regenT = 0; P.shield = Math.min(P.maxShield, P.shield + 12); }
   const size = e.kind === 'rock' ? e.r / 12 : { drone: 1, inter: 0.9, bomber: 1.8, ace: 2.4, turret: 1.6, gen: 3, buoy: 2.2, core: 5, kami: 1.3, hauler: 4.5, target: 1.6, corvette: 5, jammer: 1.1, shielder: 1.7 }[e.kind] || 1;
   explode(e.pos, size, e.kind === 'rock' ? [0.7, 0.6, 0.5] : e.kind === 'ace' ? [0.8, 0.4, 1.4] : e.kind === 'gen' ? [0.3, 1.2, 0.5] : [1, 0.55, 0.2], e.vel, { ring: size >= 2.2 });
-  const d = e.pos.distanceTo(P.pos), pan = clamp(-t1.copy(e.pos).sub(camera.position).normalize().dot(P.right) * 1.2, -1, 1); sfx.boom(clamp(size, 0.6, 3), pan, clamp(1 - d / 900, 0, 1));
+  const d = e.pos.distanceTo(P.pos), pan = clamp(-t1.copy(e.pos).sub(camera.position).normalize().dot(P.right) * 1.2, -1, 1); sfx.death(e.kind, clamp(size, 0.6, 3), pan, clamp(1 - d / 900, 0, 1));
   fx.spark(e.pos, 10 + size * 6, 55 + size * 20, 1.6, 0.9, 2.6, 1.3, 0.3, e.vel);                       // glühende Trümmer
   if (size >= 1.6) { const pp = e.pos.clone(); for (let i = 1; i <= 3; i++) setTimeout(() => { if (G.mode === 'play') { explode(pp.add(randUnit(t1).multiplyScalar(e.r * 0.8)), size * 0.5); } }, i * 140); }   // Folgeexplosionen
   G.shake = Math.max(G.shake, clamp((size * 90) / (d + 40), 0, 1.6));
@@ -388,7 +394,7 @@ function kill(e) {
   if (e.kind !== 'rock') { G.slow = Math.max(G.slow, e.def.big ? 0.9 : 0.07); ui.toast(`${e.def.name} zerstört · +${e.def.credit} Cr`); }   // kurzer Stillstand: der Abschuss soll sitzen
   if (e.kind === 'corvette') { G.shake = 2.4; ui.banner('KORVETTE VERNICHTET', '+' + e.def.credit + ' Credits'); const pp = e.pos.clone(), dd = e.dir.clone(); for (let i = 0; i < 6; i++) setTimeout(() => { if (G.mode === 'play') explode(t1.copy(pp).addScaledVector(dd, (i - 2.5) * 11).add(randUnit(t2).multiplyScalar(5)), rand(1.6, 3)); }, 120 + i * 170); }
   if (e.kind === 'ace') { G.slow = 0.5; ui.banner('LIQUIDATOR ABGEWICKELT', '+' + e.def.credit + ' Credits'); }
-  if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Verbandschef', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
+  if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Leitstelle', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
 }
 function jamWeapon() {   // Störkugel: die aktive Waffe fällt aus, das Spiel schaltet auf eine andere um
   if (P.invuln > 0 || P.rollT > 0 || P.man || P.jam) return; const w = P.weapon, other = WEAPONS.findIndex((x, i) => i !== w && weaponOpen(i));
@@ -597,6 +603,10 @@ function updatePlayer(dt) {
     const ang = Math.acos(clamp(t2.dot(P.fwd) / d, -1, 1)); if (ang > 0.42) continue; const s = ang + d / 4000 + (e.shielded ? 0.5 : 0); if (s < bs) { bs = s; best = { e, ang, dist: d }; }
   }
   G.lock = best;
+  P.heatT -= dt; for (let i = 0; i < WEAPONS.length; i++) {   // abkühlen: langsam unter Dauerfeuer, schnell in Feuerpausen
+    if (P.over[i] > 0) { if ((P.over[i] -= dt) <= 0) { P.heat[i] = 0.3; sfx.cooled(); ui.weaponChanged(true); } continue; }
+    if (P.heat[i] > 0) P.heat[i] = Math.max(0, P.heat[i] - dt * (i === P.weapon && P.heatT > 0 ? 0.14 : 0.5));
+  }
   // Raketen-Erfassung: Ziele innerhalb des Visierkegels, die nächsten am Fadenkreuz zuerst
   G.locks.length = 0;
   if (WEAPONS[P.weapon].id === 'missile') { const c = []; for (const e of G.ents) { if (!e.alive || e.team !== 1 || e.shielded) continue; t2.copy(e.pos).sub(P.pos); const d = t2.length(); if (d > 850) continue; const a = Math.acos(clamp(t2.dot(P.fwd) / d, -1, 1)); if (a < 0.26) c.push([a, e]); } c.sort((x, y) => x[0] - y[0]); for (const [, e] of c.slice(0, 2 + up('multi') + 2 * up('lock'))) G.locks.push(e); }
@@ -642,6 +652,7 @@ function drawMarks() {
   for (const e of G.ents) if (e.alive && e.kind === 'transport') { const s = project(e.pos); if (!s.behind) { hc.globalAlpha = 0.8; hc.strokeStyle = '#59c8ff'; hc.strokeRect(s.x - 14, s.y - 8, 28, 16); hc.fillStyle = '#59c8ff'; hc.fillRect(s.x - 14, s.y + 12, 28 * (e.hp / e.maxHp), 3); } }
   // Fadenkreuz und Zielerfassung
   const c = project(t1.copy(P.pos).addScaledVector(P.fwd, 420));
+  { const h = P.heat[P.weapon] || 0, ov = P.over[P.weapon] > 0; if (h > 0.12 || ov) { hc.globalAlpha = 0.9; hc.lineWidth = 3; hc.strokeStyle = ov ? (Math.sin(G.t * 30) > 0 ? '#ff4d4d' : '#7a1f1f') : h > 0.75 ? '#ff7a3c' : '#ffd166'; hc.beginPath(); hc.arc(c.x, c.y, 21, Math.PI * 0.75, Math.PI * 0.75 + Math.PI * 1.5 * Math.min(1, h)); hc.stroke(); } }   // Hitzeanzeige: Bogen ums Fadenkreuz
   if (G.hitT > 0) { hc.globalAlpha = Math.min(1, G.hitT / 0.08); hc.strokeStyle = '#ffd166'; hc.lineWidth = 2.5; hc.beginPath(); for (const [ax, ay] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { hc.moveTo(c.x + ax * 9, c.y + ay * 9); hc.lineTo(c.x + ax * 19, c.y + ay * 19); } hc.stroke(); }   // Treffermarke
   hc.globalAlpha = 0.9; hc.strokeStyle = '#eaf6ff'; hc.lineWidth = 1.5;
   hc.beginPath(); hc.arc(c.x, c.y, 13, 0, 6.283); for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { hc.moveTo(c.x + ax * 18, c.y + ay * 18); hc.lineTo(c.x + ax * 26, c.y + ay * 26); } hc.stroke(); hc.fillStyle = '#eaf6ff'; hc.fillRect(c.x - 1, c.y - 1, 2, 2);
@@ -712,10 +723,16 @@ const ui = createUI({
   act: { rollAuto: () => roll(P.sx < -0.15 ? -1 : 1), roll, nova, setWeapon, cycleWeapon, maneuver, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; }, brake: (v) => { input.brake = v; } },
   weaponOpen,
   audio: () => { initAudio(); startMusic(); setScene('music_hangar'); },
-  getJam: () => (P.jam ? P.jam.w : -1),
+  getJam: () => (P.jam ? P.jam.w : -1), getOver: () => P.over.map((v) => (v > 0 ? 1 : 0)).join(''),
+  fullscreen: toggleFullscreen,
   getWeapon: () => P.weapon,
   showcase: setShowcase,
 });
+function toggleFullscreen() {   // Vollbild: klappt in Chrome, Edge, Firefox und auf dem iPad; wo es nicht geht, sagt es die Meldung
+  const el = document.documentElement, on = document.fullscreenElement || document.webkitFullscreenElement;
+  try { if (on) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else { const r = (el.requestFullscreen || el.webkitRequestFullscreen); if (!r) throw 0; const pr = r.call(el, { navigationUI: 'hide' }); if (pr && pr.catch) pr.catch(() => ui.toastMenu('Vollbild ist hier gesperrt. Seite im Browser öffnen oder zum Home-Bildschirm hinzufügen.')); } }
+  catch { ui.toastMenu('Vollbild ist hier gesperrt. Seite im Browser öffnen oder zum Home-Bildschirm hinzufügen.'); }
+}
 function toHangar() { clearWorld(); G.mode = 'hangar'; G.mission = null; G.run = null; setScene('music_hangar'); ui.hideChoice(); setIntensity(0.1); buildEnv(ENVS[['kerasis', 'belt', 'deep'][doneCount() % 3]]); ui.showHangar(); }
 window.claude?.hot?.snapshot?.(() => ({}));
 setupQuality(); buildEnv(ENVS.kerasis); ui.showTitle(); requestAnimationFrame(frame);

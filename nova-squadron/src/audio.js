@@ -94,6 +94,25 @@ export const sfx = {
     const n = Math.min(9, 2 + Math.round(size * 2.5));                                                                  // Trümmer: kurze, helle Splitter verstreut
     for (let i = 0; i < n; i++) setTimeout(() => { if (rec.crunch) { const s3 = ctx.createBufferSource(), g3 = ctx.createGain(), hp = ctx.createBiquadFilter(); s3.buffer = rec.crunch[0]; s3.playbackRate.value = 1.8 + Math.random() * 2.4; hp.type = 'highpass'; hp.frequency.value = 1200; g3.gain.value = (0.05 + Math.random() * 0.12) * v; s3.connect(hp).connect(g3).connect(sfxBus); g3.connect(reverb); s3.start(ctx.currentTime, 0.05 + Math.random() * 0.2, 0.09 + Math.random() * 0.12); } else play(bank?.hit, 0.15 * v, 0.5 + Math.random() * 0.5, pan, 0.5); }, 90 + Math.random() * (350 + size * 380));
   },
+  // Jeder Gegnertyp stirbt mit eigenem Klang: Grundexplosion plus Signatur
+  death(kind, size = 1, pan = 0, near = 1) {
+    if (!ctx) return; const v = Math.min(1, 0.3 + near * 0.7), later = (ms, f) => setTimeout(f, ms);
+    if (kind === 'rock') { noise(0.5, 0.5 * v, 500, 90, 0.7); noise(0.9, 0.3 * v, 220, 60, 0.6); for (let i = 0; i < 4; i++) later(60 + i * 90, () => noise(0.12, 0.3 * v, 700 + Math.random() * 600, 200, 1.5, 'bandpass')); tone('sine', 70, 30, 0.5, 0.5 * v); return; }   // Bröckeln ohne Feuerknall
+    sfx.boom(size, pan, near);
+    if (kind === 'drone' || kind === 'target') { ping(520 + Math.random() * 200, 0.3, 0.1 * v); later(70, () => play(bank?.hit, 0.3 * v, 0.7, pan, 0.4)); }                              // Blech reißt
+    else if (kind === 'inter') { tone('sawtooth', 2600, 160, 0.28, 0.12 * v); noise(0.2, 0.25 * v, 6000, 900, 2, 'bandpass'); }                                                         // schriller Abriss
+    else if (kind === 'kami') { for (let i = 0; i < 4; i++) later(i * 45, () => noise(0.05, 0.55 * v, 3500, 1200, 1, 'bandpass')); tone('square', 900, 90, 0.2, 0.12 * v); }            // Knallkette
+    else if (kind === 'bomber') { later(260, () => { tone('sine', 52, 24, 0.9, 0.9 * v); noise(1.1, 0.4 * v, 300, 50, 0.6); play(rec.crunch, 0.6 * v, 0.5, pan, 0.6); }); }             // Bombenlast geht nach
+    else if (kind === 'jammer') { for (let i = 0; i < 7; i++) later(i * 50, () => tone('square', 400 + Math.random() * 2400, 200 + Math.random() * 800, 0.06, 0.1 * v)); noise(0.5, 0.2 * v, 5000, 300, 5, 'bandpass'); }   // Elektronik schmort
+    else if (kind === 'shielder') { for (const f of [3100, 2300, 1700, 1250, 900]) tone('sine', f, f * 0.5, 0.7, 0.07 * v); noise(0.6, 0.3 * v, 9000, 2500, 0.6, 'highpass'); tone('sawtooth', 500, 50, 0.8, 0.12 * v); }   // Schild zerspringt wie Glas
+    else if (kind === 'ace') { tone('sawtooth', 1400, 60, 1.1, 0.2 * v); tone('sawtooth', 1407, 62, 1.1, 0.2 * v); later(350, () => sfx.boom(size * 1.2, pan, near)); }                 // lang gezogener Absturz
+    else if (kind === 'turret') { ping(240, 0.6, 0.16 * v); ping(331, 0.5, 0.1 * v); }                                                                                                    // Stahlglocke
+    else if (kind === 'gen' || kind === 'buoy') { tone('sawtooth', 420, 36, 1.3, 0.22 * v); tone('sine', 840, 60, 1.1, 0.12 * v); }                                                       // fährt herunter
+    else if (kind === 'corvette' || kind === 'hauler' || kind === 'core') { tone('sawtooth', 74, 38, 2.4, 0.3 * v, sfxBus, 0, 0.3); tone('sawtooth', 111, 52, 2.2, 0.16 * v, sfxBus, 0.2, 0.3); for (let i = 1; i <= 4; i++) later(i * 330, () => { tone('sine', 60, 24, 0.8, 0.7 * v); noise(0.9, 0.3 * v, 500, 60, 0.6); }); }   // Rumpf ächzt und rollt aus
+  },
+  // Überhitzung: Zischen wie Dampf, dazu ein abfallender Warnton
+  overheat() { noise(1.3, 0.4, 7000, 2500, 0.8, 'highpass'); noise(0.9, 0.25, 3000, 900, 2, 'bandpass'); tone('square', 1200, 300, 0.5, 0.12); tone('square', 900, 220, 0.5, 0.1, sfxBus, 0.16); },
+  cooled() { tone('sine', 700, 1050, 0.12, 0.12); tone('sine', 1050, 1400, 0.14, 0.1, sfxBus, 0.09); },
   heavy(vol = 0.5, rate = 1, pan = 0) { if (!play(rec.heavy, vol, rate, pan, 0.35)) tone('sawtooth', 500 * rate, 70, 0.4, vol * 0.4); },
   // Triebwerk: läuft durch, Tonhöhe und Lautstärke folgen dem Tempo (0 = Bremse, 1 = Reise, 2 = Schub)
   engine(k) {

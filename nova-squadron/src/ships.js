@@ -184,6 +184,26 @@ function buildDrone() {   // „Heuschrecke“: Kugelkanzel im Keil, zwei nach v
   part(g, tube(1.2, 0.95, 0.9, 8), MATS.metal, 0, 0, -2.9); part(g, disc(0.85, 8), MATS.engineRed, 0, 0, -3.37);
   return g;
 }
+function buildDrone2() {  // „Zwilling“: zwei Ausleger, Kanzel dazwischen
+  const g = new THREE.Group();
+  for (const s of [-1, 1]) { part(g, tube(0.25, 0.8, 9, 6), MATS.dom, s * 2.6, 0, 0.4); part(g, disc(0.55, 8), MATS.engineRed, s * 2.6, 0, -4.12); part(g, box(0.3, 2.2, 2.4), MATS.gold, s * 2.6, 0.9, -3); part(g, tube(0.1, 0.14, 3, 5), MATS.metal, s * 2.6, -0.5, 4.6); }
+  part(g, box(5.6, 0.4, 2.6), MATS.domLight, 0, 0, -0.6); part(g, new THREE.SphereGeometry(1.0, 10, 8), MATS.dom, 0, 0.2, 0.2); part(g, new THREE.SphereGeometry(0.5, 8, 6), MATS.eye, 0, 0.3, 1.0); part(g, box(5.6, 0.2, 0.5), MATS.domRed, 0, 0.3, -1.6);
+  return g;
+}
+function buildDrone3() {  // „Rochen“: flacher Nurflügler mit hochgezogenen Spitzen
+  const g = new THREE.Group(), w = [[0, 4.4], [5.6, -1.6], [5.2, -3.2], [1.6, -2.2], [0, -3.4]];
+  part(g, plate(w, 0.5), MATS.dom); part(g, plate(mirror(w), 0.5), MATS.dom); part(g, plate([[0, 2.6], [2.2, -0.6], [0, -1.6]], 0.7), MATS.domLight); part(g, plate(mirror([[0, 2.6], [2.2, -0.6], [0, -1.6]]), 0.7), MATS.domLight);
+  for (const s of [-1, 1]) { part(g, box(0.3, 1.8, 1.8), MATS.gold, s * 5.3, 0.8, -2.4, 0, 0, s * -0.3); part(g, tube(0.1, 0.14, 2.6, 5), MATS.metal, s * 1.6, -0.3, 2.6); part(g, disc(0.5, 8), MATS.engineRed, s * 1.0, 0.1, -2.72); part(g, tube(0.6, 0.5, 0.8, 8), MATS.metal, s * 1.0, 0.1, -2.3); }
+  part(g, new THREE.SphereGeometry(0.55, 8, 6), MATS.eye, 0, 0.45, 1.6, 0, 0, 0, 0.8, 0.6, 1.8);
+  return g;
+}
+function buildInter2() {  // „Sichel“: vorwärts gepfeilte Flügel
+  const g = new THREE.Group(), w = [[0.4, -3.6], [4.6, 2.6], [3.6, 3.0], [0.4, -0.6]];
+  part(g, tube(0.08, 0.8, 10, 6), MATS.domLight, 0, 0, 0.4); part(g, plate(w, 0.24), MATS.dom); part(g, plate(mirror(w), 0.24), MATS.dom);
+  for (const s of [-1, 1]) { part(g, box(0.4, 0.3, 1.6), MATS.domRed, s * 4.1, 0, 2.4); part(g, tube(0.08, 0.12, 2.6, 5), MATS.metal, s * 4.1, 0, 3.8); }
+  part(g, box(0.2, 1.8, 2), MATS.gold, 0, 0.9, -3.6, -0.3); part(g, new THREE.SphereGeometry(0.45, 8, 6), MATS.eye, 0, 0.4, 1.2, 0, 0, 0, 0.7, 0.5, 2); part(g, disc(0.7, 8), MATS.engineRed, 0, 0, -4.62);
+  return g;
+}
 function buildInter() {   // „Kurshai“: Nadel mit drei Finnen
   const g = new THREE.Group();
   part(g, tube(0.06, 0.85, 9, 6), MATS.domLight, 0, 0, 0.4); part(g, new THREE.SphereGeometry(0.5, 8, 6), MATS.eye, 0, 0.42, 0.8, 0, 0, 0, 0.7, 0.5, 2);
@@ -367,7 +387,7 @@ export function buildCapital(dread) {
 }
 
 // ---------- Fabrik: einmal bauen, verschmelzen, dann klonen ----------
-const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy, corvette: buildCorvette, jammer: buildJammer, shielder: buildShielder };
+const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy, corvette: buildCorvette, jammer: buildJammer, shielder: buildShielder, drone2: buildDrone2, drone3: buildDrone3, inter2: buildInter2 };
 const protos = {};
 function fromProto(key, make) {
   if (!protos[key]) { UVS = key === 'transport' || key === 'hauler' || key === 'corvette' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
