@@ -250,7 +250,7 @@ function nextPhase() {
 // Wellen-Gefecht: Welle geschafft, Fanfare, dann eines von zwei Upgrades wählen (nach einem Boss zusätzlich ein Sonder-Upgrade)
 function waveDone() {
   const boss = !!G.phaseDef.boss, n = G.phase + 1, bonus = 80 + 20 * n + (boss ? 400 : 0); G.bossPick = boss; G.stats.credits += bonus; G.stats.miles = n; save.bestWave = Math.max(save.bestWave, n);
-  sfx.fanfare(boss); G.slow = 0.5; ui.banner(boss ? 'BOSS BESIEGT' : `WELLE ${n} GESCHAFFT`, `+${bonus} Credits · Upgrade wählen`); G.choiceT = boss ? 2.8 : 1.8;
+  sfx.fanfare(boss); G.slow = 0.5; if (boss) ui.comms('Charlie', 'WUFF! (Vex übersetzt: Das war der Boss.)'); ui.banner(boss ? 'BOSS BESIEGT' : `WELLE ${n} GESCHAFFT`, `+${bonus} Credits · Upgrade wählen`); G.choiceT = boss ? 2.8 : 1.8;
 }
 function pickOptions(boss) {
   const r = G.run, lv = (id) => r.up[id] || 0, next = WEAPONS.findIndex((w, i) => !r.weapons.has(i));
@@ -411,7 +411,7 @@ function hitPlayer(dmg, pos) {
   G.shake = Math.max(G.shake, 0.5); sfx.shieldHit(); ui.flash('hit'); fx.spark(pos || P.pos, 8, 30, 0.4, 2, 0.5, 1.4, 3);
   if (P.shield <= 0) {   // unendlich Leben: Notsprung statt Game Over
     G.stats.respawns++; G.combo = 0; P.shield = P.maxShield; P.invuln = 3; G.shake = 2; G.slow = 0.6; sfx.down(); ui.flash('down');
-    explode(P.pos, 2.4, [0.4, 0.9, 2]); ui.banner('NOTSCHILD GEZÜNDET', 'Schild voll · Leben ∞');
+    explode(P.pos, 2.4, [0.4, 0.9, 2]); ui.banner('NOTSCHILD GEZÜNDET', 'Schild voll · Leben ∞'); ui.comms('Charlie', 'Wuff! Wuff! (Vex übersetzt: Schild steht wieder.)');
   }
 }
 

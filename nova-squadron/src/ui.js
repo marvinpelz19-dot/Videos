@@ -48,18 +48,34 @@ export function createUI(api) {
   }
 
   // Story-Einstieg: drei Karten, danach geht es in den Hangar mit der Flugschule als erstem Einsatz
-  // Comic-Seite: zwei Bilder mit Erzählkasten und Sprechblase, bei Einsätzen dazu das Zielfeld
+  // Comic zum Durchklicken: ein Bild nach dem anderen, Sprechblasen ploppen einzeln auf. Tippen, Klick, Leertaste oder Pfeil = weiter.
   const asset = (n) => globalThis.NOVA_ASSETS?.[n] || `./assets/${n}.jpg`;
-  function showComic(key, onGo, label, m) {
-    const c = COMICS[key]; if (!c) return onGo(); hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen comic'; api.showcase(null);
+  let comicNext = null;
+  function showComic(panels, title, onDone, m) {
+    if (!panels || !panels.length) return onDone(); hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen comic'; api.showcase(null);
+    const total = panels.length + (m ? 1 : 0), who = [...new Set(panels.flatMap((p) => p.lines.map((l) => l[0])))]; let i = 0, j = 0;
     const foes = m && m.phases ? [...new Set(m.phases.flatMap((p) => (p.spawn || []).map(([k]) => ({ cruiser: 'Kreuzer Rendite', dread: 'Flaggschiff Monopol', target: 'Übungsziele' }[k] || ENEMIES[k]?.name)).filter(Boolean)))] : [];
-    screen.innerHTML = `<div class="cpage"><h2 class="ctitle">${esc(c.title)}</h2><div class="cgrid p${c.panels.length}">${c.panels.map((p, i) => `<figure class="cpanel t${i % 2}"><img src="${asset(p.img)}" alt="" loading="eager"><figcaption class="ccap">${esc(p.cap)}</figcaption><div class="bubble b${i % 2}"><b>${esc(p.who)}</b>${esc(p.say)}</div></figure>`).join('')}
-      ${m ? `<div class="cpanel cgoal"><span class="burst">Dein Ziel</span><b>${esc(m.aim)}</b><p>${esc(m.why)}</p>${foes.length ? `<p class="foes"><i>Gegner</i> ${foes.map(esc).join(' · ')}</p>` : ''}</div>` : ''}</div>
-      <div class="row crow"><button class="btn big" id="c-go">${label}</button>${m ? '<button class="btn ghost" id="c-back">Zurück</button>' : ''}</div></div>`;
-    $('c-go').onclick = () => { sfx.click(); onGo(); }; if ($('c-back')) $('c-back').onclick = () => { sfx.click(); api.toHangar(); };
+    screen.innerHTML = `<div class="cv"><header class="cvh"><h2 class="ctitle">${esc(title)}</h2><button class="btn ghost" id="c-skip">${m ? 'Zum Ziel' : 'Überspringen'}</button></header><div class="cstage" id="c-stage"></div>
+      <footer class="cvf"><div class="cdots" id="c-dots"></div><span class="chint">${api.isTouch ? 'Tippen: weiter' : 'Klick oder Leertaste: weiter'}</span></footer></div>`;
+    const stage = $('c-stage'), finish = () => { comicNext = null; onDone(); };
+    const bubbles = (p, upto, pop) => p.lines.slice(0, upto + 1).map((l, k) => `<div class="bubble b${who.indexOf(l[0]) % 2}${k === upto && pop ? ' pop' : ''}"><b>${esc(l[0])}</b>${esc(l[1])}</div>`).join('');
+    const draw = (enter) => {
+      $('c-dots').innerHTML = Array.from({ length: total }, (_, k) => `<i class="${k < i ? 'on' : k === i ? 'cur' : ''}"></i>`).join('');
+      if (i >= panels.length) {   // letzte Seite vor dem Einsatz: das Ziel
+        stage.innerHTML = `<div class="cpanel cgoal big enter"><span class="burst">Dein Ziel</span><b>${esc(m.aim)}</b><p>${esc(m.why)}</p>${foes.length ? `<p class="foes"><i>Gegner</i> ${foes.map(esc).join(' · ')}</p>` : ''}<div class="row"><button class="btn big" id="c-go">Einsatz starten</button><button class="btn ghost dark" id="c-back">Zurück zum Hangar</button></div></div>`;
+        $('c-go').onclick = (e) => { e.stopPropagation(); sfx.click(); finish(); }; $('c-back').onclick = (e) => { e.stopPropagation(); sfx.click(); comicNext = null; api.toHangar(); }; $('c-skip').hidden = true; return;
+      }
+      const p = panels[i];
+      if (enter) { stage.innerHTML = `<figure class="cpanel big enter t${i % 2}"><img src="${asset(p.img)}" alt=""><figcaption class="ccap">${esc(p.cap)}</figcaption>${p.fx ? `<span class="cfx">${esc(p.fx)}</span>` : ''}<div class="cbubs" id="c-bubs">${bubbles(p, 0, true)}</div></figure>`; const nx = panels[i + 1]; if (nx) new Image().src = asset(nx.img); }
+      else $('c-bubs').innerHTML = bubbles(p, j, true);
+    };
+    comicNext = () => { const p = panels[i]; if (p && j < p.lines.length - 1) { j++; sfx.click(); draw(false); } else if (i < total - 1) { i++; j = 0; sfx.roll(); draw(true); } else if (!m) { sfx.click(); finish(); } };
+    stage.onclick = () => comicNext && comicNext(); $('c-skip').onclick = () => { sfx.click(); if (m) { i = panels.length; j = 0; draw(true); } else finish(); };
+    draw(true);
   }
-  const startStory = (m) => (m.endless ? api.start(m) : showComic(m.id, () => api.start(m), 'Einsatz starten', m));
-  function showIntro() { showComic('intro', () => { save.seenIntro = true; api.persist(); api.toHangar(); }, 'Weiter'); }
+  addEventListener('keydown', (e) => { if (comicNext && !screen.hidden && screen.classList.contains('comic') && ['Space', 'Enter', 'ArrowRight'].includes(e.code)) { e.preventDefault(); comicNext(); } });
+  const startStory = (m) => (m.endless || !COMICS[m.id] ? api.start(m) : showComic(COMICS[m.id].pre, COMICS[m.id].title, () => api.start(m), m));
+  function showIntro() { showComic(COMICS.intro.pre, COMICS.intro.title, () => { save.seenIntro = true; api.persist(); api.toHangar(); }); }
 
   function showHangar() {
     hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen hangar' + (tab === 'ship' ? ' view' : ''); api.showcase(tab === 'ship' ? save.ship : null);
@@ -184,8 +200,7 @@ export function createUI(api) {
   let outroSeen = false;
   function showResult(r) {
     const { m, s, stars: st, bonus, won, newWeapon, newShip } = r;
-    if (m.id === 'm6' && won && !outroSeen) { outroSeen = true; return showComic('outro', () => showResult(r), 'Weiter'); }
-    outroSeen = false;
+    if (won && !m.endless && COMICS[m.id]?.post && !r.postSeen) { r.postSeen = true; return showComic(COMICS[m.id].post, COMICS[m.id].title, () => showResult(r)); }   // erst die Siegesszene, dann die Abrechnung
     hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen pause';
     const mm = Math.floor(s.time / 60), ss = String(Math.floor(s.time % 60)).padStart(2, '0');
     const next = MISSIONS[MISSIONS.indexOf(m) + 1];

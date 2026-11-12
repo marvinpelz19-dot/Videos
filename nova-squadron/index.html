@@ -70,6 +70,27 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 .cgoal .burst { position: absolute; left: 14px; top: 50%; transform: translateY(-50%) rotate(-7deg); font-family: "Bangers", "Impact", sans-serif; font-weight: 400; font-size: 26px; letter-spacing: 0.04em; color: #fff; background: #c8281e; border: 3px solid var(--ink2); padding: 8px 14px; box-shadow: 4px 4px 0 #000; white-space: nowrap; }
 .cgoal b { font-size: clamp(16px, 2.2vw, 22px); line-height: 1.2; text-wrap: balance; } .cgoal p { margin: 0; font-size: clamp(13px, 1.5vw, 15.5px); line-height: 1.35; } .foes i { font-style: normal; font-family: "Bangers", "Impact", sans-serif; font-weight: 400; letter-spacing: 0.06em; color: #c8281e; margin-right: 6px; }
 .crow { justify-content: center; margin-top: 4px; }
+.comic { padding: 0; align-items: stretch; overflow: hidden; }
+.cv { --paper: #f4ead2; --ink2: #14131a; flex: 1; min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 8px; padding: var(--gt) var(--gr) var(--gb) var(--gl); }
+.cvh { display: flex; justify-content: space-between; align-items: center; gap: 12px; } .cvh .ctitle { font-size: clamp(20px, 3.4vw, 38px); margin: 0; }
+.cstage { display: grid; place-items: center; min-height: 0; cursor: pointer; }
+.cpanel.big { width: min(100%, calc((100vh - 170px) * 1.5), 1240px); box-shadow: 8px 8px 0 #000; }
+.cpanel.big img { aspect-ratio: 3 / 2; }
+.cpanel.enter { animation: cin 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.2); }
+@keyframes cin { from { opacity: 0; transform: scale(0.94) rotate(-2deg); } }
+.cpanel.big .ccap { font-size: clamp(13px, 1.7vw, 19px); padding: 8px 14px 7px; max-width: 70%; }
+.cbubs { position: absolute; left: 14px; right: 14px; bottom: 14px; display: grid; gap: 8px; pointer-events: none; }
+.cbubs .bubble { position: static; max-width: min(74%, 560px); font-size: clamp(14px, 1.8vw, 20px); }
+.cbubs .bubble.b0 { justify-self: start; } .cbubs .bubble.b1 { justify-self: end; }
+.bubble.pop { animation: pop 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.5); } @keyframes pop { from { opacity: 0; transform: scale(0.6) translateY(10px); } }
+.cfx { position: absolute; right: 4%; top: 12%; font-family: "Bangers", "Impact", sans-serif; font-size: clamp(30px, 6.5vw, 86px); letter-spacing: 0.04em; color: #ffd84a; -webkit-text-stroke: 2px #14131a; text-shadow: 4px 4px 0 #c8281e, 7px 7px 0 #000; transform: rotate(-9deg); animation: fxin 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.6) 0.15s both; pointer-events: none; }
+@keyframes fxin { from { opacity: 0; transform: rotate(-9deg) scale(2.2); } }
+.cvf { display: flex; justify-content: space-between; align-items: center; gap: 12px; } .chint { font-family: var(--display); font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); animation: pulse 1s infinite alternate; }
+.cdots { display: flex; gap: 5px; flex-wrap: wrap; } .cdots i { width: 16px; height: 5px; background: rgba(255, 255, 255, 0.18); transform: skewX(-18deg); } .cdots i.on { background: #ffd84a; } .cdots i.cur { background: #fff; }
+.cgoal.big { width: min(100%, 760px); padding: 70px 26px 26px; gap: 10px; cursor: default; } .cgoal.big .burst { top: 14px; left: 18px; transform: rotate(-5deg); font-size: 30px; } .cgoal.big b { font-size: clamp(20px, 3vw, 30px); } .cgoal.big p { font-size: clamp(15px, 1.8vw, 18px); } .cgoal.big .row { margin-top: 8px; }
+.btn.ghost.dark { color: #14131a; border-color: #14131a; }
+@media (orientation: portrait), (max-width: 700px) { .cpanel.big { width: 100%; overflow: visible; background: var(--paper); } .cbubs { position: static; padding: 10px; } .cbubs .bubble { max-width: 92%; box-shadow: none; } .cfx { top: 16%; } .cstage { align-items: start; overflow-y: auto; } }
+@media (prefers-reduced-motion: reduce) { .cpanel.enter, .bubble.pop, .cfx, .chint { animation: none; } }
 @media (max-width: 760px), (orientation: portrait) { .cgrid { grid-template-columns: minmax(0, 1fr); } .cgoal { padding: 52px 14px 14px; } .cgoal .burst { top: 8px; transform: rotate(-4deg); font-size: 20px; padding: 4px 12px; } .bubble { max-width: 84%; } .comic { align-items: stretch; } }
 @media (prefers-reduced-motion: reduce) { .wchip.hot { animation: none; } }
 
