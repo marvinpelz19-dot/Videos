@@ -155,6 +155,8 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
   .wchip { padding: 6px 7px 5px; font-size: 10px; } .wlist li { grid-template-columns: 28px 1fr auto; } .wlist small { grid-column: 2 / -1; grid-row: 2; }
   .title-art { background-position: 74% center; } .title-art::after { background: linear-gradient(0deg, rgba(4, 6, 12, 0.96) 8%, rgba(4, 6, 12, 0.55) 48%, transparent 80%); }
 }
+/* Tablet: größere Tasten für die Daumen */
+@media (min-width: 700px) and (min-height: 600px) { #touch { transform: scale(1.4); transform-origin: bottom right; right: calc(var(--gr) + 14px); bottom: calc(var(--gb) + 70px); } #stick { transform-origin: 0 0; } #stick::before { left: -80px; top: -80px; width: 160px; height: 160px; } .wchip { padding: 10px 14px 8px; font-size: 13px; } #b-pause { width: 52px; height: 44px; } }
 @media (max-height: 520px) { #touch { bottom: calc(var(--gb) + 46px); transform: scale(0.86); transform-origin: bottom right; } #banner { top: 16%; } }
 @media (prefers-reduced-motion: reduce) { .title-art, #warn, #nova.ready .lab b { animation: none; } }
 </style>

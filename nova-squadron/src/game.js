@@ -62,7 +62,7 @@ addEventListener('resize', resize);
 // ---------- Welt ----------
 const texLoader = new THREE.TextureLoader(), texCache = {};
 function tex(name) {
-  if (!texCache[name]) { const t = texLoader.load(`./assets/${name}.jpg`, (tt) => { if (name.startsWith('sky')) { const e = tt.clone(); e.mapping = THREE.EquirectangularReflectionMapping; e.wrapS = THREE.RepeatWrapping; e.repeat.x = 1; e.needsUpdate = true; envCache[name] = pmrem.fromEquirectangular(e).texture; if (curSky === name) scene.environment = envCache[name]; } }); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; texCache[name] = t; }
+  if (!texCache[name]) { const t = texLoader.load(globalThis.NOVA_ASSETS?.[name] || `./assets/${name}.jpg`, (tt) => { if (name.startsWith('sky')) { const e = tt.clone(); e.mapping = THREE.EquirectangularReflectionMapping; e.wrapS = THREE.RepeatWrapping; e.repeat.x = 1; e.needsUpdate = true; envCache[name] = pmrem.fromEquirectangular(e).texture; if (curSky === name) scene.environment = envCache[name]; } }); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; texCache[name] = t; }
   return texCache[name];
 }
 const skyMat = new THREE.MeshBasicMaterial({ side: THREE.BackSide, depthWrite: false, depthTest: false, fog: false });
