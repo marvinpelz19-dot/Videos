@@ -4,9 +4,9 @@ import fs from 'node:fs'; import path from 'node:path'; import { fileURLToPath }
 const R = path.dirname(fileURLToPath(import.meta.url)), W = path.join(R, 'dist/web');
 fs.mkdirSync(W, { recursive: true });
 let html = fs.readFileSync(path.join(R, 'dist/Trade-Force.html'), 'utf8');
-const ver = crypto.createHash('sha1').update(html).digest('hex').slice(0, 10);
 html = html.replace('<link rel="icon" href="data:,">', `<link rel="icon" href="./icon-192.png">\n<link rel="apple-touch-icon" href="./icon-192.png">\n<link rel="manifest" href="./manifest.webmanifest">\n<meta name="theme-color" content="#04060c">\n<meta name="robots" content="noindex, nofollow">\n<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Trade Force">`)
   .replace('</body>', `<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));</script>\n</body>`);
+const ver = crypto.createHash('sha1').update(html).digest('hex').slice(0, 10);
 if (!html.includes('manifest.webmanifest') || !html.includes('sw.js')) throw new Error('Einbau fehlgeschlagen');
 fs.writeFileSync(path.join(W, 'index.html'), html);
 fs.writeFileSync(path.join(W, 'manifest.webmanifest'), JSON.stringify({ name: 'Trade Force · Der Krieg um Essen', short_name: 'Trade Force', start_url: './', scope: './', display: 'fullscreen', orientation: 'landscape', background_color: '#04060c', theme_color: '#04060c', icons: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }] }, null, 1));
