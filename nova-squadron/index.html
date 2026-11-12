@@ -166,10 +166,11 @@ body.touch .wchip span { display: none; }
 #t-fire { right: 0; bottom: 0; width: 98px !important; height: 98px !important; border-color: rgba(255, 110, 80, 0.7) !important; color: #ffb9a6 !important; } #t-fire svg { width: 40px; height: 40px; }
 #t-boost { right: 108px; bottom: 2px; width: 62px !important; height: 62px !important; }
 #t-brake { right: 180px; bottom: 6px; }
-#t-rr { right: 4px; bottom: 108px; }
-#t-loop { right: 70px; bottom: 90px; }
-#t-turn { right: 134px; bottom: 78px; }
-#t-nova { right: 34px; bottom: 172px; opacity: 0.35; }
+#t-rr { right: 0; bottom: 110px; }
+#t-rl { right: 62px; bottom: 110px; } #t-rl svg { transform: scaleX(-1); }
+#t-loop { right: 126px; bottom: 92px; }
+#t-turn { right: 186px; bottom: 70px; }
+#t-nova { right: 30px; bottom: 174px; opacity: 0.35; }
 #t-nova.ready { opacity: 1; border-color: var(--gold) !important; color: var(--gold) !important; box-shadow: 0 0 18px rgba(255, 209, 102, 0.6); }
 .spd { color: var(--dim); margin-left: 10px; } .spd b { color: var(--ink); font-variant-numeric: tabular-nums; display: inline-block; min-width: 3ch; }
 #toast { left: 50%; bottom: calc(var(--gb) + 58px); transform: translateX(-50%); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); opacity: 0; white-space: nowrap; text-shadow: 0 1px 8px #000; }
@@ -320,7 +321,7 @@ body.touch #weapons { left: var(--gl); transform: none; }
   </div>
   <div id="stick" hidden><div id="knob"></div></div>
   <div id="touch" hidden>
-    <button id="t-nova" aria-label="Nova-Welle"></button><button id="t-loop" aria-label="Looping"></button><button id="t-turn" aria-label="Wende"></button><button id="t-rr" aria-label="Ausweichrolle"></button><button id="t-brake" aria-label="Bremse"></button><button id="t-boost" aria-label="Schub"></button><button id="t-fire" aria-label="Feuer"></button>
+    <button id="t-nova" aria-label="Nova-Welle"></button><button id="t-loop" aria-label="Looping"></button><button id="t-turn" aria-label="Wende"></button><button id="t-rl" aria-label="Rolle nach links"></button><button id="t-rr" aria-label="Rolle nach rechts"></button><button id="t-brake" aria-label="Bremse"></button><button id="t-boost" aria-label="Schub"></button><button id="t-fire" aria-label="Feuer"></button>
   </div>
   <div id="choice" hidden></div>
   <div id="mtoast"></div>

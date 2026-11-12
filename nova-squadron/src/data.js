@@ -2,10 +2,10 @@
 
 export const WEAPONS = [
   { id: 'laser', name: 'Zwillingslaser', short: 'LASER', color: [0.5, 1.7, 4.6], rate: 10, dmg: 10, speed: 460, desc: 'Schnelle Salven aus beiden Flügelkanonen.', unlock: 0 },
-  { id: 'spread', name: 'Ionenfächer', short: 'FÄCHER', color: [0.7, 2.9, 3.4], rate: 3.2, dmg: 8, speed: 400, desc: 'Sieben Bolzen im Fächer. Stark auf kurze Distanz.', unlock: 1 },
-  { id: 'missile', name: 'Schwarmraketen', short: 'RAKETEN', color: [4.0, 2.2, 0.4], rate: 2.4, dmg: 34, speed: 210, desc: 'Suchen nur Ziele, die du im Visier hast. Zwei Raketen pro Salve.', unlock: 2 },
-  { id: 'beam', name: 'Plasmalanze', short: 'LANZE', color: [1.0, 2.2, 5.0], rate: 0, dmg: 150, speed: 0, desc: 'Dauerstrahl, der alles auf der Ziellinie durchschneidet.', unlock: 3 },
-  { id: 'orb', name: 'Nova-Kanone', short: 'NOVA-K.', color: [3.4, 0.8, 4.2], rate: 1.1, dmg: 90, speed: 240, desc: 'Schwere Plasmakugel mit Flächenschaden.', unlock: 4 },
+  { id: 'spread', name: 'Ionenfächer', short: 'FÄCHER', color: [0.7, 2.9, 3.4], rate: 3.2, dmg: 8, speed: 400, desc: 'Sieben Bolzen im Fächer. Stark auf kurze Distanz.', unlock: 0 },
+  { id: 'missile', name: 'Schwarmraketen', short: 'RAKETEN', color: [4.0, 2.2, 0.4], rate: 2.4, dmg: 34, speed: 210, desc: 'Suchen nur Ziele, die du im Visier hast. Zwei Raketen pro Salve.', unlock: 0 },
+  { id: 'beam', name: 'Plasmalanze', short: 'LANZE', color: [1.0, 2.2, 5.0], rate: 0, dmg: 150, speed: 0, desc: 'Dauerstrahl, der alles auf der Ziellinie durchschneidet.', unlock: 0 },
+  { id: 'orb', name: 'Nova-Kanone', short: 'NOVA-K.', color: [3.4, 0.8, 4.2], rate: 1.1, dmg: 90, speed: 240, desc: 'Schwere Plasmakugel mit Flächenschaden.', unlock: 0 },
 ];
 
 export const UPGRADES = [

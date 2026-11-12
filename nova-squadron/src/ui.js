@@ -247,8 +247,8 @@ export function createUI(api) {
   hold('t-fire', api.act.fire); hold('t-boost', api.act.boost);
   const tap = (id, fn) => { const b = $(id); b.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); }, { passive: false }); b.addEventListener('click', fn); };
   hold('t-brake', api.act.brake); tap('t-loop', () => api.act.maneuver('loop')); tap('t-turn', () => api.act.maneuver('turn'));
-  tap('t-rr', () => api.act.rollAuto()); tap('goal', () => { goalT = 0.01; });
-  for (const [id, ic] of [['t-fire', 'fire'], ['t-boost', 'boost'], ['t-brake', 'brake'], ['t-rr', 'roll'], ['t-loop', 'loop'], ['t-turn', 'turn'], ['t-nova', 'nova']]) $(id).innerHTML = ICON[ic]; $('b-pause').innerHTML = ICON.pause; tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
+  tap('t-rr', () => api.act.roll(1)); tap('t-rl', () => api.act.roll(-1)); tap('goal', () => { goalT = 0.01; });
+  for (const [id, ic] of [['t-fire', 'fire'], ['t-boost', 'boost'], ['t-brake', 'brake'], ['t-rr', 'roll'], ['t-rl', 'roll'], ['t-loop', 'loop'], ['t-turn', 'turn'], ['t-nova', 'nova']]) $(id).innerHTML = ICON[ic]; $('b-pause').innerHTML = ICON.pause; tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
 
   return { toastMenu, showChoice, hideChoice, milestone, toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
 }
