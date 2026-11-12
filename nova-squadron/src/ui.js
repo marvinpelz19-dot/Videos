@@ -68,6 +68,7 @@ export function createUI(api) {
       const p = panels[i];
       if (enter) { stage.innerHTML = `<figure class="cpanel big enter t${i % 2}"><img src="${asset(p.img)}" alt=""><figcaption class="ccap">${esc(p.cap)}</figcaption>${p.fx ? `<span class="cfx">${esc(p.fx)}</span>` : ''}<div class="cbubs" id="c-bubs">${bubbles(p, 0, true)}</div></figure>`; const nx = panels[i + 1]; if (nx) new Image().src = asset(nx.img); }
       else $('c-bubs').innerHTML = bubbles(p, j, true);
+      const cb = $('c-bubs'); if (cb) cb.scrollTop = cb.scrollHeight;   // neueste Sprechblase immer sichtbar
     };
     comicNext = () => { const p = panels[i]; if (p && j < p.lines.length - 1) { j++; sfx.click(); draw(false); } else if (i < total - 1) { i++; j = 0; sfx.roll(); draw(true); } else if (!m) { sfx.click(); finish(); } };
     stage.onclick = () => comicNext && comicNext(); $('c-skip').onclick = () => { sfx.click(); if (m) { i = panels.length; j = 0; draw(true); } else finish(); };
@@ -210,7 +211,8 @@ export function createUI(api) {
       ${m.convoy ? `<dt>Konvoi</dt><dd>${Math.round(s.convoy * 100)} %</dd>` : ''}<dt>Abschussprämien</dt><dd>${fmt(s.credits)} Cr</dd><dt>Einsatzbonus</dt><dd>${fmt(bonus)} Cr</dd></dl>
       ${newWeapon ? `<p class="unlock">Neue Waffe: <b>${newWeapon.name}</b></p>` : ''}${newShip ? `<p class="unlock">Neues Schiff: <b>${newShip.name}</b></p>` : ''}
       ${m.id === 'm6' ? `<p class="unlock outro">${STORY.outro}</p>` : ''}
-      ${next && won ? '<button class="btn big" id="r-next">Nächster Einsatz</button>' : ''}<button class="btn ${next && won ? 'ghost' : 'big'}" id="r-hangar">Zum Hangar</button></div>`;
+      ${next && won && COMICS[next.id] ? `<p class="unlock">Comic freigeschaltet: <b>${esc(COMICS[next.id].title)}</b></p>` : ''}
+      ${next && won ? '<button class="btn big" id="r-next">Weiter im Comic</button>' : ''}<button class="btn ${next && won ? 'ghost' : 'big'}" id="r-hangar">Zum Hangar</button></div>`;
     $('r-hangar').onclick = () => { sfx.click(); sel = next && won ? next : m; api.toHangar(); };
     if ($('r-next')) $('r-next').onclick = () => { sfx.click(); sel = next; startStory(next); };
   }
