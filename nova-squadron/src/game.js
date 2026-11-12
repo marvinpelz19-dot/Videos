@@ -5,7 +5,8 @@ import { RenderPass } from '../vendor/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from '../vendor/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from '../vendor/addons/postprocessing/OutputPass.js';
 import { WEAPONS, UPGRADES, SHIPS, ENEMIES, ENVS, MISSIONS, ENDLESS, endlessPhase } from './data.js';
-import { MATS, buildPlayerShip, buildEnemy, buildCapital, buildAsteroidGeos } from './ships.js';
+import { MATS, ROCK_MATS, buildPlayerShip, buildEnemy, buildCapital, buildAsteroidGeos, buildStation, buildSatellite } from './ships.js';
+import { Blast } from './blast.js';
 import { FX, BoltMesh } from './fx.js';
 import { sfx, initAudio, startMusic, setIntensity, audioState, applyAudioState, suspendAudio } from './audio.js';
 import { createUI } from './ui.js';
@@ -71,8 +72,15 @@ skyMat.color.setRGB(0.62, 0.62, 0.62);
 const sky = new THREE.Mesh(new THREE.SphereGeometry(8000, 48, 24), skyMat); sky.renderOrder = -10; sky.frustumCulled = false; scene.add(sky);
 const far = new THREE.Group(); scene.add(far);       // Planet, Sonne: folgen der Kamera (unendlich weit weg)
 const world = new THREE.Group(); scene.add(world);   // alles, was pro Mission neu entsteht
-const fx = new FX(scene, save.set.quality), boltMesh = new BoltMesh(scene);
-const rockGeos = buildAsteroidGeos();
+const fx = new FX(scene, save.set.quality), boltMesh = new BoltMesh(scene), blast = new Blast(scene, save.set.quality);
+// Explosion: Blitz, Druckring, wenige heiße Funken, dazu Feuerball, Feuerring, Rauch und Trümmer aus blast.js
+function explode(pos, size = 1, tint = [1, 0.55, 0.2], inherit, o = {}) {
+  fx.flash(pos, 13 * size + 9, [1.7, 1.4, 1.0], 0.14 + size * 0.02); if (o.ring) fx.ring(pos, 30 * size, tint, 0.5 + size * 0.08);
+  fx.spark(pos, Math.min(40, 8 + size * 7) | 0, 70 * Math.sqrt(size) + 25, 0.7 + size * 0.12, 0.55 + size * 0.1, 2.6, 1.7, 0.7, inherit);
+  blast.explode(pos, size, inherit, { plasma: tint[2] > tint[0] * 1.2 ? 1 : 0, ...o });
+}
+const rockGeos = buildAsteroidGeos(save.set.quality === 'low' ? 8 : 16);
+{ const rt = tex('tex_rock'); rt.wrapS = rt.wrapT = THREE.RepeatWrapping; for (const m of ROCK_MATS) { m.map = rt; m.bumpMap = rt; } const st = tex('tex_solar'); st.wrapS = st.wrapT = THREE.RepeatWrapping; MATS.solar.map = st; }
 const atmoMat = (c) => new THREE.ShaderMaterial({
   uniforms: { col: { value: new THREE.Color(c[0], c[1], c[2]) }, sunDir: { value: V() } }, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   vertexShader: 'varying vec3 vN; varying vec3 vV; varying vec3 vW; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); vW=normalize(mat3(modelMatrix)*normal); gl_Position=projectionMatrix*mv; }',
@@ -105,8 +113,17 @@ function buildEnv(env) {
 // ---------- Zustand ----------
 const G = { mode: 'title', t: 0, ents: [], bolts: [], freeBolts: [], mission: null, phase: -1, phaseDef: null, phaseT: 0, cap: null, center: V(), stats: null, shake: 0, slow: 0, endT: 0, combo: 0, comboT: 0, lock: null, beamOn: false, intensity: 0 };
 const P = { pos: V(), yaw: 0, pitch: 0, quat: new THREE.Quaternion(), fwd: V(0, 0, 1), right: V(-1, 0, 0), vel: V(), sx: 0, sy: 0, speed: 70, shield: 100, maxShield: 100, regenT: 0, invuln: 0, rollT: 0, rollDir: 1, rollCd: 0, boost: 0, fireCd: 0, weapon: 0, gun: 0, nova: 0, mesh: null, inner: null, def: SHIPS[0], r: 4.5, hullCd: 0, team: 0 };
+const CORV_GUNS = [[20, -0.4, 14], [-20, -0.4, 14], [14, 2.4, 24], [-14, 2.4, 24], [3.4, 8.6, 28], [-3.4, 8.6, 28]];
 const qMan = new THREE.Quaternion(), XAX = V(1, 0, 0);
 const camFwd = V(0, 0, 1), eul = new THREE.Euler(0, 0, 0, 'YXZ');
+// Nova-Welle: flacher Ring in der Ebene des Schiffs und eine dünne Kugelschale
+const waveRing = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.2, 160, 1, true), new THREE.ShaderMaterial({ uniforms: { fade: { value: 1 }, time: { value: 0 } }, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
+  vertexShader: 'varying float vY; varying float vA; void main(){ vY=position.y/0.1; vA=atan(position.z,position.x); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
+  fragmentShader: 'uniform float fade; uniform float time; varying float vY; varying float vA; void main(){ float core=exp(-vY*vY*26.0); float halo=exp(-vY*vY*3.2); float fl=0.75+0.25*sin(vA*46.0+time*14.0)*sin(vA*17.0-time*9.0); gl_FragColor=vec4((vec3(1.3,1.6,2.4)*core*2.2+vec3(0.25,0.55,1.5)*halo*0.9*fl)*fade,1.0); }' }));
+const waveShell = new THREE.Mesh(new THREE.SphereGeometry(1, 48, 32), new THREE.ShaderMaterial({ uniforms: { fade: { value: 1 } }, transparent: true, depthWrite: false, side: THREE.BackSide, blending: THREE.AdditiveBlending,
+  vertexShader: 'varying vec3 vN; varying vec3 vV; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vN=normalize(normalMatrix*normal); vV=normalize(-mv.xyz); gl_Position=projectionMatrix*mv; }',
+  fragmentShader: 'uniform float fade; varying vec3 vN; varying vec3 vV; void main(){ float rim=pow(1.0-abs(dot(vN,vV)),3.0); float edge=pow(1.0-abs(dot(vN,vV)),9.0); gl_FragColor=vec4((vec3(0.3,0.55,1.3)*rim*0.5+vec3(0.9,1.3,2.4)*edge*2.6)*fade,1.0); }' }));
+waveRing.visible = waveShell.visible = false; waveRing.frustumCulled = waveShell.frustumCulled = false; scene.add(waveRing, waveShell);
 const beam = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 8, 1, true).rotateX(Math.PI / 2).translate(0, 0, 0.5), new THREE.MeshBasicMaterial({ blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false }));
 beam.material.color.setRGB(1.2, 2.6, 6); beam.visible = false; scene.add(beam);
 const bossBeam = new THREE.Mesh(beam.geometry, new THREE.MeshBasicMaterial({ blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false })); bossBeam.visible = false; scene.add(bossBeam);
@@ -149,6 +166,7 @@ function addEnt(kind, pos, o = {}) {
   const d = ENEMIES[kind] || {};
   const e = { kind, team: 1, pos: pos.clone(), dir: V(0, 0, 1), vel: V(), speed: d.speed || 0, turn: d.turn || 0, hp: d.hp || 1, maxHp: d.hp || 1, r: d.r || 5, def: d, alive: true, state: 'attack', timer: 0, cd: rand(0.5, 2), bank: 0, objective: false, fighter: !!d.speed && !d.static, tgt: null, flashT: 0, ...o };
   if (!e.mesh) { e.mesh = buildEnemy(kind); }
+  if (e.team === 1 && e.fighter && !d.big) { e.mesh.scale.setScalar(1.3); e.r *= 1.25; }   // Gegner größer als die eigenen Jäger
   e.mesh.position.copy(e.pos); world.add(e.mesh); G.ents.push(e); return e;
 }
 function spawnAround(dist0, dist1, out) {
@@ -169,7 +187,7 @@ function spawnGroup([kind, n], objective) {
   const c = spawnAround(560, 820, V());
   for (let i = 0; i < n; i++) {
     const p = c.clone().add(randUnit(t1).multiplyScalar(rand(20, 90))), e = addEnt(kind, p, { objective });
-    e.dir.copy(P.pos).sub(p).normalize(); e.tgt = pickTarget(e); e.breakDist = kind === 'bomber' ? 110 : kind === 'kami' ? 0 : rand(50, 90); if (kind === 'kami') e.tgt = P;
+    e.dir.copy(P.pos).sub(p).normalize(); e.tgt = pickTarget(e); e.breakDist = kind === 'bomber' ? 110 : kind === 'kami' ? 0 : kind === 'corvette' ? 240 : rand(50, 90); if (kind === 'kami') e.tgt = P;
     if (G.mission.endless) { const k = 1 + G.phase * 0.06; e.hp = e.maxHp = e.hp * k; }
     fx.flash(p, 60, [1.2, 0.4, 0.3], 0.5);
   }
@@ -179,18 +197,18 @@ function spawnCapital(dread) {
   const mesh = buildCapital(dread), pos = dread ? V(260, -90, 1250) : V(150, -50, 820); mesh.position.copy(pos); world.add(mesh);
   const u = mesh.userData, cap = G.cap = { mesh, pos, dread, hull: u.hull.map(([x, y, z, r]) => ({ c: V(x, y, z).add(pos), r })), dying: 0, beamT: 9, beamState: 0, beamDir: V(), muzzle: V(0, 0, 235 * u.k).add(pos), parts: [] };
   for (const [x, y, z, rot] of u.turrets) { const e = addEnt('turret', V(x, y, z).add(pos), { cap, objective: true }); e.mesh.rotation.z = rot; e.upSign = rot ? -1 : 1; cap.parts.push(e); }
-  for (const [x, y, z] of u.gens) { const e = addEnt('gen', V(x, y, z).add(pos), { cap }); if (dread) e.mesh.scale.setScalar(1.3), (e.r = 18), (e.hp = e.maxHp = 520); cap.parts.push(e); }
-  const core = addEnt('core', V(...u.core).add(pos), { cap, shielded: true }); if (dread) { core.hp = core.maxHp = 3600; core.mesh.scale.setScalar(1.4); core.r = 28; } cap.core = core; cap.parts.push(core);
+  for (const [x, y, z] of u.gens) { const e = addEnt('gen', V(x, y, z).add(pos), { cap }); if (dread) e.mesh.scale.setScalar(1.3), (e.r = 18), (e.hp = e.maxHp = 950); cap.parts.push(e); }
+  const core = addEnt('core', V(...u.core).add(pos), { cap, shielded: true }); if (dread) { core.hp = core.maxHp = 7000; core.mesh.scale.setScalar(1.4); core.r = 28; } cap.core = core; cap.parts.push(core);
   G.center.copy(pos);
 }
 function clearWorld() {
-  for (const e of G.ents) world.remove(e.mesh); G.ents.length = 0; G.bolts.length = 0; world.clear(); G.cap = null; beam.visible = bossBeam.visible = false; sfx.beam(false);
+  G.wave = null; waveRing.visible = waveShell.visible = false; for (const e of G.ents) world.remove(e.mesh); G.ents.length = 0; G.bolts.length = 0; world.clear(); G.cap = null; beam.visible = bossBeam.visible = false; sfx.beam(false);
 }
 
 // ---------- Mission ----------
 function startMission(m) {
   initAudio(); startMusic(); clearWorld(); setShowcase(null); P.man = null; P.flip = 0; P.brake = 0; P.manCd = 0; G.did = {}; G.mission = m; G.phase = -1; G.phaseDef = null; G.t = 0; G.endT = 0; G.combo = 0; G.center.set(0, 0, 0);
-  G.stats = { kills: 0, score: 0, credits: 0, respawns: 0, time: 0, wave: 0, convoy: 1 };
+  G.stats = { kills: 0, score: 0, credits: 0, respawns: 0, time: 0, wave: 0, convoy: 1, miles: 0 }; G.wave = null; P.stun = 0;
   const env = ENVS[m.env]; buildEnv(env);
   P.def = SHIPS.find((s) => s.id === save.ship) || SHIPS[0];
   P.mesh = new THREE.Group(); P.inner = buildPlayerShip(P.def.id); P.mesh.add(P.inner); world.add(P.mesh);
@@ -198,24 +216,29 @@ function startMission(m) {
   if (!weaponOpen(P.weapon) || m.tutorial) P.weapon = 0;
   camFwd.set(0, 0, 1);
   for (let i = 0; i < 1 + up('wing'); i++) { const e = addEnt('ally', V((i % 2 ? 1 : -1) * (22 + i * 9), 4, -18 - i * 8), { team: 0, mesh: buildPlayerShip(i % 3 === 2 ? 'wespe' : 'pfeil', true), speed: 76, turn: 1.7, r: 5, fighter: true, slot: i, hp: 1e9 }); e.breakDist = 70; }
-  for (let i = 0; i < env.asteroids; i++) {
-    const r = rand(8, 46) * (Math.random() < 0.12 ? 2 : 1), p = randUnit(V()).multiplyScalar(rand(160, 1000)); p.y *= 0.45; p.z += 250;
-    const mesh = new THREE.Mesh(rockGeos[i % 4], MATS.rock); mesh.scale.setScalar(r); mesh.rotation.set(rand(6), rand(6), rand(6));
-    const e = addEnt('rock', p, { team: 2, mesh, r: r * 0.92, hp: r * 5, maxHp: r * 5, def: { credit: 8, score: 20, name: 'Asteroid' }, fighter: false }); e.spinAx = randUnit(V()); e.spin = rand(0.02, 0.2);
+  for (let i = 0; i < Math.max(14, env.asteroids); i++) {   // Asteroiden treiben durch jedes Kampfgebiet
+    const r = rand(7, 40) * (Math.random() < 0.14 ? 2.2 : 1), p = randUnit(V()).multiplyScalar(rand(170, 1150)); p.y *= 0.45; p.z += 250;
+    const mesh = new THREE.Mesh(rockGeos[i % rockGeos.length], ROCK_MATS[i % 3]); mesh.scale.setScalar(r); mesh.rotation.set(rand(6), rand(6), rand(6));
+    const e = addEnt('rock', p, { team: 2, mesh, r: r * 0.9, hp: r * 9, maxHp: r * 9, def: { credit: 8, score: 20, name: 'Asteroid' }, fighter: false }); e.spinAx = randUnit(V()); e.spin = rand(0.03, 0.22); randUnit(e.vel).multiplyScalar(rand(3, 15)); e.vel.y *= 0.3;
   }
+  if (m.station) { const e = addEnt('station', V(-420, 50, 640), { team: 0, mesh: buildStation(), r: 34, hp: 1e9, fighter: false, solid: true, def: { name: 'Handelsstation' } }); e.mesh.rotation.z = 0.25; }
+  for (let i = 0; i < 4; i++) { const p = randUnit(V()).multiplyScalar(rand(260, 900)); p.y *= 0.4; p.z += 300; const e = addEnt('sat', p, { team: 0, mesh: buildSatellite(), r: 7, hp: 1e9, fighter: false, solid: true, def: { name: 'Relais-Satellit' } }); e.mesh.rotation.set(rand(6), rand(6), rand(6)); e.spin = rand(0.05, 0.2); }
   for (let i = 0; i < (m.convoy || 0); i++) addEnt('transport', V((i - 1) * 90, -30 - (i % 2) * 25, 160 - Math.abs(i - 1) * 70), { team: 0, speed: 16, hp: 900, maxHp: 900, r: 26, fighter: false, def: { name: 'Frachter' } });
-  ui.showGame(m); G.mode = 'play'; setIntensity(0.5); nextPhase();
-  ui.banner(m.name.toUpperCase(), m.place);
+  ui.showGame(m, m.endless ? 0 : m.phases.length); G.mode = 'play'; setIntensity(0.5); nextPhase();
 }
 function nextPhase() {
   const m = G.mission; G.phase++;
+  if (G.phase > 0) {   // Meilenstein: jede abgeschlossene Phase zählt und bringt eine Prämie
+    const bonus = m.tutorial ? 30 : 60 + 40 * (m.n || 2); G.stats.credits += bonus; G.stats.miles = G.phase; sfx.phase();
+    ui.milestone(G.phase, m.endless ? 0 : m.phases.length, bonus);
+  }
   const def = m.endless ? endlessPhase(G.phase + 1) : m.phases[G.phase];
   if (!def) { G.endT = 2.6; G.phaseDef = null; return; }
   G.phaseDef = def; G.phaseT = 0; G.stats.wave = G.phase + 1; G.did = {}; if (def.task === 'nova') P.nova = 100;
   for (const g of def.spawn || []) spawnGroup(g, !def.goal);
   if (def.goal === 'core' && G.cap) { G.cap.core.shielded = false; G.cap.core.mesh.userData.shield.visible = false; fx.ring(G.cap.core.pos, 160, [0.3, 1, 0.6], 1.2); }
   (def.comms || []).forEach(([n, t], i) => setTimeout(() => G.mode !== 'title' && ui.comms(n, t), 900 + i * 3800));
-  if (G.phase > 0) { sfx.phase(); ui.banner(def.label.toUpperCase(), m.endless ? '' : `Phase ${G.phase + 1} von ${m.phases.length}`); }
+  if (G.phase > 0) setTimeout(() => { if (G.mode === 'play' && G.phaseDef === def) ui.banner(def.label.toUpperCase(), m.endless ? '' : `Nächstes Ziel · ${G.phase + 1} von ${m.phases.length}`); }, 1900);
 }
 function remaining() {
   const d = G.phaseDef; if (!d) return 0;
@@ -243,12 +266,22 @@ function roll(dir) { if (G.mode !== 'play' || P.rollCd > 0 || P.man) return; P.r
 function maneuver(type) { if (G.mode !== 'play' || P.man || P.rollT > 0 || P.manCd > 0) return; P.man = { type, t: 0, dur: type === 'loop' ? 1.7 : 1.2, base: P.quat.clone() }; P.manCd = (type === 'loop' ? 1.7 : 1.2) + 0.3; sfx.loop(); G.did[type] = true; ui.banner(type === 'loop' ? 'LOOPING' : 'WENDE', ''); }
 function setWeapon(i) { if (weaponOpen(i) && i !== P.weapon) { P.weapon = i; sfx.click(); G.did.weapon = true; ui.weaponChanged(); ui.toast(WEAPONS[i].name + ' · Munition ∞'); } }
 function cycleWeapon(d) { const n = WEAPONS.filter((w, i) => weaponOpen(i)).length; setWeapon((P.weapon + d + n) % n); }
-function nova() {
-  if (G.mode !== 'play' || P.nova < 100) return; P.nova = 0; G.did.nova = true; sfx.nova(); G.shake = 2.2; G.slow = 0.7; ui.flash('nova');
-  const dmg = 380 * (1 + 0.35 * up('nova'));
-  fx.ring(P.pos, 520, [0.6, 0.9, 2], 1.1); fx.ring(P.pos, 300, [2, 1.2, 0.5], 0.8); fx.flash(P.pos, 500, [2, 2.4, 4], 0.7); fx.spark(P.pos, 90, 260, 1.0, 2.2, 0.5, 1.0, 2.6);
-  for (const e of G.ents) if (e.alive && e.team !== 0 && e.pos.distanceTo(P.pos) < 520) damage(e, e.kind === 'core' || e.kind === 'gen' ? dmg * 0.6 : dmg, true);
-  for (const b of G.bolts) if (b.team === 1 && b.pos.distanceTo(P.pos) < 520) b.life = 0;
+function nova() {   // Nova-Welle: ein Ring aus Energie läuft vom Schiff nach außen und trifft, was er erreicht
+  if (G.mode !== 'play' || P.nova < 100) return; P.nova = 0; G.did.nova = true; sfx.nova(); G.shake = 1.6; ui.flash('nova');
+  G.wave = { pos: P.pos.clone(), r: 8, max: 520 * (1 + 0.12 * up('nova')), dmg: 380 * (1 + 0.35 * up('nova')), hit: new Set() };
+  waveRing.quaternion.copy(P.quat); waveRing.visible = waveShell.visible = true; fx.flash(P.pos, 120, [2, 2.4, 4], 0.35);
+}
+function updateWave(dt) {
+  const w = G.wave; if (!w) return; w.r += (300 + w.r * 0.9) * dt; const k = w.r / w.max;
+  for (const e of G.ents) if (e.alive && e.team !== 0 && !w.hit.has(e) && e.pos.distanceTo(w.pos) - e.r < w.r) {
+    w.hit.add(e); const fall = 1 - 0.45 * k; damage(e, (e.kind === 'core' || e.kind === 'gen' ? 0.6 : 1) * w.dmg * fall, true); fx.flash(e.pos, e.r * 3 + 10, [1.4, 2, 4], 0.2);
+    if (e.alive && e.fighter) { t1.copy(e.pos).sub(w.pos).normalize(); e.state = 'break'; e.timer2 = 1.4; e.breakDir = (e.breakDir || V()).copy(t1); }   // Überlebende werden weggedrückt
+  }
+  for (const b of G.bolts) if (b.team === 1 && b.pos.distanceTo(w.pos) < w.r) b.life = 0;
+  for (let i = 0; i < 10; i++) { const a = rand(6.283); t1.set(Math.cos(a) * w.r, rand(-2, 2), Math.sin(a) * w.r).applyQuaternion(waveRing.quaternion).add(w.pos); fx.p(t1.x, t1.y, t1.z, 0, 0, 0, 0.35, 2.2, 0.6, 1.2, 3); }
+  waveRing.position.copy(w.pos); waveRing.scale.setScalar(w.r); waveShell.position.copy(w.pos); waveShell.scale.setScalar(w.r);
+  waveRing.material.uniforms.fade.value = waveShell.material.uniforms.fade.value = 1 - k * k; waveRing.material.uniforms.time.value = G.t;
+  if (k >= 1) { G.wave = null; waveRing.visible = waveShell.visible = false; }
 }
 function newBolt(pos, dir, speed, team, dmg, c, kind = 0) {
   const b = G.freeBolts.pop() || { pos: V(), vel: V(), c: null };
@@ -296,28 +329,31 @@ function fireBeam(dt, dps) {
 function damage(e, dmg, silent, cont) {
   if (!e.alive || e.team === 0) return;
   if (e.shielded) { if (!cont || Math.random() < 0.1) { fx.spark(e.pos, 4, 30, 0.4, 2, 0.3, 2, 0.8); } return; }
-  e.hp -= dmg; e.flashT = 0.08; if (!silent && !cont) { sfx.hit(); fx.flash(e.pos, e.r * 2.2 + 4, [2.2, 1.6, 1.0], 0.09); }
+  e.hp -= dmg; e.flashT = 0.08; G.hitT = 0.14; if (!silent && !cont) { sfx.hit(); fx.flash(e.pos, e.r * 2.2 + 4, [2.2, 1.6, 1.0], 0.09); }
   if (e.hp <= 0) kill(e);
 }
 function kill(e) {
   e.alive = false; world.remove(e.mesh);
-  const size = e.kind === 'rock' ? e.r / 12 : { drone: 1, inter: 0.9, bomber: 1.8, ace: 2.4, turret: 1.6, gen: 3, buoy: 2.2, core: 5, kami: 1.3, hauler: 4.5, target: 1.6 }[e.kind] || 1;
-  fx.explode(e.pos, size, e.kind === 'rock' ? [0.7, 0.6, 0.5] : e.kind === 'ace' ? [0.8, 0.4, 1.4] : e.kind === 'gen' ? [0.3, 1.2, 0.5] : [1, 0.55, 0.2], e.vel);
+  const size = e.kind === 'rock' ? e.r / 12 : { drone: 1, inter: 0.9, bomber: 1.8, ace: 2.4, turret: 1.6, gen: 3, buoy: 2.2, core: 5, kami: 1.3, hauler: 4.5, target: 1.6, corvette: 5 }[e.kind] || 1;
+  explode(e.pos, size, e.kind === 'rock' ? [0.7, 0.6, 0.5] : e.kind === 'ace' ? [0.8, 0.4, 1.4] : e.kind === 'gen' ? [0.3, 1.2, 0.5] : [1, 0.55, 0.2], e.vel, { ring: size >= 2.2 });
   const d = e.pos.distanceTo(P.pos), pan = clamp(-t1.copy(e.pos).sub(camera.position).normalize().dot(P.right) * 1.2, -1, 1); sfx.boom(clamp(size, 0.6, 3), pan, clamp(1 - d / 900, 0, 1));
   fx.spark(e.pos, 10 + size * 6, 55 + size * 20, 1.6, 0.9, 2.6, 1.3, 0.3, e.vel);                       // glühende Trümmer
-  if (size >= 1.6) { const pp = e.pos.clone(); for (let i = 1; i <= 3; i++) setTimeout(() => { if (G.mode === 'play') { fx.explode(pp.add(randUnit(t1).multiplyScalar(e.r * 0.8)), size * 0.5); } }, i * 140); }   // Folgeexplosionen
+  if (size >= 1.6) { const pp = e.pos.clone(); for (let i = 1; i <= 3; i++) setTimeout(() => { if (G.mode === 'play') { explode(pp.add(randUnit(t1).multiplyScalar(e.r * 0.8)), size * 0.5); } }, i * 140); }   // Folgeexplosionen
   G.shake = Math.max(G.shake, clamp((size * 90) / (d + 40), 0, 1.6));
   if (e.kind !== 'rock') { G.combo++; G.comboT = 5; G.stats.kills++; P.nova = Math.min(100, P.nova + (6 + up('nova') * 2)); }
   const mult = 1 + Math.min(G.combo, 12) * 0.25; G.stats.score += Math.round(e.def.score * mult); G.stats.credits += Math.round(e.def.credit * (1 + Math.min(G.combo, 10) * 0.05));
+  if (e.kind !== 'rock') { G.slow = Math.max(G.slow, e.def.big ? 0.9 : 0.07); ui.toast(`${e.def.name} zerstört · +${e.def.credit} Cr`); }   // kurzer Stillstand: der Abschuss soll sitzen
+  if (e.kind === 'corvette') { G.shake = 2.4; ui.banner('KORVETTE VERNICHTET', '+' + e.def.credit + ' Credits'); const pp = e.pos.clone(), dd = e.dir.clone(); for (let i = 0; i < 6; i++) setTimeout(() => { if (G.mode === 'play') explode(t1.copy(pp).addScaledVector(dd, (i - 2.5) * 11).add(randUnit(t2).multiplyScalar(5)), rand(1.6, 3)); }, 120 + i * 170); }
   if (e.kind === 'ace') { G.slow = 0.5; ui.banner('LIQUIDATOR ABGEWICKELT', '+' + e.def.credit + ' Credits'); }
   if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Verbandschef', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
 }
 function hitPlayer(dmg, pos) {
   if (P.invuln > 0 || P.rollT > 0 || P.man || G.mode !== 'play') return;
-  P.shield -= dmg; P.regenT = 2.6; G.shake = Math.max(G.shake, 0.5); sfx.shieldHit(); ui.flash('hit'); fx.spark(pos || P.pos, 8, 30, 0.4, 2, 0.5, 1.4, 3);
+  P.shield -= dmg * 0.6; P.regenT = 2.6; if (P.stun < 0.3) ui.toast('Treffer · Antrieb gedrosselt'); P.stun = Math.min(1, P.stun + 0.34 + dmg * 0.012);   // Treffer kosten vor allem Tempo
+  G.shake = Math.max(G.shake, 0.5); sfx.shieldHit(); ui.flash('hit'); fx.spark(pos || P.pos, 8, 30, 0.4, 2, 0.5, 1.4, 3);
   if (P.shield <= 0) {   // unendlich Leben: Notsprung statt Game Over
     G.stats.respawns++; G.combo = 0; P.shield = P.maxShield; P.invuln = 3; G.shake = 2; G.slow = 0.6; sfx.down(); ui.flash('down');
-    fx.explode(P.pos, 2.4, [0.4, 0.9, 2]); ui.banner('NOTSCHILD GEZÜNDET', 'Schild voll · Leben ∞');
+    explode(P.pos, 2.4, [0.4, 0.9, 2]); ui.banner('NOTSCHILD GEZÜNDET', 'Schild voll · Leben ∞');
   }
 }
 
@@ -349,6 +385,12 @@ function updateFighter(e, dt) {
   t4.cross(e.dir); e.bank += (clamp(-t4.y * 45, -1.1, 1.1) - e.bank) * Math.min(1, dt * 5);
   e.vel.copy(e.dir).multiplyScalar(e.speed); e.pos.addScaledVector(e.vel, dt);
   e.mesh.position.copy(e.pos); e.mesh.lookAt(t3.copy(e.pos).add(e.dir)); e.mesh.rotateZ(e.bank);
+  if (e.kind === 'corvette') {   // sechs Geschütze feuern reihum, egal wohin der Bug zeigt
+    const d = e.pos.distanceTo(P.pos);
+    if ((e.cd -= dt) < 0 && d < 720) { const g = CORV_GUNS[(e.gun = ((e.gun || 0) + 1) % 6)]; t3.set(g[0], g[1], g[2]).applyQuaternion(e.mesh.quaternion).add(e.pos); t2.copy(P.pos).addScaledVector(P.vel, d / 210).sub(t3).normalize(); randUnit(t4); t2.addScaledVector(t4, 0.03).normalize(); const b = newBolt(t3, t2, 210, 1, e.def.dmg, [4, 2.2, 0.4]); b.len = 12; b.w = 0.9; fx.flash(t3, 9, [3, 1.6, 0.4], 0.08); e.cd = e.def.fire * rand(0.7, 1.4); if (d < 450) sfx.heavy(0.13, 1.6); }
+    if (e.pos.distanceToSquared(P.pos) < (e.r + P.r) ** 2 && P.hullCd <= 0) bounce(e.pos, e.r);
+    return;
+  }
   if ((e.cd -= dt) < 0 && T && e.state === 'attack' && dist < 460 && e.def.fire !== 0) {
     t2.normalize(); if (t2.dot(e.dir) > 0.975) {
       if (e.team === 0) { newBolt(e.pos, t3.copy(T.pos).addScaledVector(T.vel, dist / 400).sub(e.pos).normalize(), 400, 0, 7, [0.5, 1.6, 4]).r = 1.5; e.cd = 0.22; }
@@ -356,7 +398,7 @@ function updateFighter(e, dt) {
       else { t3.copy(T.pos).addScaledVector(T.vel, dist / 190).sub(e.pos).normalize(); randUnit(t4); t3.addScaledVector(t4, e.kind === 'ace' ? 0.018 : 0.035).normalize(); const b = newBolt(e.pos, t3, 190, 1, e.def.dmg, e.kind === 'ace' ? [3, 0.6, 4.5] : [0.4, 3.6, 0.6]); b.len = 7; e.cd = e.def.fire * rand(0.6, 1.4) * (e.burst = ((e.burst || 0) + 1) % 4 ? 0.22 : 1.6); if (dist < 300 && T === P) sfx.enemyShot(clamp(-t2.dot(P.right) * -1, -1, 1)); }
     } else e.cd = 0.15;
   }
-  if (e.team === 1 && e.hp < e.maxHp * 0.5 && Math.random() < dt * 30) { fx.p(e.pos.x, e.pos.y, e.pos.z, rand(-4, 4), rand(-4, 4), rand(-4, 4), 0.9, 4.5, 0.22, 0.13, 0.09); if (Math.random() < 0.4) fx.p(e.pos.x, e.pos.y, e.pos.z, rand(-8, 8), rand(-8, 8), rand(-8, 8), 0.35, 2, 2.4, 1.0, 0.2); }   // Rauch und Flammen bei Schaden
+  if (e.team === 1 && e.hp < e.maxHp * 0.6 && Math.random() < dt * (e.def.big ? 26 : 14)) { const k = e.hp / e.maxHp, o = e.def.big ? 14 : 2; blast.puff(e.pos.x + rand(-o, o), e.pos.y + rand(-o * 0.3, o * 0.3), e.pos.z + rand(-o, o), 0, 0, 0, (e.def.big ? 9 : 4) * rand(0.7, 1.3), 0.9, k < 0.3 ? 1.1 : 0.2, 0.9, 1.5); }   // unter 60 % Rauch, unter 30 % Flammen
   if (e.team === 1 && (e.trailT = (e.trailT || 0) - dt) < 0) { e.trailT = 0.045; fx.p(e.pos.x - e.dir.x * 4, e.pos.y - e.dir.y * 4, e.pos.z - e.dir.z * 4, 0, 0, 0, 0.35, 2.2, e.kind === 'ace' ? 1.2 : 1.6, 0.3, e.kind === 'ace' ? 2 : 0.2); }
   if (e.pos.distanceToSquared(P.pos) < (e.r + P.r) * (e.r + P.r) && e.team === 1) { hitPlayer(e.kind === 'kami' ? 28 : 18, e.pos); damage(e, 60, true); }
 }
@@ -366,7 +408,13 @@ function updateStatic(e, dt) {
     const head = e.mesh.userData.head; t3.copy(t2).normalize(); if (t3.y * e.upSign > -0.15) { head.lookAt(t4.copy(e.pos).add(t2)); }
     if ((e.cd -= dt) < 0 && d < 720 && t3.y * e.upSign > -0.1) { randUnit(t4); t3.addScaledVector(t4, 0.03).normalize(); const p = t4.copy(e.pos).addScaledVector(t3, 10).addScaledVector(UP, 3 * e.upSign); const b = newBolt(p, t3, 200, 1, e.def.dmg, [4, 1.4, 0.3]); b.len = 10; b.w = 0.8; e.cd = e.def.fire * rand(0.6, 1.3); if (d < 400) sfx.heavy(0.16, 1.7); }
   } else if (e.kind === 'buoy') { e.mesh.rotation.y += e.spin * dt; e.mesh.rotation.x += e.spin * 0.3 * dt; }
-  else if (e.kind === 'rock') { e.mesh.rotateOnAxis(e.spinAx, e.spin * dt); }
+  else if (e.kind === 'rock') {
+    e.mesh.rotateOnAxis(e.spinAx, e.spin * dt); e.pos.addScaledVector(e.vel, dt);
+    t3.copy(e.pos).sub(G.center); if (t3.lengthSq() > 1500 * 1500) e.pos.copy(G.center).addScaledVector(t3, -0.96);   // am Rand wieder hereinholen
+    e.mesh.position.copy(e.pos);
+  }
+  else if (e.kind === 'station') { e.mesh.rotateY(dt * 0.05); }
+  else if (e.kind === 'sat') { e.mesh.rotateY(dt * e.spin); }
   else if (e.kind === 'core') { e.mesh.rotation.y += dt * 0.6; e.mesh.rotation.x += dt * 0.25; }
   else if (e.kind === 'hauler') {   // Goldtransporter: zieht stur seine Bahn und wehrt sich mit zwei Bordkanonen
     e.vel.copy(e.dir).multiplyScalar(e.speed); e.pos.addScaledVector(e.vel, dt); e.mesh.position.copy(e.pos); e.mesh.lookAt(t3.copy(e.pos).add(e.dir));
@@ -388,10 +436,10 @@ function updateCapital(dt) {
   if (c.core.shielded && !c.parts.some((p) => p.alive && p.kind === 'gen') && G.phaseDef?.goal !== 'core') { /* Phase schaltet den Schild ab */ }
   if (c.dying > 0) {
     c.dying -= dt; G.shake = Math.max(G.shake, 0.5);
-    if (Math.random() < dt * 14) { const h = c.hull[(Math.random() * c.hull.length) | 0]; t1.copy(h.c).add(randUnit(t2).multiplyScalar(h.r)); fx.explode(t1, rand(1.5, 4)); if (Math.random() < 0.3) sfx.boom(2); }
+    if (Math.random() < dt * 14) { const h = c.hull[(Math.random() * c.hull.length) | 0]; t1.copy(h.c).add(randUnit(t2).multiplyScalar(h.r)); explode(t1, rand(1.5, 4)); if (Math.random() < 0.3) sfx.boom(2); }
     if (c.dying <= 0) {
       c.dead = true; world.remove(c.mesh); for (const p of c.parts) if (p.alive) { p.alive = false; world.remove(p.mesh); }
-      for (const h of c.hull) fx.explode(h.c, 5); fx.flash(c.pos, 2600, [3, 2.4, 1.8], 1.6); fx.ring(c.pos, 1500, [1, 0.6, 0.3], 2.4); sfx.nova(); G.shake = 3; ui.flash('nova'); bossBeam.visible = false;
+      for (const h of c.hull) explode(h.c, 5); fx.flash(c.pos, 2600, [3, 2.4, 1.8], 1.6); fx.ring(c.pos, 1500, [1, 0.6, 0.3], 2.4); sfx.nova(); G.shake = 3; ui.flash('nova'); bossBeam.visible = false;
     }
     return;
   }
@@ -424,15 +472,15 @@ function updateBolts(dt) {
     if (b.life > 0) {
       if (b.team === 1) {
         if (b.pos.distanceToSquared(P.pos) < (P.r + b.r + 1) ** 2) { hitPlayer(b.dmg, b.pos); hit = true; }
-        else for (const e of G.ents) if (e.alive && (e.kind === 'transport' || e.kind === 'rock') && b.pos.distanceToSquared(e.pos) < e.r * e.r) { hit = true; if (e.kind === 'transport') { e.hp = Math.max(1, e.hp - b.dmg * 2.2); fx.spark(b.pos, 5, 30, 0.4, 2, 0.4, 2, 0.6); } break; }
+        else for (const e of G.ents) if (e.alive && (e.kind === 'transport' || e.kind === 'rock' || e.solid) && b.pos.distanceToSquared(e.pos) < e.r * e.r) { hit = true; if (e.kind === 'transport') { e.hp = Math.max(1, e.hp - b.dmg * 2.2); fx.spark(b.pos, 5, 30, 0.4, 2, 0.4, 2, 0.6); } break; }
       } else {
-        for (const e of G.ents) { if (!e.alive || e.team === 0) continue; const rr = e.r + b.r; if (b.pos.distanceToSquared(e.pos) < rr * rr) { hit = true; if (!b.aoe) { damage(e, b.dmg); fx.spark(b.pos, 5, 36, 0.3, 1.6, b.c[0], b.c[1], b.c[2]); } break; } }
+        for (const e of G.ents) { if (!e.alive) continue; if (e.team === 0) { if (e.solid && b.pos.distanceToSquared(e.pos) < e.r * e.r) { hit = true; fx.spark(b.pos, 4, 30, 0.3, 1.4, 2, 1.6, 1); break; } continue; } const rr = e.r + b.r; if (b.pos.distanceToSquared(e.pos) < rr * rr) { hit = true; if (!b.aoe) { damage(e, b.dmg); fx.spark(b.pos, 5, 36, 0.3, 1.6, b.c[0], b.c[1], b.c[2]); } break; } }
       }
       if (!hit && cap) for (const h of cap.hull) if (b.pos.distanceToSquared(h.c) < h.r * h.r) { hit = true; fx.spark(b.pos, 4, 30, 0.3, 1.5, 2, 1.4, 0.6); break; }
     }
     if (hit || b.life <= 0) {
       if (b.aoe && b.team === 0 && (hit || b.kind === 2)) {
-        fx.explode(b.pos, b.aoe / 22, b.kind === 2 ? [1.2, 0.4, 1.6] : [1, 0.6, 0.2]); if (b.kind === 2) { fx.ring(b.pos, b.aoe * 1.3, [1.4, 0.4, 2], 0.5); sfx.boom(1.6); G.shake = Math.max(G.shake, 0.6); } else sfx.boom(0.7);
+        explode(b.pos, b.aoe / 22, b.kind === 2 ? [1.2, 0.4, 1.6] : [1, 0.6, 0.2]); if (b.kind === 2) { fx.ring(b.pos, b.aoe * 1.3, [1.4, 0.4, 2], 0.5); sfx.boom(1.6); G.shake = Math.max(G.shake, 0.6); } else sfx.boom(0.7);
         for (const e of G.ents) if (e.alive && e.team !== 0) { const d = e.pos.distanceTo(b.pos) - e.r; if (d < b.aoe) damage(e, b.dmg * (1 - 0.5 * Math.max(0, d) / b.aoe), true); }
       }
       B[i] = B[B.length - 1]; B.pop(); G.freeBolts.push(b);
@@ -452,7 +500,8 @@ function updatePlayer(dt) {
   // Autopilot zurück ins Kampfgebiet
   const off = t1.copy(P.pos).sub(G.center), od = off.length(); G.outside = od > 2300;
   P.sx += (ix - P.sx) * Math.min(1, dt * 9); P.sy += (iy - P.sy) * Math.min(1, dt * 9);
-  const boosting = (keys.ShiftLeft || keys.ShiftRight || input.boost) && P.rollT <= 0, braking = (keys.KeyC || keys.ControlLeft || input.brake) && !boosting;
+  P.stun = Math.max(0, P.stun - dt * 0.5);
+  const boosting = (keys.ShiftLeft || keys.ShiftRight || input.boost) && P.rollT <= 0 && P.stun < 0.5, braking = (keys.KeyC || keys.ControlLeft || input.brake) && !boosting;
   if (boosting && P.boost < 0.05) sfx.boost();
   P.boost += ((boosting ? 1 : 0) - P.boost) * Math.min(1, dt * 4); P.brake += ((braking ? 1 : 0) - P.brake) * Math.min(1, dt * 5);
   if (P.boost > 0.8) G.did.boost = true; if (P.brake > 0.8) G.did.brake = true; P.manCd -= dt;
@@ -469,7 +518,8 @@ function updatePlayer(dt) {
   }
   P.flip = Math.max(0, (P.flip || 0) - dt * 5.5);
   P.fwd.set(0, 0, 1).applyQuaternion(P.quat); P.right.set(-1, 0, 0).applyQuaternion(P.quat);
-  P.speed = 72 * P.def.speed * eng * (1 + P.boost * 0.95) * (1 - P.brake * 0.55) * (P.man ? 1.25 : 1);
+  P.speed = 72 * P.def.speed * eng * (1 + P.boost * 0.95) * (1 - P.brake * 0.55) * (P.man ? 1.25 : 1) * (1 - 0.58 * P.stun);
+  if (P.stun > 0.25 && Math.random() < dt * 22) { t2.set(rand(-3, 3), rand(-1, 1), -5).applyQuaternion(P.quat).add(P.pos); blast.puff(t2.x, t2.y, t2.z, 0, 0, 0, 3.2, 0.7, 0.5 * P.stun, 0.8, 1.4); }   // qualmender Antrieb
   P.vel.copy(P.fwd).multiplyScalar(P.speed);
   let spin = 0;
   if (P.rollT > 0) { P.rollT -= dt; const k = 1 - P.rollT / 0.5; P.vel.addScaledVector(P.right, P.rollDir * 150 * Math.sin(k * Math.PI)); spin = P.rollDir * k * Math.PI * 2; }
@@ -524,7 +574,9 @@ function drawMarks() {
   }
   for (const e of G.ents) if (e.alive && e.kind === 'transport') { const s = project(e.pos); if (!s.behind) { hc.globalAlpha = 0.8; hc.strokeStyle = '#59c8ff'; hc.strokeRect(s.x - 14, s.y - 8, 28, 16); hc.fillStyle = '#59c8ff'; hc.fillRect(s.x - 14, s.y + 12, 28 * (e.hp / e.maxHp), 3); } }
   // Fadenkreuz und Zielerfassung
-  const c = project(t1.copy(P.pos).addScaledVector(P.fwd, 420)); hc.globalAlpha = 0.9; hc.strokeStyle = '#eaf6ff'; hc.lineWidth = 1.5;
+  const c = project(t1.copy(P.pos).addScaledVector(P.fwd, 420));
+  if (G.hitT > 0) { hc.globalAlpha = Math.min(1, G.hitT / 0.08); hc.strokeStyle = '#ffd166'; hc.lineWidth = 2.5; hc.beginPath(); for (const [ax, ay] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { hc.moveTo(c.x + ax * 9, c.y + ay * 9); hc.lineTo(c.x + ax * 19, c.y + ay * 19); } hc.stroke(); }   // Treffermarke
+  hc.globalAlpha = 0.9; hc.strokeStyle = '#eaf6ff'; hc.lineWidth = 1.5;
   hc.beginPath(); hc.arc(c.x, c.y, 13, 0, 6.283); for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { hc.moveTo(c.x + ax * 18, c.y + ay * 18); hc.lineTo(c.x + ax * 26, c.y + ay * 26); } hc.stroke(); hc.fillStyle = '#eaf6ff'; hc.fillRect(c.x - 1, c.y - 1, 2, 2);
   const L = G.lock;
   if (L) {
@@ -554,7 +606,8 @@ function frame(now) {
     if (G.phaseDef) { G.phaseT += dt; if (G.phaseT > 1 && remaining() === 0) nextPhase(); }
     else if (G.endT > 0 && !(G.cap && !G.cap.dead)) { G.endT -= dt; if (G.endT <= 0) finishMission(false); }
     const threat = G.ents.some((e) => e.team === 1 && e.alive); G.intensity += ((threat ? 1 : 0.4) - G.intensity) * dt; setIntensity(G.intensity);
-    updateCamera(dt); fx.update(dt, camera); boltMesh.draw(G.bolts);
+    updateWave(dt); if (G.hitT > 0) G.hitT -= dt;
+    updateCamera(dt); fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts);
     if ((hudT -= dt) < 0) { hudT = 0.06; sfx.engine(1 + P.boost - P.brake * 0.7 + (P.man ? 0.6 : 0)); ui.hud({ P, G, remaining: remaining(), outside: G.outside }); }
   } else if (G.mode !== 'pause') {
     // Hangar und Titel: langsamer Kameraschwenk durch den Himmel
@@ -564,7 +617,7 @@ function frame(now) {
       showcase.position.set(0, tall ? 4.6 : 3.4, tall ? -40 : -22).applyMatrix4(camera.matrixWorld); showcase.rotation.set(0.28, showcase.rotation.y + dt * 0.5, 0.1);
       camera.getWorldDirection(t1); fill.position.copy(t1).multiplyScalar(-1).addScaledVector(UP, 0.6); rim.position.copy(t1).addScaledVector(UP, 0.9);
     }
-    fx.update(dt, camera); boltMesh.draw(G.bolts);
+    fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts);
   }
   drawMarks();
   if (composer) composer.render(); else renderer.render(scene, camera);
@@ -583,7 +636,7 @@ const ui = createUI({
   toHangar: () => toHangar(),
   settings: () => { audioState.sound = save.set.sound; audioState.music = save.set.music; applyAudioState(); persist(); },
   quality: () => { persist(); setupQuality(); },
-  act: { roll, nova, setWeapon, cycleWeapon, maneuver, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; }, brake: (v) => { input.brake = v; } },
+  act: { rollAuto: () => roll(P.sx < -0.15 ? -1 : 1), roll, nova, setWeapon, cycleWeapon, maneuver, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; }, brake: (v) => { input.brake = v; } },
   weaponOpen,
   audio: () => { initAudio(); startMusic(); },
   getWeapon: () => P.weapon,

@@ -19,7 +19,8 @@ Zum Spielen ohne Server: `dist/Nova-Squadron.html` (eine Datei, erzeugt mit `nod
 ## Herkunft
 
 - Code, Schiffsmodelle (prozedural), Musik und Effekte: eigens für dieses Spiel geschrieben
-- Himmel, Planeten und Titelbild: mit Higgscheap (GPT Image 2) erzeugt, `assets/`
+- Explosionen: Feuerball-Shader und 3D-Trümmer (`src/blast.js`); Asteroiden aus Fraktal-Rauschen mit Einschlagkratern
+- Himmel, Planeten, Titelbild, Gesteins- und Solarzellentextur: mit Higgscheap (GPT Image 2) erzeugt, `assets/`
 - three.js r170 (MIT) in `vendor/`, jsfxr 1.4.1 (Unlicense, https://github.com/chr15m/jsfxr) in `vendor/jsfxr/`
 - Zwei Aufnahmen (Explosion, schwerer Laser) aus „Sci-Fi Sounds“ von Kenney (kenney.nl, CC0 1.0), eingebettet in `src/samples.js`
 - Eigene Entwürfe und Namen; keine Schiffe, Figuren oder Marken aus Filmen übernommen

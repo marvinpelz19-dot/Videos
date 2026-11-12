@@ -3,6 +3,21 @@ import { WEAPONS, UPGRADES, SHIPS, MISSIONS, ENDLESS, STORY, upgradeCost } from 
 import { sfx } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
+const svg = (d, extra = '') => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}${extra}</svg>`;
+// Symbole statt Schrift: Waffen und Touch-Tasten
+const ICON = {
+  laser: svg('<path d="M5 19 11 9M11 21l6-10"/><path d="M12 7l1.5-2.5M18 9l1.5-2.5" stroke-width="2.6"/>'),
+  spread: svg('<path d="M12 21V4M12 21 4 7M12 21l8-14M12 21 7.5 5M12 21l4.5-16"/>'),
+  missile: svg('<path d="M12 2c2.4 2.6 3 5.6 3 9v6H9v-6c0-3.4.6-6.4 3-9z"/><path d="M9 14l-3 4v2l3-1.6M15 14l3 4v2l-3-1.6M11 20.5 12 23l1-2.5"/>'),
+  beam: svg('<path d="M3 12h18" stroke-width="3.4"/><path d="M3 7.5h4M3 16.5h4M17 7.5h4M17 16.5h4"/>'),
+  orb: svg('<circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
+  fire: svg('<circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>', '<circle cx="12" cy="12" r="1.3" fill="currentColor"/>'),
+  boost: svg('<path d="M5 13l7-7 7 7M5 19l7-7 7 7"/>'), brake: svg('<path d="M5 5l7 7 7-7M5 11l7 7 7-7"/>'),
+  roll: svg('<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.5 3.5v4.2h-4.2"/>'),
+  loop: svg('<path d="M3 18h6.5c4.6 0 8-2.9 8-6.6A4.6 4.6 0 0 0 12.8 7C10.300 7 8.500 8.800 8.500 11.200c0 3.800 3.800 6.800 8.500 6.800h4"/>'),
+  turn: svg('<path d="M7 21V9.500a5 5 0 0 1 10 0V17"/><path d="M13 13.500l4 4 4-4"/>'),
+  nova: svg('<circle cx="12" cy="12" r="2.200" fill="currentColor"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="10" stroke-dasharray="3 3.200"/>'),
+};
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (n) => Math.round(n).toLocaleString('de-DE');
 const stars = (n, of = 3) => '<span class="stars">' + '★'.repeat(n) + '<i>' + '★'.repeat(of - n) + '</i></span>';
@@ -70,7 +85,8 @@ export function createUI(api) {
     const reward = m.endless ? 'Credits je Welle' : [w && !save.done[m.id] ? `Neue Waffe: ${w.name}` : '', s && !save.done[m.id] ? `Neues Schiff: ${s.name}` : '', `${fmt(m.tutorial ? (save.done[m.id] ? 100 : 500) : 500 * i * (save.done[m.id] ? 1 : 2))} Credits`].filter(Boolean).join(' · ');
     return `<div class="mgrid"><div class="mlist">${cards}${endless}</div>
       <section class="brief"><p class="eyebrow">${m.endless ? 'Dauergefecht' : m.tutorial ? 'Ausbildung' : `Einsatz ${i} von ${MISSIONS.length - 1}`} · ${esc(m.place)}</p><h2>${esc(m.name)}</h2><p>${esc(m.brief)}</p>
-      ${m.phases ? `<ol class="phases">${m.phases.map((p) => `<li>${esc(p.label)}</li>`).join('')}</ol>` : ''}
+      <p class="reward aim"><span>Dein Ziel</span> ${esc(m.aim || '')}</p><p class="reward"><span>Warum</span> ${esc(m.why || '')}</p>
+      ${m.phases ? `<p class="reward"><span>Meilensteine</span></p><ol class="phases">${m.phases.map((p) => `<li>${esc(p.label)}</li>`).join('')}</ol>` : ''}
       <p class="reward"><span>Belohnung</span> ${esc(reward)}</p>
       <p class="reward"><span>Wertung</span> ★★★ ohne Notschild · ★★ bis drei · ★ darüber</p>
       <button class="btn big" id="b-go">Starten</button></section></div>`;
@@ -102,13 +118,17 @@ export function createUI(api) {
   }
 
   // ---- HUD ----
-  function showGame(m) {
+  let pipsTotal = 0, goalT = 0;
+  function pips(done) { $('pips').innerHTML = pipsTotal ? Array.from({ length: pipsTotal }, (_, i) => `<i class="${i < done ? 'on' : i === done ? 'cur' : ''}"></i>`).join('') : ''; }
+  function milestone(n, total, bonus) { pips(n); goalT = 0; $('goal').classList.remove('show'); banner(total ? `MEILENSTEIN ${n} VON ${total} ERREICHT` : `WELLE ${n} ÜBERSTANDEN`, `+${fmt(bonus)} Credits`); }
+  function showGame(m, total = 0) {
+    pipsTotal = total; pips(0); const gc = $('goal'); gc.innerHTML = `<em>${esc(m.name)} · ${esc(m.place)}</em><span>Dein Ziel</span><b>${esc(m.aim || m.name)}</b><p>${esc(m.why || '')}</p><small>${total ? total + ' Meilensteine' : 'Ohne Ende'} · Leben ∞ · Munition ∞</small>`; gc.classList.add('show'); goalT = 5.5;
     screen.hidden = true; hud.hidden = false; touch.hidden = !api.isTouch; lastWeaponKey = ''; $('comms').classList.remove('show'); $('banner').classList.remove('show');
     $('boss').hidden = !(m.boss || m.id === 'm4'); $('convoy').hidden = !m.convoy; weaponChanged();
   }
   function weaponChanged() {
     const cur = api.getWeapon(), list = unlockedW(), key = cur + ':' + list.length; if (key === lastWeaponKey) return; lastWeaponKey = key;
-    $('weapons').innerHTML = list.map((w, i) => `<button class="wchip${i === cur ? ' on' : ''}" data-w="${i}" style="--wc:rgb(${w.color.map((c) => Math.min(255, 70 + c * 60) | 0).join(',')})"><span>${i + 1}</span>${w.short}<em>∞</em></button>`).join('');
+    $('weapons').innerHTML = list.length < 2 ? '' : list.map((w, i) => `<button class="wchip${i === cur ? ' on' : ''}" data-w="${i}" aria-label="${w.name}" title="${w.name}" style="--wc:rgb(${w.color.map((c) => Math.min(255, 70 + c * 60) | 0).join(',')})">${ICON[w.id]}<span>${i + 1}</span></button>`).join('');
     $('weapons').querySelectorAll('[data-w]').forEach((b) => (b.onclick = () => api.act.setWeapon(+b.dataset.w)));
   }
   const set = (el, k, v) => { if (el[k] !== v) el[k] = v; };
@@ -123,6 +143,8 @@ export function createUI(api) {
     if (G.cap) { const c = G.cap.core; $('boss-fill').style.transform = `scaleX(${Math.max(0, c.hp / c.maxHp)})`; set($('boss-name'), 'textContent', (G.cap.dread ? 'Flaggschiff Monopol' : 'Kreuzer Rendite') + (c.shielded ? ' · Kern abgeschirmt' : ' · Kern')); }
     if (G.mission.convoy) { $('convoy-fill').style.transform = `scaleX(${G.stats.convoy})`; }
     weaponChanged();
+    if (goalT > 0 && (goalT -= 0.06) <= 0) $('goal').classList.remove('show');
+    $('spd').parentNode.classList.toggle('stun', P.stun > 0.25);
     if (bannerT > 0 && (bannerT -= 0.06) <= 0) $('banner').classList.remove('show');
     if (commsT > 0 && (commsT -= 0.06) <= 0) $('comms').classList.remove('show');
   }
@@ -158,7 +180,8 @@ export function createUI(api) {
   hold('t-fire', api.act.fire); hold('t-boost', api.act.boost);
   const tap = (id, fn) => { const b = $(id); b.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); }, { passive: false }); b.addEventListener('click', fn); };
   hold('t-brake', api.act.brake); tap('t-loop', () => api.act.maneuver('loop')); tap('t-turn', () => api.act.maneuver('turn'));
-  tap('t-rl', () => api.act.roll(-1)); tap('t-rr', () => api.act.roll(1)); tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
+  tap('t-rr', () => api.act.rollAuto()); tap('goal', () => { goalT = 0.01; });
+  for (const [id, ic] of [['t-fire', 'fire'], ['t-boost', 'boost'], ['t-brake', 'brake'], ['t-rr', 'roll'], ['t-loop', 'loop'], ['t-turn', 'turn'], ['t-nova', 'nova']]) $(id).innerHTML = ICON[ic]; tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
 
-  return { toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
+  return { milestone, toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
 }

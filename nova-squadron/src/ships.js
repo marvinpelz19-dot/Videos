@@ -45,6 +45,7 @@ export const MATS = {
   domRed: M(0xb02030, tDark, bDark, { emissive: 0x3a0508 }), ace: M(0x3a3348, tDark, bDark, { metalness: 0.85, roughness: 0.28 }), acePurple: M(0x7a2ab8, tDark, bDark, { emissive: 0x2a0850 }),
   cap: M(0xa6a9b6, tHuge, bHuge, { metalness: 0.7, roughness: 0.5, emissiveMap: tWin, emissive: 0xffffff, emissiveIntensity: 2.4, bumpScale: 2 }), capLight: M(0xcfd2dc, tHuge, bHuge, { metalness: 0.65, roughness: 0.5, bumpScale: 2 }), capDark: M(0x4d505c, tHuge, bHuge, { metalness: 0.8, roughness: 0.45 }),
   cargo: M(0xa8ad98, tLight, bLight), cargoBox: M(0xd98a35, tLight, bLight), cargoBlue: M(0x3f78c9, tLight, bLight), rock: new THREE.MeshStandardMaterial({ color: 0x8d8377, roughness: 0.95, metalness: 0.05, flatShading: true }),
+  white: M(0xf4f4f0, null, null, { metalness: 0.2, roughness: 0.5, side: THREE.DoubleSide }), goldFoil: M(0xd8a23a, null, null, { metalness: 1, roughness: 0.32, clearcoat: 0 }), solar: M(0xffffff, null, null, { metalness: 0.9, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.8 }),
   engine: GLOW(0.35, 1.3, 3.0), engineRed: GLOW(2.6, 0.5, 0.18), engineBig: GLOW(1.7, 0.42, 0.14), eye: GLOW(4.5, 0.5, 0.25), purple: GLOW(2.6, 0.5, 4.2),
   green: GLOW(0.4, 2.6, 0.8), core: GLOW(4.5, 2.0, 0.5), windows: GLOW(2.2, 1.8, 1.1), blueLight: GLOW(0.5, 1.6, 3.2), goldLight: GLOW(3.0, 2.0, 0.6),
 };
@@ -278,6 +279,20 @@ function buildHauler() {  // „Goldtransporter“: gepanzerter Frachter mit Gol
   return g;
 }
 
+function buildCorvette() { // „Vollstrecker“: Kanonenboot mit sechs Geschützen
+  const g = new THREE.Group();
+  part(g, box(13, 9, 58), MATS.dom); part(g, tube(2, 7.4, 20, 4), MATS.domLight, 0, 0, 39, 0, 0, Math.PI / 4, 1, 0.66, 1); part(g, box(9, 4, 44), MATS.domLight, 0, 6, -4); part(g, box(8, 3, 40), MATS.metal, 0, -5.6, -2);
+  part(g, box(10, 7, 12), MATS.dom, 0, 11, -14); part(g, box(11, 2.4, 6), MATS.domLight, 0, 15, -12); part(g, box(9.6, 1.1, 0.5), MATS.eye, 0, 15.2, -8.9); part(g, box(0.4, 9, 0.4), MATS.metal, 3, 20, -17); part(g, box(0.4, 6, 0.4), MATS.metal, -3, 18.6, -18);
+  for (const s of [-1, 1]) {
+    part(g, box(10, 3, 30), MATS.dom, s * 11, -1, -10); part(g, plate(s > 0 ? [[6, 12], [22, -8], [22, -22], [6, -24]] : mirror([[6, 12], [22, -8], [22, -22], [6, -24]]), 1.2), MATS.domLight, 0, -1, 0);
+    part(g, box(1, 1.4, 56), MATS.gold, s * 6.6, 3, 0); part(g, box(10.2, 0.7, 30.2), MATS.gold, s * 11, 0.7, -10);
+    nacelle(g, s * 12, -1, -28, 4.2, 14, MATS.metal, MATS.engineRed); cannon(g, s * 20, -0.4, 2, 20, 0.6); cannon(g, s * 14, 2.4, 14, 16, 0.5); cannon(g, s * 3.4, 8.6, 20, 14, 0.45);
+    part(g, box(2.4, 2.4, 6), MATS.domRed, s * 20, -0.4, -9); for (let i = 0; i < 3; i++) part(g, box(0.5, 1.6, 2), MATS.eye, s * 6.8, 0, -16 + i * 12);
+  }
+  nacelle(g, 0, 1, -31, 5, 12, MATS.dom, MATS.engineRed); part(g, new THREE.SphereGeometry(2.6, 10, 6, 0, 6.283, 0, 1.571), MATS.metal, 0, 8, 10); part(g, box(5, 0.4, 5), MATS.goldLight, 0, -7.3, 14);
+  return g;
+}
+
 // Großkampfschiff. k = 1: Kreuzer Rendite (ca. 430 lang), k = 1.9: Flaggschiff Monopol.
 // Liefert Rumpfkugeln (Kollision) und Plätze für Türme, Generatoren und Kern in lokalen Koordinaten.
 export function buildCapital(dread) {
@@ -334,10 +349,10 @@ export function buildCapital(dread) {
 }
 
 // ---------- Fabrik: einmal bauen, verschmelzen, dann klonen ----------
-const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy };
+const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy, corvette: buildCorvette };
 const protos = {};
 function fromProto(key, make) {
-  if (!protos[key]) { UVS = key === 'transport' || key === 'hauler' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
+  if (!protos[key]) { UVS = key === 'transport' || key === 'hauler' || key === 'corvette' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
   const p = protos[key], c = p.clone(true); c.userData = { ...p.userData };
   if (p.userData.head) c.userData.head = c.children[p.children.indexOf(p.userData.head)];
   if (p.userData.shield) { const i = p.children.indexOf(p.userData.shield); c.children[i].material = p.userData.shield.material.clone(); c.userData.shield = c.children[i]; }
@@ -349,16 +364,71 @@ export function buildPlayerShip(id, ally = false) {
   return fromProto(id + (ally ? '_a' : ''), () => (id === 'wespe' ? buildWespe(hull, stripe) : id === 'bastion' ? buildBastion(hull, stripe) : buildPfeil(hull, stripe)));
 }
 
-export function buildAsteroidGeos() {
-  const out = [];
-  for (let i = 0; i < 4; i++) {
-    const geo = new THREE.IcosahedronGeometry(1, 2), p = geo.attributes.position, seed = i * 17.3;
-    for (let j = 0; j < p.count; j++) {
-      const x = p.getX(j), y = p.getY(j), z = p.getZ(j);
-      const n = 1 + 0.3 * Math.sin(x * 3.1 + seed) * Math.cos(y * 2.7 + seed * 2) + 0.18 * Math.sin(z * 5.3 + seed * 3) + 0.08 * Math.sin(x * 11 + y * 9 + seed);
-      p.setXYZ(j, x * n, y * n * 0.82, z * n);
+// ---------- Asteroiden: Fraktal-Rauschen plus Einschlagkrater, glatte Normalen aus der Höhenfunktion ----------
+function noise3(seed) {
+  const h = (x, y, z) => { const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7 + seed * 13.37) * 43758.5453; return n - Math.floor(n); };
+  const sm = (t) => t * t * (3 - 2 * t), mix = (a, b, t) => a + (b - a) * t;
+  const n = (x, y, z) => { const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z), u = sm(x - xi), v = sm(y - yi), w = sm(z - zi);
+    return mix(mix(mix(h(xi, yi, zi), h(xi + 1, yi, zi), u), mix(h(xi, yi + 1, zi), h(xi + 1, yi + 1, zi), u), v), mix(mix(h(xi, yi, zi + 1), h(xi + 1, yi, zi + 1), u), mix(h(xi, yi + 1, zi + 1), h(xi + 1, yi + 1, zi + 1), u), v), w); };
+  return (x, y, z, oct) => { let a = 0.5, s = 0, f = 1; for (let i = 0; i < oct; i++) { s += a * n(x * f, y * f, z * f); f *= 2.07; a *= 0.5; } return s; };
+}
+export function buildAsteroidGeos(detail = 16, count = 6) {
+  const out = [], d = new THREE.Vector3(), t1 = new THREE.Vector3(), t2 = new THREE.Vector3(), p0 = new THREE.Vector3(), p1 = new THREE.Vector3(), p2 = new THREE.Vector3();
+  for (let v = 0; v < count; v++) {
+    const r = rng(101 + v * 7), fb = noise3(v + 1), sx = 0.8 + r() * 0.5, sy = 0.6 + r() * 0.35, sz = 0.85 + r() * 0.6, craters = [];
+    for (let i = 0; i < 9 + v; i++) { const c = new THREE.Vector3(r() - 0.5, r() - 0.5, r() - 0.5).normalize(); craters.push({ c, s: 0.12 + r() * r() * 0.5, depth: 0.05 + r() * 0.1 }); }
+    const f = (dir, out) => {   // Punkt auf der Oberfläche in Richtung dir
+      let h = 1 + 0.5 * (fb(dir.x * 1.3 + 5, dir.y * 1.3, dir.z * 1.3, 4) - 0.47) + 0.16 * (fb(dir.x * 4.1, dir.y * 4.1 + 9, dir.z * 4.1, 3) - 0.47) + 0.045 * (fb(dir.x * 13, dir.y * 13, dir.z * 13 + 3, 2) - 0.47);
+      for (const k of craters) { const ang = Math.acos(Math.min(1, dir.dot(k.c))); if (ang < k.s * 1.5) { const x = ang / k.s; h += x < 1 ? k.depth * (x * x - 1) * (0.6 + 0.4 * x) : 0; h += k.depth * 0.45 * Math.exp(-(((x - 1.02) / 0.16) ** 2)); } }   // Schüssel und aufgeworfener Rand
+      return out.set(dir.x * h * sx, dir.y * h * sy, dir.z * h * sz);
+    };
+    const geo = new THREE.IcosahedronGeometry(1, detail), pos = geo.attributes.position, nor = new Float32Array(pos.count * 3);
+    for (let j = 0; j < pos.count; j++) {
+      d.fromBufferAttribute(pos, j).normalize(); t1.set(d.y, -d.x, 0); if (t1.lengthSq() < 0.01) t1.set(0, d.z, -d.y); t1.normalize(); t2.crossVectors(d, t1);
+      f(d, p0); f(p1.copy(d).addScaledVector(t1, 0.012).normalize(), p1); f(p2.copy(d).addScaledVector(t2, 0.012).normalize(), p2);
+      p1.sub(p0); p2.sub(p0); p1.cross(p2).normalize(); if (p1.dot(d) < 0) p1.negate();
+      pos.setXYZ(j, p0.x, p0.y, p0.z); nor[j * 3] = p1.x; nor[j * 3 + 1] = p1.y; nor[j * 3 + 2] = p1.z;
     }
-    geo.computeVertexNormals(); out.push(geo);
+    UVS = 1.3; const g2 = triUV(geo); UVS = 7; g2.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); g2.computeBoundingSphere(); out.push(g2);
   }
   return out;
+}
+export const ROCK_MATS = [0xffffff, 0xd9c2ad, 0xb9bcc4].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: 0.96, metalness: 0.04, bumpScale: 2.6 }));
+
+// ---------- Kulisse: Handelsstation und Relais-Satelliten ----------
+function dishGeo(r, depth) { const pts = []; for (let i = 0; i <= 10; i++) { const x = (i / 10) * r; pts.push(new THREE.Vector2(x, (x * x) / (r * r) * depth)); } return new THREE.LatheGeometry(pts, 28).rotateX(Math.PI / 2); }
+function dish(g, x, y, z, r, rx = 0, ry = 0) {
+  const d = new THREE.Group(); d.position.set(x, y, z); d.rotation.set(rx, ry, 0);
+  const m = part(d, dishGeo(r, r * 0.34), MATS.white); m.material = MATS.white; part(d, dishGeo(r * 0.98, r * 0.33), MATS.metal, 0, 0, -0.06 * r);
+  part(d, tube(r * 0.03, r * 0.03, r * 0.9, 6), MATS.metal, 0, 0, r * 0.45); part(d, new THREE.SphereGeometry(r * 0.09, 8, 6), MATS.gold, 0, 0, r * 0.9);
+  for (let i = 0; i < 3; i++) { const a = i * 2.094; part(d, tube(r * 0.015, r * 0.015, r * 1.0, 4), MATS.metal, Math.cos(a) * r * 0.42, Math.sin(a) * r * 0.42, r * 0.5, Math.sin(a) * 0.72, -Math.cos(a) * 0.72, 0); }
+  part(d, tube(r * 0.1, r * 0.14, r * 0.5, 8), MATS.hullDark, 0, 0, -r * 0.22);
+  d.updateMatrix(); for (const c of [...d.children]) { c.applyMatrix4(d.matrix); g.add(c); }
+}
+function solarWing(g, x, y, z, w, h, rz = 0) {
+  part(g, box(w, 0.25, h), MATS.solar, x, y, z, 0, 0, rz); part(g, box(w * 1.02, 0.35, 0.3), MATS.metal, x, y, z, 0, 0, rz); part(g, box(0.3, 0.35, h * 1.02), MATS.metal, x, y, z, 0, 0, rz);
+  for (const s of [-1, 1]) part(g, box(w * 1.02, 0.35, 0.25), MATS.metal, x, y, z + s * h * 0.5, 0, 0, rz);
+}
+export function buildSatellite() {
+  if (protos.sat) return protos.sat.clone(true);
+  const g = new THREE.Group(); UVS = 6;
+  part(g, box(3, 3, 5), MATS.goldFoil); part(g, box(3.2, 0.3, 5.2), MATS.metal, 0, 1.4, 0); part(g, box(2, 2, 1.4), MATS.hullDark, 0, 0, -3.1);
+  for (const s of [-1, 1]) { part(g, tube(0.15, 0.15, 3, 6).rotateY(Math.PI / 2), MATS.metal, s * 3, 0, 0); solarWing(g, s * 9.5, 0, 0, 10, 4.2, 0.25 * s); }
+  dish(g, 0, 2.6, 0.6, 3.2, -0.9, 0.2); dish(g, 0, -2, 2.2, 1.3, 0.7, 0);
+  part(g, box(0.12, 5, 0.12), MATS.metal, 1, 3.8, -2); part(g, new THREE.SphereGeometry(0.25, 6, 4), MATS.eye, 1, 6.4, -2); part(g, tube(0.5, 0.7, 1.2, 8), MATS.metal, 0, 0, -4.2); part(g, box(1.2, 1.2, 0.2), MATS.blueLight, -0.6, 0.4, 2.55);
+  bake(g); UVS = 7; protos.sat = g; return g.clone(true);
+}
+export function buildStation() {
+  const g = new THREE.Group(), r = rng(77); UVS = 26;
+  const cyl = (rt, rb, h, seg = 24) => new THREE.CylinderGeometry(rt, rb, h, seg);
+  part(g, cyl(16, 16, 90), MATS.cap); part(g, cyl(22, 22, 14), MATS.capLight, 0, 26, 0); part(g, cyl(22, 22, 14), MATS.capLight, 0, -26, 0); part(g, cyl(9, 16, 16), MATS.capLight, 0, 53, 0); part(g, cyl(16, 7, 22), MATS.capDark, 0, -56, 0);
+  part(g, cyl(22.4, 22.4, 1.2), MATS.gold, 0, 33.4, 0); part(g, cyl(22.4, 22.4, 1.2), MATS.gold, 0, -33.4, 0); part(g, cyl(16.3, 16.3, 2.4), MATS.windows, 0, 8, 0); part(g, cyl(16.3, 16.3, 1.6), MATS.windows, 0, -10, 0);
+  for (const [y, R, t] of [[0, 92, 9], [0, 60, 4]]) { part(g, new THREE.TorusGeometry(R, t, 10, 56).rotateX(Math.PI / 2), MATS.cap, 0, y, 0); part(g, new THREE.TorusGeometry(R + t * 0.72, t * 0.2, 6, 56).rotateX(Math.PI / 2), MATS.windows, 0, y, 0); part(g, new THREE.TorusGeometry(R, t * 1.04, 4, 56).rotateX(Math.PI / 2), MATS.gold, 0, y + t * 0.72, 0, 0, 0, 0, 1, 0.12, 1); }
+  for (let i = 0; i < 6; i++) { const a = i * 1.047; part(g, box(4, 4, 78), MATS.capDark, Math.cos(a) * 53, 0, Math.sin(a) * 53, 0, -a + 1.571, 0); part(g, box(9, 7, 12), MATS.capLight, Math.cos(a) * 92, 8, Math.sin(a) * 92, 0, -a + 1.571, 0); }
+  for (let i = 0; i < 4; i++) { const a = i * 1.571 + 0.785, x = Math.cos(a), z = Math.sin(a); part(g, box(2, 2, 50), MATS.metal, x * 40, -46, z * 40, 0, -a + 1.571, 0); const w = new THREE.Group(); w.position.set(x * 86, -46, z * 86); w.rotation.y = -a; solarWing(w, 0, 0, 0, 52, 22, 0.5); w.updateMatrix(); for (const c of [...w.children]) { c.applyMatrix4(w.matrix); g.add(c); } }
+  part(g, cyl(1.2, 1.2, 60, 8), MATS.metal, 0, 90, 0); part(g, new THREE.SphereGeometry(2.2, 8, 6), MATS.eye, 0, 121, 0); for (const y of [74, 86, 98]) part(g, box(14, 0.6, 0.6), MATS.metal, 0, y, 0);
+  dish(g, 14, 66, 0, 11, -1.1, 0.6); dish(g, -12, 64, 6, 7, -0.8, -1.2); dish(g, 0, -70, 0, 9, 1.571, 0);
+  for (let i = 0; i < 70; i++) { const a = r() * 6.283, y = (r() - 0.5) * 84, w = 2 + r() * 5; part(g, box(w, 2 + r() * 5, w), r() < 0.5 ? MATS.capLight : MATS.capDark, Math.cos(a) * 16.6, y, Math.sin(a) * 16.6, 0, -a, 0); }
+  for (let i = 0; i < 4; i++) { const a = i * 1.571; part(g, box(10, 8, 22), MATS.capDark, Math.cos(a) * 30, 0, Math.sin(a) * 30, 0, -a + 1.571, 0); part(g, box(7, 5, 0.6), MATS.blueLight, Math.cos(a) * 41.2, 0, Math.sin(a) * 41.2, 0, -a + 1.571, 0); }   // Hangartore
+  bake(g); UVS = 7; return g;
 }

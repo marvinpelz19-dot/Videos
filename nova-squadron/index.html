@@ -56,9 +56,18 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 #boss-name, #convoy span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
 #warn { left: 50%; top: 32%; transform: translateX(-50%); color: var(--danger); font-weight: 700; letter-spacing: 0.14em; font-size: 14px; text-align: center; animation: pulse 0.5s infinite alternate; }
 #weapons { left: 50%; bottom: var(--gb); transform: translateX(-50%); display: flex; gap: 6px; pointer-events: auto; max-width: calc(100% - 32px); }
-.wchip { background: var(--panel); border: 1px solid var(--line); padding: 7px 10px 6px; font-family: var(--display); font-size: 11px; font-weight: 600; letter-spacing: 0.08em; display: grid; grid-template-columns: auto auto; column-gap: 6px; align-items: baseline; color: var(--dim); white-space: nowrap; }
-.wchip span { color: var(--dim); font-size: 10px; } .wchip em { grid-column: 1 / -1; font-style: normal; color: var(--ok); font-size: 12px; line-height: 1; }
-.wchip.on { color: var(--ink); border-color: var(--wc); box-shadow: inset 0 -3px 0 var(--wc), 0 0 18px -6px var(--wc); }
+.wchip { position: relative; width: 44px; height: 44px; border-radius: 50%; padding: 0; display: grid; place-items: center; background: rgba(9, 14, 26, 0.6); border: 1.5px solid var(--line); color: var(--dim); }
+.wchip svg { width: 22px; height: 22px; } .wchip span { position: absolute; right: -2px; top: -4px; font-size: 10px; font-family: var(--display); color: var(--dim); }
+.wchip.on { color: var(--wc); border-color: var(--wc); box-shadow: 0 0 16px -4px var(--wc), inset 0 0 10px -6px var(--wc); }
+body.touch .wchip span { display: none; }
+#pips { display: flex; gap: 5px; justify-content: center; } #pips i { width: 22px; height: 4px; background: rgba(140, 180, 255, 0.2); transform: skewX(-18deg); } #pips i.on { background: var(--gold); box-shadow: 0 0 8px var(--gold); } #pips i.cur { background: var(--ink); animation: pulse 0.7s infinite alternate; }
+#goal { left: 50%; top: 22%; transform: translate(-50%, 10px); width: min(92%, 520px); pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 14px 18px; text-align: left; display: grid; gap: 5px; font-family: var(--body); color: var(--ink); }
+#goal.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+#goal em { font-style: normal; font-family: var(--display); font-weight: 700; font-size: clamp(18px, 3vw, 26px); letter-spacing: 0.08em; text-transform: uppercase; text-wrap: balance; margin-bottom: 4px; }
+#goal span { font-family: var(--display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); } #goal b { font-family: var(--display); font-size: clamp(16px, 2.4vw, 21px); line-height: 1.2; text-wrap: balance; }
+#goal p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--dim); } #goal small { font-family: var(--display); font-size: 11px; letter-spacing: 0.1em; color: var(--ok); }
+.spd.stun, .spd.stun b { color: var(--danger); }
+.reward.aim { font-size: 16px; color: var(--ink); font-weight: 600; }
 #comms { left: var(--gl); bottom: calc(var(--gb) + 8px); width: min(330px, 60vw); background: var(--panel); border-left: 3px solid var(--ion); padding: 9px 12px; display: grid; gap: 2px; opacity: 0; transform: translateX(-14px); transition: opacity 0.25s, transform 0.25s; font-family: var(--body); }
 #comms.show { opacity: 1; transform: none; }
 #comms b { font-family: var(--display); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ion); }
@@ -77,20 +86,20 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 #stick { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
 #stick::before { content: ""; position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%; border: 2px solid rgba(160, 200, 255, 0.4); background: rgba(90, 140, 255, 0.08); }
 #knob { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; background: rgba(160, 210, 255, 0.5); }
-#touch { position: absolute; right: var(--gr); bottom: calc(var(--gb) + 56px); width: 262px; height: 236px; font-family: var(--display); pointer-events: none; }
-#touch button { position: absolute; pointer-events: auto; border-radius: 50%; border: 2px solid var(--line); background: rgba(12, 20, 38, 0.55); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; width: 58px; height: 58px; padding: 0; }
+#touch { position: absolute; right: var(--gr); bottom: calc(var(--gb) + 12px); width: 240px; height: 232px; pointer-events: none; }
+#touch button { position: absolute; pointer-events: auto; border-radius: 50%; border: 1.5px solid var(--line); background: rgba(12, 20, 38, 0.42); color: rgba(233, 242, 255, 0.85); width: 54px; height: 54px; padding: 0; display: grid; place-items: center; }
 #touch button.down { background: rgba(90, 170, 255, 0.4); }
-#t-fire { right: 0; bottom: 0; width: 98px !important; height: 98px !important; border-color: rgba(255, 110, 80, 0.7) !important; font-size: 13px !important; }
-#t-boost { right: 108px; bottom: 2px; width: 64px !important; height: 64px !important; }
-#t-brake { right: 182px; bottom: 6px; }
+#touch svg { width: 24px; height: 24px; }
+#t-fire { right: 0; bottom: 0; width: 98px !important; height: 98px !important; border-color: rgba(255, 110, 80, 0.7) !important; color: #ffb9a6 !important; } #t-fire svg { width: 40px; height: 40px; }
+#t-boost { right: 108px; bottom: 2px; width: 62px !important; height: 62px !important; }
+#t-brake { right: 180px; bottom: 6px; }
 #t-rr { right: 4px; bottom: 108px; }
-#t-rl { right: 70px; bottom: 88px; }
-#t-loop { right: 136px; bottom: 78px; border-color: rgba(89, 200, 255, 0.6) !important; }
-#t-turn { right: 200px; bottom: 76px; border-color: rgba(89, 200, 255, 0.6) !important; }
-#t-nova { right: 40px; bottom: 174px; opacity: 0.4; }
-#t-nova.ready { opacity: 1; border-color: var(--gold) !important; color: var(--gold); box-shadow: 0 0 18px rgba(255, 209, 102, 0.6); }
+#t-loop { right: 70px; bottom: 90px; }
+#t-turn { right: 134px; bottom: 78px; }
+#t-nova { right: 34px; bottom: 172px; opacity: 0.35; }
+#t-nova.ready { opacity: 1; border-color: var(--gold) !important; color: var(--gold) !important; box-shadow: 0 0 18px rgba(255, 209, 102, 0.6); }
 .spd { color: var(--dim); margin-left: 10px; } .spd b { color: var(--ink); font-variant-numeric: tabular-nums; display: inline-block; min-width: 3ch; }
-#toast { left: 50%; bottom: calc(var(--gb) + 62px); transform: translateX(-50%); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); opacity: 0; white-space: nowrap; text-shadow: 0 1px 8px #000; }
+#toast { left: 50%; bottom: calc(var(--gb) + 58px); transform: translateX(-50%); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); opacity: 0; white-space: nowrap; text-shadow: 0 1px 8px #000; }
 #toast.show { animation: toast 1.6s ease-out; }
 @keyframes toast { 0% { opacity: 0; transform: translate(-50%, 8px); } 12% { opacity: 1; transform: translate(-50%, 0); } 75% { opacity: 1; } 100% { opacity: 0; } }
 #obj-n { text-wrap: balance; }
@@ -170,13 +179,15 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
 .unlock { margin: 0; color: var(--ok); font-size: 14.5px; } .unlock b { font-family: var(--display); letter-spacing: 0.06em; }
 @media (max-width: 760px) {
   .mgrid { grid-template-columns: 1fr; } .brief { order: -1; padding: 16px; } .phases { display: none; }
-  .objective { top: calc(var(--gt) + 84px); width: calc(100% - 32px); } body.touch #comms { top: calc(var(--gt) + 150px); } #banner { top: 30%; } .score b { font-size: 20px; }
-  .wchip { padding: 6px 7px 5px; font-size: 10px; } .wlist li { grid-template-columns: 28px 1fr auto; } .wlist small { grid-column: 2 / -1; grid-row: 2; }
+  .objective { top: calc(var(--gt) + 84px); width: calc(100% - 32px); } body.touch #comms { top: auto; bottom: calc(var(--gb) + 250px); } #banner { top: 30%; } .score b { font-size: 20px; }
+  .wlist li { grid-template-columns: 28px 1fr auto; } .wlist small { grid-column: 2 / -1; grid-row: 2; }
   .title-art { background-position: 74% center; } .title-art::after { background: linear-gradient(0deg, rgba(4, 6, 12, 0.96) 8%, rgba(4, 6, 12, 0.55) 48%, transparent 80%); }
 }
 /* Tablet: größere Tasten für die Daumen */
-@media (min-width: 700px) and (min-height: 600px) { #touch { transform: scale(1.4); transform-origin: bottom right; right: calc(var(--gr) + 14px); bottom: calc(var(--gb) + 70px); } #stick { transform-origin: 0 0; } #stick::before { left: -80px; top: -80px; width: 160px; height: 160px; } .wchip { padding: 10px 14px 8px; font-size: 13px; } #b-pause { width: 52px; height: 44px; } }
-@media (max-height: 520px) { body.touch #weapons { left: var(--gl); transform: none; }  #touch { bottom: calc(var(--gb) + 46px); transform: scale(0.86); transform-origin: bottom right; } #banner { top: 16%; } }
+@media (min-width: 700px) and (min-height: 600px) { #touch { transform: scale(1.4); transform-origin: bottom right; right: calc(var(--gr) + 14px); bottom: calc(var(--gb) + 20px); } #stick { transform-origin: 0 0; } #stick::before { left: -80px; top: -80px; width: 160px; height: 160px; } .wchip { width: 52px; height: 52px; } #b-pause { width: 52px; height: 44px; } }
+body.touch #weapons { left: var(--gl); transform: none; }
+@media (orientation: portrait) and (max-width: 600px) { body.touch #weapons { flex-direction: column; bottom: calc(var(--gb) + 120px); } }
+@media (max-height: 520px) { #touch { bottom: calc(var(--gb) + 4px); transform: scale(0.86); transform-origin: bottom right; } #banner { top: 16%; } }
 @media (prefers-reduced-motion: reduce) { .title-art, #warn, #nova.ready .lab b { animation: none; } }
 </style>
 <div id="app">
@@ -189,12 +200,13 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
       <button id="nova"><div class="lab"><span>Nova-Welle</span><b class="hint-desktop">F</b></div><div class="meter"><i id="nova-fill"></i></div></button>
       <div class="inf">Munition ∞ <span class="spd">Tempo <b id="spd">0</b></span></div>
     </div>
-    <div class="objective"><div id="obj"></div><div id="obj-n"></div>
+    <div class="objective"><div id="obj"></div><div id="pips"></div><div id="obj-n"></div>
       <div id="boss" hidden><span id="boss-name"></span><div class="meter"><i id="boss-fill"></i></div></div>
       <div id="convoy" hidden><span>Konvoi</span><div class="meter"><i id="convoy-fill"></i></div></div>
     </div>
     <div class="score"><b id="score">0</b><small id="cr">+0</small><span id="combo" hidden></span><button id="b-pause" aria-label="Pause">II</button></div>
     <div id="warn" hidden>Kampfgebiet verlassen<br>Autopilot dreht um</div>
+    <button id="goal"></button>
     <div id="banner"></div>
     <div id="toast"></div>
     <div id="comms"></div>
@@ -202,7 +214,7 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
   </div>
   <div id="stick" hidden><div id="knob"></div></div>
   <div id="touch" hidden>
-    <button id="t-nova">NOVA</button><button id="t-loop">LOOP</button><button id="t-turn">WENDE</button><button id="t-rl">◄ ROLLE</button><button id="t-rr">ROLLE ►</button><button id="t-brake">BREMSE</button><button id="t-boost">SCHUB</button><button id="t-fire">FEUER</button>
+    <button id="t-nova" aria-label="Nova-Welle"></button><button id="t-loop" aria-label="Looping"></button><button id="t-turn" aria-label="Wende"></button><button id="t-rr" aria-label="Ausweichrolle"></button><button id="t-brake" aria-label="Bremse"></button><button id="t-boost" aria-label="Schub"></button><button id="t-fire" aria-label="Feuer"></button>
   </div>
   <div id="screen" class="screen"></div>
 </div>

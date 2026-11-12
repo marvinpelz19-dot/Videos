@@ -27,17 +27,18 @@ export const SHIPS = [
 
 // hp, Tempo, Wenderate (rad/s), Radius, Credits, Punkte
 export const ENEMIES = {
-  drone: { name: 'Heuschrecke', hp: 30, speed: 62, turn: 1.5, r: 5, credit: 25, score: 100, fire: 1.5, dmg: 5 },
-  inter: { name: 'Kurshai', hp: 22, speed: 92, turn: 2.1, r: 4.5, credit: 40, score: 150, fire: 1.1, dmg: 4 },
-  bomber: { name: 'Abmahner', hp: 130, speed: 40, turn: 0.9, r: 8, credit: 70, score: 250, fire: 2.6, dmg: 14 },
-  ace: { name: 'Liquidator', hp: 420, speed: 84, turn: 2.0, r: 6.5, credit: 350, score: 1500, fire: 0.5, dmg: 6 },
-  turret: { name: 'Geschützturm', hp: 90, speed: 0, turn: 0, r: 8, credit: 50, score: 200, fire: 1.5, dmg: 6 },
-  gen: { name: 'Schildgenerator', hp: 320, speed: 0, turn: 0, r: 14, credit: 200, score: 800, fire: 0, dmg: 0 },
+  drone: { name: 'Heuschrecke', hp: 55, speed: 62, turn: 1.5, r: 5, credit: 25, score: 100, fire: 1.5, dmg: 5 },
+  inter: { name: 'Kurshai', hp: 40, speed: 92, turn: 2.1, r: 4.5, credit: 40, score: 150, fire: 1.1, dmg: 4 },
+  bomber: { name: 'Abmahner', hp: 230, speed: 40, turn: 0.9, r: 8, credit: 70, score: 250, fire: 2.6, dmg: 14 },
+  ace: { name: 'Liquidator', hp: 900, speed: 84, turn: 2.0, r: 6.5, credit: 350, score: 1500, fire: 0.5, dmg: 6 },
+  turret: { name: 'Geschützturm', hp: 170, speed: 0, turn: 0, r: 8, credit: 50, score: 200, fire: 1.5, dmg: 6 },
+  gen: { name: 'Schildgenerator', hp: 600, speed: 0, turn: 0, r: 14, credit: 200, score: 800, fire: 0, dmg: 0 },
   buoy: { name: 'Werbeboje', hp: 240, speed: 0, turn: 0, r: 10, credit: 150, score: 600, fire: 0, dmg: 0 },
+  corvette: { name: 'Korvette Vollstrecker', hp: 2400, speed: 30, turn: 0.32, r: 26, credit: 500, score: 3500, fire: 0.3, dmg: 6, big: true },
   kami: { name: 'Spekulant', hp: 14, speed: 108, turn: 2.3, r: 4, credit: 30, score: 120, fire: 0, dmg: 0 },
-  hauler: { name: 'Goldtransporter', hp: 950, speed: 24, turn: 0, r: 24, credit: 600, score: 2500, fire: 0.9, dmg: 6, static: true },
+  hauler: { name: 'Goldtransporter', big: true, hp: 1500, speed: 24, turn: 0, r: 24, credit: 600, score: 2500, fire: 0.9, dmg: 6, static: true },
   target: { name: 'Übungsziel', hp: 40, speed: 0, turn: 0, r: 10, credit: 10, score: 50, fire: 0, dmg: 0 },
-  core: { name: 'Tresorkern', hp: 1400, speed: 0, turn: 0, r: 20, credit: 1500, score: 6000, fire: 0, dmg: 0 },
+  core: { name: 'Tresorkern', hp: 3000, speed: 0, turn: 0, r: 20, credit: 1500, score: 6000, fire: 0, dmg: 0 },
 };
 
 export const ENVS = {
@@ -62,30 +63,31 @@ export const STORY = {
 };
 export const MISSIONS = [
   {
-    id: 'm0', n: 0, tutorial: true, name: 'Flugschule', place: 'Übungsraum über Essen Prime', env: 'kerasis',
+    id: 'm0', aim: 'Lerne dein Schiff zu beherrschen', why: 'Der Handelsverband schickt niemanden unvorbereitet gegen Kords Flotte.', station: true, n: 0, tutorial: true, name: 'Flugschule', place: 'Übungsraum über Essen Prime', env: 'kerasis',
     brief: 'Bevor du gegen den Unternehmerverband fliegst, zeigt dir der Verbandschef dein Schiff: schießen, rollen, Schub und Bremse, Looping, Wende, Waffenwechsel und die Nova-Welle. Zum Üben sind alle fünf Waffen freigeschaltet.',
     phases: [
-      { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · FEUER halten', spawn: [['target', 3]], comms: [['Verbandschef', 'Willkommen in der Nova Squadron. Zeig mir zuerst, dass du triffst.']] },
-      { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste ROLLE', comms: [['Verbandschef', 'In der Rolle trifft dich nichts. Merk dir das.']] },
-      { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'SCHUB halten, dann BREMSE halten', comms: [['Vex', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
-      { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste LOOP', comms: [['Vex', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
-      { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste WENDE', comms: [['Verbandschef', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
-      { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffe unten antippen', comms: [['Vex', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
-      { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste NOVA', comms: [['Verbandschef', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
+      { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · Fadenkreuz-Taste halten', spawn: [['target', 3]], comms: [['Verbandschef', 'Willkommen in der Nova Squadron. Zeig mir zuerst, dass du triffst.']] },
+      { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste mit dem Kreispfeil', comms: [['Verbandschef', 'In der Rolle trifft dich nichts. Merk dir das.']] },
+      { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'Pfeile hoch halten, dann Pfeile runter halten', comms: [['Vex', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
+      { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste mit der Schleife', comms: [['Vex', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
+      { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste mit dem Umkehrpfeil', comms: [['Verbandschef', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
+      { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffensymbol unten antippen', comms: [['Vex', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
+      { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste mit den Ringen', comms: [['Verbandschef', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
       { label: 'Ernstfall: Heuschrecken abschießen', spawn: [['drone', 4]], comms: [['Verbandschef', 'Kein Übungsziel mehr. Der Unternehmerverband hat uns gefunden. Zeig, was du gelernt hast.']] },
     ],
   },
   {
-    id: 'm1', n: 1, name: 'Feuertaufe über Rüttenscheid', place: 'Orbit von Rüttenscheid', env: 'kerasis',
+    id: 'm1', aim: 'Verteidige die Marktstation Rüttenscheid und zerstöre die Korvette Vollstrecker', why: 'Wer die Marktstation hält, setzt die Preise im ganzen Sektor. Fällt sie an den Unternehmerverband, zahlen alle Händler seinen Zoll.', station: true, n: 1, name: 'Feuertaufe über Rüttenscheid', place: 'Orbit von Rüttenscheid', env: 'kerasis',
     brief: 'Der Unternehmerverband schickt Heuschrecken-Drohnen gegen die Marktstation über Rüttenscheid. Wer sie besetzt, diktiert dort die Preise. Fang den Schwarm ab.',
     phases: [
       { label: 'Heuschrecken abfangen', spawn: [['drone', 6]], comms: [['Verbandschef', 'Nova Eins, hier spricht der Handelsverband. Der Schwarm ist da. Waffen frei.']] },
       { label: 'Zweite Welle zerstören', spawn: [['drone', 8]], comms: [['Vex', 'Die wollen die Marktstation. Ich bleibe an deinem Flügel.']] },
       { label: 'Kurshaie ausschalten', spawn: [['drone', 5], ['inter', 4]], comms: [['Verbandschef', 'Schnelle Signaturen. Das sind Kurshaie. Halt sie dir vom Heck.']] },
+      { label: 'Korvette Vollstrecker zerstören', spawn: [['corvette', 1], ['drone', 4]], comms: [['Verbandschef', 'Da kommt ihr Führungsschiff: die Korvette Vollstrecker. Sechs Geschütze, dicke Panzerung. Bleib in Bewegung und nimm sie auseinander.']] },
     ],
   },
   {
-    id: 'm2', n: 2, name: 'Zeche Zollverein', place: 'Trümmergürtel Zollverein', env: 'belt',
+    id: 'm2', aim: 'Zerstöre alle fünf Werbebojen und den Liquidator, der sie bewacht', why: 'Solange die Bojen senden, kann der Handelsverband seine Frachter nicht warnen.', n: 2, name: 'Zeche Zollverein', place: 'Trümmergürtel Zollverein', env: 'belt',
     brief: 'Im alten Bergbaugürtel Zollverein senden Werbebojen des Unternehmerverbands auf allen Kanälen und legen unseren Funk lahm. Zerstöre alle fünf. Ein Liquidator bewacht sie.',
     phases: [
       { label: 'Werbebojen zerstören', spawn: [['buoy', 5], ['drone', 6]], comms: [['Verbandschef', 'Fünf Bojen zwischen den Felsen. Achte auf die Asteroiden.']] },
@@ -94,16 +96,16 @@ export const MISSIONS = [
     ],
   },
   {
-    id: 'm3', n: 3, name: 'Geleit auf dem Hellweg', place: 'Handelsroute Hellweg', env: 'nebula', convoy: 3,
+    id: 'm3', aim: 'Bring die drei Frachter heil zum Sprungtor Kettwig', why: 'Ohne diese Lieferung stehen die Märkte von Essen leer, und Kord verkauft als Einziger.', n: 3, name: 'Geleit auf dem Hellweg', place: 'Handelsroute Hellweg', env: 'nebula', convoy: 3,
     brief: 'Drei Frachter bringen Waren für die Märkte von Essen über den Hellweg. Abmahner-Bomber des Unternehmerverbands wollen die Lieferung stoppen. Je heiler die Frachter ankommen, desto besser die Wertung.',
     phases: [
       { label: 'Abmahner abfangen', spawn: [['bomber', 4], ['drone', 4]], comms: [['Frachter Ruhrperle', 'Nova Squadron, Bomber auf dem Schirm. Wir haben Ware für halb Essen an Bord.']] },
       { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 4], ['kami', 5]], comms: [['Vex', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
-      { label: 'Letzte Welle zerstören', spawn: [['bomber', 6], ['drone', 6], ['inter', 3]], comms: [['Frachter Ruhrperle', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
+      { label: 'Korvette und letzte Welle zerstören', spawn: [['corvette', 1], ['bomber', 5], ['drone', 5]], comms: [['Frachter Ruhrperle', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
     ],
   },
   {
-    id: 'm4', n: 4, name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
+    id: 'm4', aim: 'Versenke den Kreuzer Rendite: Türme, Schildgeneratoren, Tresorkern', why: 'Die Rendite deckt jede Besetzung des Unternehmerverbands. Ohne sie sind seine Stationen schutzlos.', station: true, n: 4, name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
     brief: 'Der Kreuzer Rendite liegt ohne Eskorte vor der Werft Borbeck. Zerstöre seine Türme, dann die Schildgeneratoren auf dem Rücken. Erst danach liegt der Tresorkern am Heck frei.',
     phases: [
       { label: 'Geschütztürme zerstören', spawn: [['cruiser', 1], ['drone', 6]], goal: 'turret', comms: [['Verbandschef', 'Das ist die Rendite. Vierhundert Meter Stahl. Fang mit den Türmen an.']] },
@@ -112,17 +114,17 @@ export const MISSIONS = [
     ],
   },
   {
-    id: 'm5', n: 5, name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
+    id: 'm5', aim: 'Kapere Kords Gold und schlage seine drei Liquidatoren', why: 'Mit dem Gold bezahlt Kord seine Flotte, mit den Liquidatoren führt er sie. Beides verliert er heute.', n: 5, name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
     brief: 'Über der Lavawelt Hochofen sammelt der Unternehmerverband seine Elite. Drei Liquidatoren führen sie an. Brich ihnen das Rückgrat, dann steht das Flaggschiff allein.',
     phases: [
-      { label: 'Vorhut zerschlagen', spawn: [['inter', 8], ['drone', 6]], comms: [['Verbandschef', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
+      { label: 'Vorhut zerschlagen', spawn: [['corvette', 1], ['inter', 6], ['drone', 6]], comms: [['Verbandschef', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
       { label: 'Goldtransporter abfangen', spawn: [['hauler', 2], ['drone', 6], ['kami', 4]], comms: [['Vex', 'Zwei Goldtransporter! Damit bezahlt Kord seine Flotte. Hol sie dir, das gibt fette Prämie.']] },
       { label: 'Ersten Liquidator stellen', spawn: [['ace', 1], ['inter', 6]], comms: [['Liquidator', 'Du hast meinen Partner in Zollverein abgeschrieben. Das wird teuer.']] },
       { label: 'Die Doppelspitze brechen', spawn: [['ace', 2], ['drone', 8], ['bomber', 2]], comms: [['Vex', 'Zwei auf einmal. Ich nehme dir die Kleinen ab.']] },
     ],
   },
   {
-    id: 'm6', n: 6, name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
+    id: 'm6', aim: 'Vernichte das Flaggschiff Monopol', why: 'Fällt die Monopol, kapituliert der Unternehmerverband. Dann führt der Handelsverband alle Verbände von Essen.', n: 6, name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
     brief: 'Die Monopol ist das Flaggschiff von Generaldirektor Kord. Ihr Hauptgeschütz zeichnet vor dem Schuss eine rote Linie: Flieg sofort aus ihr heraus. Türme, Generatoren, Kern. Fällt die Monopol, führt der Handelsverband alle Verbände.',
     phases: [
       { label: 'Türme der Monopol zerstören', spawn: [['dread', 1], ['drone', 8]], goal: 'turret', comms: [['Verbandschef', 'Alle Staffeln, das ist der Tag. Nova Eins führt den Angriff. Für Essen!']] },
@@ -132,7 +134,7 @@ export const MISSIONS = [
   },
 ];
 
-export const ENDLESS = { id: 'endless', name: 'Endlos-Gefecht', place: 'Baldeney-Nebel', env: 'nebula', endless: true,
+export const ENDLESS = { station: true, aim: 'Halte so viele Wellen durch wie möglich', why: 'Jede Welle, die hier scheitert, erreicht die Handelsstationen nicht.', id: 'endless', name: 'Endlos-Gefecht', place: 'Baldeney-Nebel', env: 'nebula', endless: true,
   brief: 'Der Unternehmerverband gibt nicht auf. Welle um Welle, ohne Ende. Jede fünfte Welle führt ein Liquidator an. Wie weit kommst du?' };
 
 export function endlessPhase(n) {
@@ -140,6 +142,7 @@ export function endlessPhase(n) {
   if (n >= 2) spawn.push(['inter', Math.min(8, 1 + (n >> 1))]);
   if (n >= 2 && n % 2 === 0) spawn.push(['kami', Math.min(10, 2 + n)]);
   if (n % 4 === 0) spawn.push(['hauler', 1]);
+  if (n % 3 === 0) spawn.push(['corvette', Math.min(3, n / 3)]);
   if (n >= 3 && n % 2 === 1) spawn.push(['bomber', Math.min(5, 1 + (n >> 2))]);
   if (n % 5 === 0) spawn.push(['ace', Math.min(3, n / 5)]);
   return { label: `Welle ${n} zerstören`, spawn, comms: n % 5 === 0 ? [['Verbandschef', 'Liquidator im Anflug!']] : [] };
