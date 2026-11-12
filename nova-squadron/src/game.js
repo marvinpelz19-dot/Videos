@@ -394,7 +394,7 @@ function kill(e) {
   if (e.kind !== 'rock') { G.slow = Math.max(G.slow, e.def.big ? 0.9 : 0.07); ui.toast(`${e.def.name} zerstört · +${e.def.credit} Cr`); }   // kurzer Stillstand: der Abschuss soll sitzen
   if (e.kind === 'corvette') { G.shake = 2.4; ui.banner('KORVETTE VERNICHTET', '+' + e.def.credit + ' Credits'); const pp = e.pos.clone(), dd = e.dir.clone(); for (let i = 0; i < 6; i++) setTimeout(() => { if (G.mode === 'play') explode(t1.copy(pp).addScaledVector(dd, (i - 2.5) * 11).add(randUnit(t2).multiplyScalar(5)), rand(1.6, 3)); }, 120 + i * 170); }
   if (e.kind === 'ace') { G.slow = 0.5; ui.banner('LIQUIDATOR ABGEWICKELT', '+' + e.def.credit + ' Credits'); }
-  if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Leitstelle', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
+  if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Astrid', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
 }
 function jamWeapon() {   // Störkugel: die aktive Waffe fällt aus, das Spiel schaltet auf eine andere um
   if (P.invuln > 0 || P.rollT > 0 || P.man || P.jam) return; const w = P.weapon, other = WEAPONS.findIndex((x, i) => i !== w && weaponOpen(i));
