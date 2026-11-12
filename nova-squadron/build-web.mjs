@@ -5,7 +5,7 @@ const R = path.dirname(fileURLToPath(import.meta.url)), W = path.join(R, 'dist/w
 fs.mkdirSync(W, { recursive: true });
 let html = fs.readFileSync(path.join(R, 'dist/Trade-Force.html'), 'utf8');
 const ver = crypto.createHash('sha1').update(html).digest('hex').slice(0, 10);
-html = html.replace('<link rel="icon" href="data:,">', `<link rel="icon" href="./icon-192.png">\n<link rel="apple-touch-icon" href="./icon-192.png">\n<link rel="manifest" href="./manifest.webmanifest">\n<meta name="theme-color" content="#04060c">\n<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Trade Force">`)
+html = html.replace('<link rel="icon" href="data:,">', `<link rel="icon" href="./icon-192.png">\n<link rel="apple-touch-icon" href="./icon-192.png">\n<link rel="manifest" href="./manifest.webmanifest">\n<meta name="theme-color" content="#04060c">\n<meta name="robots" content="noindex, nofollow">\n<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">\n<meta name="apple-mobile-web-app-title" content="Trade Force">`)
   .replace('</body>', `<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));</script>\n</body>`);
 if (!html.includes('manifest.webmanifest') || !html.includes('sw.js')) throw new Error('Einbau fehlgeschlagen');
 fs.writeFileSync(path.join(W, 'index.html'), html);
@@ -16,5 +16,7 @@ self.addEventListener('install', (e) => e.waitUntil(caches.open(C).then((c) => c
 self.addEventListener('activate', (e) => e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C).map((k) => caches.delete(k)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', (e) => { if (e.request.method !== 'GET') return; e.respondWith(caches.match(e.request, { ignoreSearch: true }).then((r) => r || fetch(e.request).then((n) => { if ((n.ok || n.type === 'opaque') && new URL(e.request.url).origin !== location.origin) { const cp = n.clone(); caches.open(C).then((c) => c.put(e.request, cp)); } return n; }).catch(() => caches.match('./index.html')))); });
 `);
+fs.writeFileSync(path.join(W, '_headers'), '/*\n  X-Robots-Tag: noindex, nofollow\n/sw.js\n  Cache-Control: no-cache\n/manifest.webmanifest\n  Content-Type: application/manifest+json\n');
+fs.writeFileSync(path.join(W, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
 for (const f of ['icon-192.png', 'icon-512.png']) if (fs.existsSync(path.join(R, f))) fs.copyFileSync(path.join(R, f), path.join(W, f)); else console.warn('fehlt:', f);
 console.log('dist/web', ver, (fs.statSync(path.join(W, 'index.html')).size / 1e6).toFixed(1) + ' MB');
