@@ -12,8 +12,8 @@ export function createUI(api) {
   let tab = 'missions', sel = null, bannerT = 0, commsT = 0, lastWeaponKey = '';
   document.body.classList.toggle('touch', api.isTouch);
 
-  const unlockedW = () => WEAPONS.filter((w) => w.unlock <= api.doneCount());
-  const missionOpen = (i) => i === 0 || !!save.done[MISSIONS[i - 1].id];
+  const unlockedW = () => WEAPONS.filter((w, i) => api.weaponOpen(i));
+  const missionOpen = (i) => i <= 1 || !!save.done[MISSIONS[i - 1].id];
 
   function showTitle() {
     hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen title';
@@ -23,7 +23,19 @@ export function createUI(api) {
       <p class="lede">${STORY.intro}</p><p class="lede small">Sechs Einsätze, fünf Waffen. Unendlich Munition, unendlich Leben.</p>
       <button class="btn big" id="b-start">Zum Hangar</button>
       <p class="hint">${api.isTouch ? 'Linker Daumen steuert, rechts feuern.' : 'Maus oder WASD steuern · Leertaste oder Maustaste feuert'}</p></div>`;
-    $('b-start').onclick = () => { api.audio(); sfx.click(); api.toHangar(); };
+    $('b-start').onclick = () => { api.audio(); sfx.click(); if (save.seenIntro) api.toHangar(); else showIntro(0); };
+  }
+
+  // Story-Einstieg: drei Karten, danach geht es in den Hangar mit der Flugschule als erstem Einsatz
+  function showIntro(i) {
+    const [h, p] = STORY.cards[i], last = i === STORY.cards.length - 1;
+    screen.className = 'screen title intro';
+    screen.innerHTML = `<div class="title-art"></div><div class="title-box"><p class="eyebrow">Der Krieg um Essen · ${i + 1} von ${STORY.cards.length}</p>
+      <h2 class="story-h">${esc(h)}</h2><p class="lede story-p">${esc(p)}</p>
+      <div class="row"><button class="btn big" id="i-next">${last ? 'Zur Flugschule' : 'Weiter'}</button>${last ? '' : '<button class="btn ghost" id="i-skip">Überspringen</button>'}</div></div>`;
+    const done = () => { save.seenIntro = true; api.persist(); api.toHangar(); };
+    $('i-next').onclick = () => { sfx.click(); if (last) done(); else showIntro(i + 1); };
+    if ($('i-skip')) $('i-skip').onclick = () => { sfx.click(); done(); };
   }
 
   function showHangar() {
@@ -50,14 +62,14 @@ export function createUI(api) {
     const cards = MISSIONS.map((m, i) => {
       const open = missionOpen(i), st = save.done[m.id] || 0;
       return `<button class="mcard${sel === m ? ' on' : ''}${open ? '' : ' locked'}" data-m="${i}" ${open ? '' : 'disabled'}>
-        <span class="num">${i + 1}</span><span class="mt"><b>${esc(m.name)}</b><small>${open ? esc(m.place) : 'Gesperrt · vorherigen Einsatz abschließen'}</small></span>${open ? stars(st) : '<span class="lock">▣</span>'}</button>`;
+        <span class="num">${m.tutorial ? 'T' : m.n}</span><span class="mt"><b>${esc(m.name)}</b><small>${open ? esc(m.place) : 'Gesperrt · vorherigen Einsatz abschließen'}</small></span>${open ? stars(st) : '<span class="lock">▣</span>'}</button>`;
     }).join('');
     const eOpen = !!save.done.m1;
     const endless = `<button class="mcard endless${sel === ENDLESS ? ' on' : ''}${eOpen ? '' : ' locked'}" data-m="endless" ${eOpen ? '' : 'disabled'}><span class="num">∞</span><span class="mt"><b>${ENDLESS.name}</b><small>${eOpen ? (save.bestWave ? `Rekord: Welle ${save.bestWave}` : ENDLESS.place) : 'Gesperrt · Einsatz 1 abschließen'}</small></span></button>`;
-    const m = sel, i = MISSIONS.indexOf(m), w = WEAPONS.find((x) => x.unlock === i + 1), s = SHIPS.find((x) => x.unlock === i + 1);
-    const reward = m.endless ? 'Credits je Welle' : [w && !save.done[m.id] ? `Neue Waffe: ${w.name}` : '', s && !save.done[m.id] ? `Neues Schiff: ${s.name}` : '', `${fmt(500 * (i + 1) * (save.done[m.id] ? 1 : 2))} Credits`].filter(Boolean).join(' · ');
+    const m = sel, i = m.n, w = WEAPONS.find((x) => x.unlock > 0 && x.unlock === i), s = SHIPS.find((x) => x.unlock > 0 && x.unlock === i);
+    const reward = m.endless ? 'Credits je Welle' : [w && !save.done[m.id] ? `Neue Waffe: ${w.name}` : '', s && !save.done[m.id] ? `Neues Schiff: ${s.name}` : '', `${fmt(m.tutorial ? (save.done[m.id] ? 100 : 500) : 500 * i * (save.done[m.id] ? 1 : 2))} Credits`].filter(Boolean).join(' · ');
     return `<div class="mgrid"><div class="mlist">${cards}${endless}</div>
-      <section class="brief"><p class="eyebrow">${m.endless ? 'Dauergefecht' : `Einsatz ${i + 1} von ${MISSIONS.length}`} · ${esc(m.place)}</p><h2>${esc(m.name)}</h2><p>${esc(m.brief)}</p>
+      <section class="brief"><p class="eyebrow">${m.endless ? 'Dauergefecht' : m.tutorial ? 'Ausbildung' : `Einsatz ${i} von ${MISSIONS.length - 1}`} · ${esc(m.place)}</p><h2>${esc(m.name)}</h2><p>${esc(m.brief)}</p>
       ${m.phases ? `<ol class="phases">${m.phases.map((p) => `<li>${esc(p.label)}</li>`).join('')}</ol>` : ''}
       <p class="reward"><span>Belohnung</span> ${esc(reward)}</p>
       <p class="reward"><span>Wertung</span> ★★★ ohne Notschild · ★★ bis drei · ★ darüber</p>
@@ -105,7 +117,8 @@ export function createUI(api) {
     $('nova-fill').style.transform = `scaleX(${P.nova / 100})`; $('nova').classList.toggle('ready', P.nova >= 100); $('t-nova').classList.toggle('ready', P.nova >= 100);
     set($('score'), 'textContent', fmt(G.stats.score)); set($('cr'), 'textContent', '+' + fmt(G.stats.credits));
     const cb = $('combo'); cb.hidden = G.combo < 2; set(cb, 'textContent', '×' + G.combo + ' Serie');
-    const d = G.phaseDef; set($('obj'), 'textContent', d ? d.label : G.endT > 0 ? 'Einsatz erfüllt' : ''); set($('obj-n'), 'textContent', d && remaining ? 'Noch ' + remaining : '');
+    const d = G.phaseDef; set($('obj'), 'textContent', d ? d.label : G.endT > 0 ? 'Einsatz erfüllt' : ''); const hint = d && (api.isTouch ? d.hintTouch : d.hint); set($('obj-n'), 'textContent', d && remaining ? (hint ? hint : 'Noch ' + remaining) : '');
+    set($('spd'), 'textContent', String(Math.round(P.speed * 3.6)));
     set($('warn'), 'hidden', !outside);
     if (G.cap) { const c = G.cap.core; $('boss-fill').style.transform = `scaleX(${Math.max(0, c.hp / c.maxHp)})`; set($('boss-name'), 'textContent', (G.cap.dread ? 'Flaggschiff Monopol' : 'Kreuzer Rendite') + (c.shielded ? ' · Kern abgeschirmt' : ' · Kern')); }
     if (G.mission.convoy) { $('convoy-fill').style.transform = `scaleX(${G.stats.convoy})`; }
@@ -113,6 +126,7 @@ export function createUI(api) {
     if (bannerT > 0 && (bannerT -= 0.06) <= 0) $('banner').classList.remove('show');
     if (commsT > 0 && (commsT -= 0.06) <= 0) $('comms').classList.remove('show');
   }
+  function toast(t) { const el = $('toast'); el.textContent = t; el.classList.remove('show'); void el.offsetWidth; el.classList.add('show'); }
   function banner(t, sub = '') { $('banner').innerHTML = `<b>${esc(t)}</b><small>${esc(sub)}</small>`; $('banner').classList.add('show'); bannerT = 2.6; }
   function comms(name, text) { $('comms').innerHTML = `<b>${esc(name)}</b><span>${esc(text)}</span>`; $('comms').classList.add('show'); commsT = 4.6; sfx.radio(); }
   function flash(type) { const f = $('flash'); f.className = ''; void f.offsetWidth; f.className = 'f-' + type; }
@@ -143,7 +157,8 @@ export function createUI(api) {
   const hold = (id, fn) => { const b = $(id); const on = (e) => { e.preventDefault(); b.classList.add('down'); fn(true); }, off = (e) => { e.preventDefault(); b.classList.remove('down'); fn(false); }; b.addEventListener('touchstart', on, { passive: false }); b.addEventListener('touchend', off); b.addEventListener('touchcancel', off); b.addEventListener('mousedown', on); b.addEventListener('mouseup', off); b.addEventListener('mouseleave', () => { b.classList.remove('down'); fn(false); }); };
   hold('t-fire', api.act.fire); hold('t-boost', api.act.boost);
   const tap = (id, fn) => { const b = $(id); b.addEventListener('touchstart', (e) => { e.preventDefault(); fn(); }, { passive: false }); b.addEventListener('click', fn); };
+  hold('t-brake', api.act.brake); tap('t-loop', () => api.act.maneuver('loop')); tap('t-turn', () => api.act.maneuver('turn'));
   tap('t-rl', () => api.act.roll(-1)); tap('t-rr', () => api.act.roll(1)); tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
 
-  return { showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
+  return { toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
 }

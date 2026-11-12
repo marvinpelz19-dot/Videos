@@ -34,6 +34,9 @@ export const ENEMIES = {
   turret: { name: 'Geschützturm', hp: 90, speed: 0, turn: 0, r: 8, credit: 50, score: 200, fire: 1.5, dmg: 6 },
   gen: { name: 'Schildgenerator', hp: 320, speed: 0, turn: 0, r: 14, credit: 200, score: 800, fire: 0, dmg: 0 },
   buoy: { name: 'Werbeboje', hp: 240, speed: 0, turn: 0, r: 10, credit: 150, score: 600, fire: 0, dmg: 0 },
+  kami: { name: 'Spekulant', hp: 14, speed: 108, turn: 2.3, r: 4, credit: 30, score: 120, fire: 0, dmg: 0 },
+  hauler: { name: 'Goldtransporter', hp: 950, speed: 24, turn: 0, r: 24, credit: 600, score: 2500, fire: 0.9, dmg: 6, static: true },
+  target: { name: 'Übungsziel', hp: 40, speed: 0, turn: 0, r: 10, credit: 10, score: 50, fire: 0, dmg: 0 },
   core: { name: 'Tresorkern', hp: 1400, speed: 0, turn: 0, r: 20, credit: 1500, score: 6000, fire: 0, dmg: 0 },
 };
 
@@ -50,11 +53,30 @@ export const ENVS = {
 // Phasen: spawn = [Typ, Anzahl]. Ziel ist immer: alle Ziel-Objekte der Phase zerstören.
 export const STORY = {
   intro: 'Das Essen-System ist das Herz des galaktischen Handels. Der Unternehmerverband will es ganz für sich: jede Route, jeden Markt, jede Station. Nur der Handelsverband stellt sich ihm entgegen. Du fliegst seine beste Staffel.',
+  cards: [
+    ['Das Essen-System', 'Zwischen Rüttenscheid, dem Trümmergürtel Zollverein und dem Hellweg fließt der Handel der halben Galaxis. Wer Essen hält, bestimmt, was die Dinge kosten.'],
+    ['Der Unternehmerverband', 'Generaldirektor Kord will keinen Markt mehr, sondern einen Besitzer. Seine Heuschrecken-Drohnen besetzen Stationen, seine Liquidatoren wickeln ab, wer sich wehrt. Über Essen Prime wartet sein Flaggschiff Monopol.'],
+    ['Die Nova Squadron', 'Der Handelsverband hat nur eine Staffel, aber die beste. Du fliegst als Nova Eins. Erst die Flugschule, dann sechs Einsätze: Schwarm abfangen, Funk befreien, Konvoi schützen, den Kreuzer Rendite versenken, die Elite schlagen, die Monopol vernichten. Danach führt der Handelsverband alle Verbände.'],
+  ],
   outro: 'Das Flaggschiff Monopol ist Geschichte, Generaldirektor Kord hat kapituliert. Alle Verbände des Systems haben den Handelsverband zu ihrem Vorsitz gewählt. Essen gehört dem Handel.',
 };
 export const MISSIONS = [
   {
-    id: 'm1', name: 'Feuertaufe über Rüttenscheid', place: 'Orbit von Rüttenscheid', env: 'kerasis',
+    id: 'm0', n: 0, tutorial: true, name: 'Flugschule', place: 'Übungsraum über Essen Prime', env: 'kerasis',
+    brief: 'Bevor du gegen den Unternehmerverband fliegst, zeigt dir der Verbandschef dein Schiff: schießen, rollen, Schub und Bremse, Looping, Wende, Waffenwechsel und die Nova-Welle. Zum Üben sind alle fünf Waffen freigeschaltet.',
+    phases: [
+      { label: 'Drei Übungsziele zerstören', hint: 'Maus oder WASD steuern · Leertaste feuert', hintTouch: 'Linker Daumen steuert · FEUER halten', spawn: [['target', 3]], comms: [['Verbandschef', 'Willkommen in der Nova Squadron. Zeig mir zuerst, dass du triffst.']] },
+      { label: 'Eine Ausweichrolle fliegen', task: 'roll', hint: 'Taste Q oder E', hintTouch: 'Taste ROLLE', comms: [['Verbandschef', 'In der Rolle trifft dich nichts. Merk dir das.']] },
+      { label: 'Schub geben, dann bremsen', task: 'speed', hint: 'Umschalt = Schub · C = Bremse', hintTouch: 'SCHUB halten, dann BREMSE halten', comms: [['Vex', 'Mit der Bremse drehst du enger. Mit Schub entkommst du.']] },
+      { label: 'Ein Looping fliegen', task: 'loop', hint: 'Taste R', hintTouch: 'Taste LOOP', comms: [['Vex', 'Sitzt dir einer im Nacken? Looping, und du sitzt hinter ihm.']] },
+      { label: 'Die Wende fliegen', task: 'turn', hint: 'Taste X', hintTouch: 'Taste WENDE', comms: [['Verbandschef', 'Die Wende dreht dich in einer Sekunde um. Halber Looping, halbe Rolle.']] },
+      { label: 'Die Waffe wechseln', task: 'weapon', hint: 'Tasten 1 bis 5 oder Mausrad', hintTouch: 'Waffe unten antippen', comms: [['Vex', 'Fünf Waffen, alle ohne Munitionsgrenze. Probier sie durch.']] },
+      { label: 'Die Nova-Welle zünden', task: 'nova', hint: 'Taste F', hintTouch: 'Taste NOVA', comms: [['Verbandschef', 'Die Nova-Welle räumt alles um dich herum ab. Sie lädt sich von selbst wieder auf.']] },
+      { label: 'Ernstfall: Heuschrecken abschießen', spawn: [['drone', 4]], comms: [['Verbandschef', 'Kein Übungsziel mehr. Der Unternehmerverband hat uns gefunden. Zeig, was du gelernt hast.']] },
+    ],
+  },
+  {
+    id: 'm1', n: 1, name: 'Feuertaufe über Rüttenscheid', place: 'Orbit von Rüttenscheid', env: 'kerasis',
     brief: 'Der Unternehmerverband schickt Heuschrecken-Drohnen gegen die Marktstation über Rüttenscheid. Wer sie besetzt, diktiert dort die Preise. Fang den Schwarm ab.',
     phases: [
       { label: 'Heuschrecken abfangen', spawn: [['drone', 6]], comms: [['Verbandschef', 'Nova Eins, hier spricht der Handelsverband. Der Schwarm ist da. Waffen frei.']] },
@@ -63,25 +85,25 @@ export const MISSIONS = [
     ],
   },
   {
-    id: 'm2', name: 'Zeche Zollverein', place: 'Trümmergürtel Zollverein', env: 'belt',
+    id: 'm2', n: 2, name: 'Zeche Zollverein', place: 'Trümmergürtel Zollverein', env: 'belt',
     brief: 'Im alten Bergbaugürtel Zollverein senden Werbebojen des Unternehmerverbands auf allen Kanälen und legen unseren Funk lahm. Zerstöre alle fünf. Ein Liquidator bewacht sie.',
     phases: [
       { label: 'Werbebojen zerstören', spawn: [['buoy', 5], ['drone', 6]], comms: [['Verbandschef', 'Fünf Bojen zwischen den Felsen. Achte auf die Asteroiden.']] },
-      { label: 'Verstärkung abwehren', spawn: [['inter', 6], ['drone', 6]], comms: [['Vex', 'Funk ist wieder da. Die Verstärkung des Verbands leider auch.']] },
+      { label: 'Verstärkung abwehren', spawn: [['inter', 5], ['drone', 5], ['kami', 6]], comms: [['Vex', 'Funk ist wieder da. Die Verstärkung des Verbands leider auch.']] },
       { label: 'Den Liquidator stellen', spawn: [['ace', 1], ['drone', 4]], comms: [['Liquidator', 'Ein einzelner Händler? Ich wickle dich ab wie jede andere Firma.']] },
     ],
   },
   {
-    id: 'm3', name: 'Geleit auf dem Hellweg', place: 'Handelsroute Hellweg', env: 'nebula', convoy: 3,
+    id: 'm3', n: 3, name: 'Geleit auf dem Hellweg', place: 'Handelsroute Hellweg', env: 'nebula', convoy: 3,
     brief: 'Drei Frachter bringen Waren für die Märkte von Essen über den Hellweg. Abmahner-Bomber des Unternehmerverbands wollen die Lieferung stoppen. Je heiler die Frachter ankommen, desto besser die Wertung.',
     phases: [
       { label: 'Abmahner abfangen', spawn: [['bomber', 4], ['drone', 4]], comms: [['Frachter Ruhrperle', 'Nova Squadron, Bomber auf dem Schirm. Wir haben Ware für halb Essen an Bord.']] },
-      { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 5]], comms: [['Vex', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
+      { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 4], ['kami', 5]], comms: [['Vex', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
       { label: 'Letzte Welle zerstören', spawn: [['bomber', 6], ['drone', 6], ['inter', 3]], comms: [['Frachter Ruhrperle', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
     ],
   },
   {
-    id: 'm4', name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
+    id: 'm4', n: 4, name: 'Kreuzer Rendite', place: 'Werft Borbeck', env: 'deep',
     brief: 'Der Kreuzer Rendite liegt ohne Eskorte vor der Werft Borbeck. Zerstöre seine Türme, dann die Schildgeneratoren auf dem Rücken. Erst danach liegt der Tresorkern am Heck frei.',
     phases: [
       { label: 'Geschütztürme zerstören', spawn: [['cruiser', 1], ['drone', 6]], goal: 'turret', comms: [['Verbandschef', 'Das ist die Rendite. Vierhundert Meter Stahl. Fang mit den Türmen an.']] },
@@ -90,16 +112,17 @@ export const MISSIONS = [
     ],
   },
   {
-    id: 'm5', name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
+    id: 'm5', n: 5, name: 'Sturm über Hochofen', place: 'Lavawelt Hochofen', env: 'pyra',
     brief: 'Über der Lavawelt Hochofen sammelt der Unternehmerverband seine Elite. Drei Liquidatoren führen sie an. Brich ihnen das Rückgrat, dann steht das Flaggschiff allein.',
     phases: [
       { label: 'Vorhut zerschlagen', spawn: [['inter', 8], ['drone', 6]], comms: [['Verbandschef', 'Viele Kontakte. Bleib in Bewegung, Nova Eins.']] },
+      { label: 'Goldtransporter abfangen', spawn: [['hauler', 2], ['drone', 6], ['kami', 4]], comms: [['Vex', 'Zwei Goldtransporter! Damit bezahlt Kord seine Flotte. Hol sie dir, das gibt fette Prämie.']] },
       { label: 'Ersten Liquidator stellen', spawn: [['ace', 1], ['inter', 6]], comms: [['Liquidator', 'Du hast meinen Partner in Zollverein abgeschrieben. Das wird teuer.']] },
       { label: 'Die Doppelspitze brechen', spawn: [['ace', 2], ['drone', 8], ['bomber', 2]], comms: [['Vex', 'Zwei auf einmal. Ich nehme dir die Kleinen ab.']] },
     ],
   },
   {
-    id: 'm6', name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
+    id: 'm6', n: 6, name: 'Flaggschiff Monopol', place: 'Über Essen Prime', env: 'deep', boss: true,
     brief: 'Die Monopol ist das Flaggschiff von Generaldirektor Kord. Ihr Hauptgeschütz zeichnet vor dem Schuss eine rote Linie: Flieg sofort aus ihr heraus. Türme, Generatoren, Kern. Fällt die Monopol, führt der Handelsverband alle Verbände.',
     phases: [
       { label: 'Türme der Monopol zerstören', spawn: [['dread', 1], ['drone', 8]], goal: 'turret', comms: [['Verbandschef', 'Alle Staffeln, das ist der Tag. Nova Eins führt den Angriff. Für Essen!']] },
@@ -115,6 +138,8 @@ export const ENDLESS = { id: 'endless', name: 'Endlos-Gefecht', place: 'Baldeney
 export function endlessPhase(n) {
   const spawn = [['drone', 4 + Math.min(10, n)]];
   if (n >= 2) spawn.push(['inter', Math.min(8, 1 + (n >> 1))]);
+  if (n >= 2 && n % 2 === 0) spawn.push(['kami', Math.min(10, 2 + n)]);
+  if (n % 4 === 0) spawn.push(['hauler', 1]);
   if (n >= 3 && n % 2 === 1) spawn.push(['bomber', Math.min(5, 1 + (n >> 2))]);
   if (n % 5 === 0) spawn.push(['ace', Math.min(3, n / 5)]);
   return { label: `Welle ${n} zerstören`, spawn, comms: n % 5 === 0 ? [['Verbandschef', 'Liquidator im Anflug!']] : [] };

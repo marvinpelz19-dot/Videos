@@ -261,6 +261,23 @@ function buildTransport() {
   return g;
 }
 
+function buildKami() {    // „Spekulant“: fliegende Sprengladung mit Stacheln
+  const g = new THREE.Group();
+  part(g, new THREE.IcosahedronGeometry(1.5, 1), MATS.dom); part(g, new THREE.SphereGeometry(0.85, 8, 6), MATS.eye, 0, 0, 1.1);
+  for (let i = 0; i < 6; i++) { const a = i * 1.047; part(g, new THREE.ConeGeometry(0.3, 2.8, 6), MATS.gold, Math.cos(a) * 2, Math.sin(a) * 2, -0.3, 0, 0, a - 1.571); }
+  part(g, tube(0.9, 0.7, 1.6, 8), MATS.metal, 0, 0, -1.8); part(g, disc(0.6, 8), MATS.engineRed, 0, 0, -2.62); part(g, new THREE.TorusGeometry(1.7, 0.16, 5, 14), MATS.domRed);
+  return g;
+}
+function buildHauler() {  // „Goldtransporter“: gepanzerter Frachter mit Goldcontainern
+  const g = new THREE.Group();
+  part(g, box(10, 9, 64), MATS.dom); part(g, box(14, 11, 12), MATS.domLight, 0, 1, 34); part(g, tube(3, 7.5, 9, 4), MATS.dom, 0, 1, 44.5, 0, 0, Math.PI / 4, 1, 0.75, 1);
+  part(g, box(10, 1.6, 0.5), MATS.eye, 0, 4.4, 40.2); part(g, box(6, 2.4, 60), MATS.domLight, 0, 5.6, -2);
+  for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { part(g, box(8, 8, 12), MATS.gold, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 0.6, 12.4), MATS.metal, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 8.4, 0.6), MATS.metal, s * 9.4, 0, -24 + i * 14); }
+  for (const s of [-1, 1]) { nacelle(g, s * 5.4, 0, -37, 4.4, 13, MATS.metal, MATS.engineRed); cannon(g, s * 3, 8, 20, 12, 0.5); }
+  part(g, new THREE.CylinderGeometry(4, 5, 2.4, 10), MATS.domLight, 0, 7.6, 16);
+  return g;
+}
+
 // Großkampfschiff. k = 1: Kreuzer Rendite (ca. 430 lang), k = 1.9: Flaggschiff Monopol.
 // Liefert Rumpfkugeln (Kollision) und Plätze für Türme, Generatoren und Kern in lokalen Koordinaten.
 export function buildCapital(dread) {
@@ -317,10 +334,10 @@ export function buildCapital(dread) {
 }
 
 // ---------- Fabrik: einmal bauen, verschmelzen, dann klonen ----------
-const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport };
+const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy };
 const protos = {};
 function fromProto(key, make) {
-  if (!protos[key]) { UVS = key === 'transport' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
+  if (!protos[key]) { UVS = key === 'transport' || key === 'hauler' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
   const p = protos[key], c = p.clone(true); c.userData = { ...p.userData };
   if (p.userData.head) c.userData.head = c.children[p.children.indexOf(p.userData.head)];
   if (p.userData.shield) { const i = p.children.indexOf(p.userData.shield); c.children[i].material = p.userData.shield.material.clone(); c.userData.shield = c.children[i]; }

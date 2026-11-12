@@ -1,4 +1,6 @@
 // Klang komplett synthetisch (WebAudio): Waffen, Explosionen, Oberfläche und eine generative Musikspur.
+import { SAMPLES } from './samples.js';
+
 let ctx = null, master = null, sfxBus = null, musicBus = null, noiseBuf = null, reverb = null;
 let musicOn = false, musicTimer = 0, step = 0, intensity = 0, nextT = 0;
 export const audioState = { sound: true, music: true };
@@ -17,7 +19,12 @@ export function initAudio() {
   for (let c = 0; c < 2; c++) { const x = ir.getChannelData(c); for (let i = 0; i < x.length; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / x.length, 3.2); }
   reverb = ctx.createConvolver(); reverb.buffer = ir; const rg = ctx.createGain(); rg.gain.value = 0.5; reverb.connect(rg).connect(sfxBus);
   buildBank(); applyAudioState();
+  // echte Aufnahmen dekodieren (asynchron; bis dahin spielt die Synthese allein)
+  for (const [k, b64] of Object.entries(SAMPLES)) { try { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); ctx.decodeAudioData(u.buffer, (buf) => { rec[k] = [buf]; }, () => {}); } catch { /* ohne Aufnahme weiter */ } }
+  // Verzerrer für den Explosionskörper
+  drive = ctx.createWaveShaper(); const cv = new Float32Array(1024); for (let i = 0; i < 1024; i++) { const x = i / 512 - 1; cv[i] = Math.tanh(x * 3.2); } drive.curve = cv; drive.connect(sfxBus); drive.connect(reverb);
 }
+const rec = {}; let drive = null, eng = null;
 export function applyAudioState() {
   if (!ctx) return;
   sfxBus.gain.value = audioState.sound ? 0.5 : 0; musicBus.gain.value = audioState.music ? 0.34 : 0;
@@ -67,18 +74,36 @@ export const sfx = {
   missile() {   // Zündung, Schub-Fauchen, tiefes Grollen
     noise(0.09, 0.5, 3000, 900, 0.8); noise(0.9, 0.34, 500, 4200, 1.4, 'bandpass'); noise(1.1, 0.3, 240, 90, 0.7); tone('sawtooth', 95, 48, 0.8, 0.22, sfxBus, 0, 0.03); tone('sine', 620, 1500, 0.5, 0.05, sfxBus, 0.05, 0.1);
   },
-  orb() { tone('sine', 190, 42, 0.7, 0.6); tone('sawtooth', 520, 60, 0.5, 0.16); noise(0.5, 0.25, 1200, 200, 2, 'bandpass'); play(bank?.spread, 0.3, 0.45, 0, 0.5); },
+  orb() { play(rec.heavy, 0.7, 0.7, 0, 0.4); tone('sine', 190, 42, 0.7, 0.6); tone('sawtooth', 520, 60, 0.5, 0.16); noise(0.5, 0.25, 1200, 200, 2, 'bandpass'); play(bank?.spread, 0.3, 0.45, 0, 0.5); },
   enemyShot(pan = 0) { if (!play(bank?.enemy, 0.16, 1, pan, 0.2)) tone('square', 640, 180, 0.1, 0.05); },
   hit() { if (!ctx || ctx.currentTime - lastHit < 0.035) return; lastHit = ctx.currentTime; play(bank?.hit, 0.3, 1.1, 0, 0.1); ping(1900 + Math.random() * 900, 0.09, 0.05); },
   shieldHit() { play(bank?.hit, 0.6, 0.6, 0, 0.3); noise(0.25, 0.35, 5200, 700, 3, 'bandpass'); tone('sine', 210, 60, 0.3, 0.4); tone('sawtooth', 2400, 300, 0.2, 0.06); },
+  // Explosion in Schichten (Knall, Körper, Sub, Feuerball, Trümmer, Hall), nach gängigen Sounddesign-Rezepten:
+  // heller Transient über 1 kHz, Aufnahme tiefer abgespielt für Größe, trockener Sub mit Tonhöhenfall, dunkler langer Nachhall.
   boom(size = 1, pan = 0, near = 1) {
-    if (!ctx) return; if (ctx.currentTime - lastBoom < 0.04) return; lastBoom = ctx.currentTime; const v = Math.min(1, 0.35 + near * 0.65);
-    play(bank?.boom, Math.min(1, 0.5 + size * 0.2) * v, 1.25 / Math.sqrt(size), pan, 0.5);                     // Krachen
-    tone('sine', 150 / Math.sqrt(size), 26, 0.5 + size * 0.35, 0.75 * v);                                       // Druckwelle
-    noise(0.9 + size * 0.5, 0.3 * v, 900 / size, 60, 0.5);                                                      // Grollen
-    if (size > 1.2) for (let i = 0; i < 3; i++) setTimeout(() => play(bank?.hit, 0.2 * v, 0.5 + Math.random() * 0.4, pan, 0.5), 120 + i * 110 + Math.random() * 80);   // Trümmer
+    if (!ctx) return; if (ctx.currentTime - lastBoom < 0.05) return; lastBoom = ctx.currentTime; const v = Math.min(1, 0.3 + near * 0.7), t = ctx.currentTime, big = Math.sqrt(size);
+    noise(0.012, 0.9 * v, 6000, 2500, 0.7, 'highpass'); noise(0.05, 0.5 * v, 3200, 900, 1.2, 'bandpass');            // Knall
+    if (rec.crunch) {                                                                                                   // Körper: Aufnahme, je größer desto tiefer
+      const s1 = ctx.createBufferSource(), g1 = ctx.createGain(), lp = ctx.createBiquadFilter(); s1.buffer = rec.crunch[0]; s1.playbackRate.value = (1.15 / big) * (0.9 + Math.random() * 0.22);
+      lp.type = 'lowpass'; lp.frequency.value = 1400 + near * 9000; g1.gain.value = Math.min(1.2, 0.6 + size * 0.22) * v; let o = s1.connect(lp).connect(g1);
+      if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; o = o.connect(p); } o.connect(drive); s1.start(t, Math.random() * 0.02);
+      if (size > 1.3) { const s2 = ctx.createBufferSource(), g2 = ctx.createGain(); s2.buffer = rec.crunch[0]; s2.playbackRate.value = 0.42 / big; g2.gain.value = 0.55 * v; s2.connect(g2).connect(sfxBus); s2.start(t + 0.03); }   // zweite Lage, zwei Oktaven tiefer
+    } else play(bank?.boom, Math.min(1, 0.5 + size * 0.2) * v, 1.25 / big, pan, 0.5);
+    tone('sine', 62 / Math.sqrt(big), 24, 0.3 + size * 0.22, 0.95 * v);                                                // Sub, trocken
+    noise(0.7 + size * 0.5, 0.42 * v, 140, 55, 1.1, 'bandpass'); noise(1.1 + size * 0.6, 0.2 * v, 700 / big, 50, 0.5); // Feuerball und Grollen
+    const n = Math.min(9, 2 + Math.round(size * 2.5));                                                                  // Trümmer: kurze, helle Splitter verstreut
+    for (let i = 0; i < n; i++) setTimeout(() => { if (rec.crunch) { const s3 = ctx.createBufferSource(), g3 = ctx.createGain(), hp = ctx.createBiquadFilter(); s3.buffer = rec.crunch[0]; s3.playbackRate.value = 1.8 + Math.random() * 2.4; hp.type = 'highpass'; hp.frequency.value = 1200; g3.gain.value = (0.05 + Math.random() * 0.12) * v; s3.connect(hp).connect(g3).connect(sfxBus); g3.connect(reverb); s3.start(ctx.currentTime, 0.05 + Math.random() * 0.2, 0.09 + Math.random() * 0.12); } else play(bank?.hit, 0.15 * v, 0.5 + Math.random() * 0.5, pan, 0.5); }, 90 + Math.random() * (350 + size * 380));
   },
-  nova() { noise(1.8, 0.9, 160, 7000, 0.7); tone('sine', 55, 28, 1.8, 1); tone('sawtooth', 180, 1900, 0.8, 0.2); play(bank?.boom, 1, 0.5, 0, 0.8); },
+  heavy(vol = 0.5, rate = 1, pan = 0) { if (!play(rec.heavy, vol, rate, pan, 0.35)) tone('sawtooth', 500 * rate, 70, 0.4, vol * 0.4); },
+  // Triebwerk: läuft durch, Tonhöhe und Lautstärke folgen dem Tempo (0 = Bremse, 1 = Reise, 2 = Schub)
+  engine(k) {
+    if (!ctx) return;
+    if (k < 0) { if (eng) { eng.g.gain.setTargetAtTime(0, ctx.currentTime, 0.1); } return; }
+    if (!eng) { const o = ctx.createOscillator(), o2 = ctx.createOscillator(), n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), ng = ctx.createGain(); o.type = 'sawtooth'; o2.type = 'triangle'; n.buffer = noiseBuf; n.loop = true; f.type = 'lowpass'; ng.gain.value = 0.5; g.gain.value = 0; o.connect(f); o2.connect(f); n.connect(ng).connect(f); f.connect(g).connect(sfxBus); o.start(); o2.start(); n.start(); eng = { o, o2, f, g }; }
+    const tt = ctx.currentTime; eng.o.frequency.setTargetAtTime(38 + k * 26, tt, 0.15); eng.o2.frequency.setTargetAtTime(77 + k * 55, tt, 0.15); eng.f.frequency.setTargetAtTime(160 + k * 520, tt, 0.15); eng.g.gain.setTargetAtTime(0.035 + k * 0.05, tt, 0.15);
+  },
+  loop() { noise(1.3, 0.3, 300, 2600, 1.1, 'bandpass'); tone('sawtooth', 90, 240, 0.7, 0.14, sfxBus, 0, 0.1); tone('sawtooth', 240, 80, 0.7, 0.12, sfxBus, 0.7, 0.05); },
+  nova() { play(rec.crunch, 1, 0.35, 0, 0.9); play(rec.heavy, 0.6, 0.4, 0, 0.6); noise(1.8, 0.9, 160, 7000, 0.7); tone('sine', 55, 28, 1.8, 1); tone('sawtooth', 180, 1900, 0.8, 0.2); play(bank?.boom, 1, 0.5, 0, 0.8); },
   down() { tone('sawtooth', 600, 80, 0.7, 0.35); noise(0.9, 0.6, 3000, 80); play(bank?.boom, 0.8, 0.8, 0, 0.6); },
   boost() { noise(0.7, 0.26, 260, 2600, 1.2, 'bandpass'); tone('sawtooth', 70, 130, 0.6, 0.12, sfxBus, 0, 0.1); },
   roll() { noise(0.35, 0.2, 1400, 380, 1.5, 'bandpass'); },

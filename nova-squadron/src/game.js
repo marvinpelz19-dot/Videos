@@ -18,11 +18,12 @@ const t1 = V(), t2 = V(), t3 = V(), t4 = V(), UP = V(0, 1, 0);
 
 // ---------- Spielstand ----------
 const SAVE_KEY = 'nova-squadron-save-v1';
-const save = { credits: 0, up: {}, done: {}, ship: 'pfeil', bestWave: 0, bestScore: 0, set: { quality: 'high', sound: true, music: true, invertY: false, autofire: null } };
+const save = { seenIntro: false, credits: 0, up: {}, done: {}, ship: 'pfeil', bestWave: 0, bestScore: 0, set: { quality: 'high', sound: true, music: true, invertY: false, autofire: null } };
 try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s) { Object.assign(save, s, { set: { ...save.set, ...(s.set || {}) } }); } } catch { /* ohne Speicher spielbar */ }
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* egal */ } };
 const up = (id) => save.up[id] || 0;
-const doneCount = () => MISSIONS.filter((m) => save.done[m.id]).length;
+const doneCount = () => MISSIONS.filter((m) => !m.tutorial && save.done[m.id]).length;
+const weaponOpen = (i) => !!WEAPONS[i] && (WEAPONS[i].unlock <= doneCount() || !!G.mission?.tutorial);
 const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
 if (save.set.autofire === null) save.set.autofire = isTouch;
 if (isTouch && !localStorage.getItem?.(SAVE_KEY)) save.set.quality = 'medium';
@@ -104,6 +105,7 @@ function buildEnv(env) {
 // ---------- Zustand ----------
 const G = { mode: 'title', t: 0, ents: [], bolts: [], freeBolts: [], mission: null, phase: -1, phaseDef: null, phaseT: 0, cap: null, center: V(), stats: null, shake: 0, slow: 0, endT: 0, combo: 0, comboT: 0, lock: null, beamOn: false, intensity: 0 };
 const P = { pos: V(), yaw: 0, pitch: 0, quat: new THREE.Quaternion(), fwd: V(0, 0, 1), right: V(-1, 0, 0), vel: V(), sx: 0, sy: 0, speed: 70, shield: 100, maxShield: 100, regenT: 0, invuln: 0, rollT: 0, rollDir: 1, rollCd: 0, boost: 0, fireCd: 0, weapon: 0, gun: 0, nova: 0, mesh: null, inner: null, def: SHIPS[0], r: 4.5, hullCd: 0, team: 0 };
+const qMan = new THREE.Quaternion(), XAX = V(1, 0, 0);
 const camFwd = V(0, 0, 1), eul = new THREE.Euler(0, 0, 0, 'YXZ');
 const beam = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 8, 1, true).rotateX(Math.PI / 2).translate(0, 0, 0.5), new THREE.MeshBasicMaterial({ blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, toneMapped: false }));
 beam.material.color.setRGB(1.2, 2.6, 6); beam.visible = false; scene.add(beam);
@@ -113,7 +115,7 @@ const bossBeam = new THREE.Mesh(beam.geometry, new THREE.MeshBasicMaterial({ ble
 const keys = {}, input = { sx: 0, sy: 0, fire: false, boost: false, mouse: false, mx: 0, my: 0, stickId: -1, stx: 0, sty: 0, jx: 0, jy: 0 };
 addEventListener('keydown', (e) => {
   if (e.repeat) return; keys[e.code] = true; if (G.mode !== 'play') { if (G.mode === 'pause' && (e.code === 'Escape' || e.code === 'KeyP')) setPause(false); return; }
-  if (e.code === 'KeyQ') roll(-1); else if (e.code === 'KeyE') roll(1); else if (e.code === 'KeyF') nova();
+  if (e.code === 'KeyQ') roll(-1); else if (e.code === 'KeyE') roll(1); else if (e.code === 'KeyF') nova(); else if (e.code === 'KeyR') maneuver('loop'); else if (e.code === 'KeyX') maneuver('turn');
   else if (e.code === 'Escape' || e.code === 'KeyP') setPause(true);
   else if (/^Digit[1-5]$/.test(e.code)) setWeapon(+e.code[5] - 1); else if (e.code === 'Tab') { e.preventDefault(); cycleWeapon(1); }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
@@ -145,7 +147,7 @@ canvas.addEventListener('touchend', endTouch); canvas.addEventListener('touchcan
 // ---------- Objekte ----------
 function addEnt(kind, pos, o = {}) {
   const d = ENEMIES[kind] || {};
-  const e = { kind, team: 1, pos: pos.clone(), dir: V(0, 0, 1), vel: V(), speed: d.speed || 0, turn: d.turn || 0, hp: d.hp || 1, maxHp: d.hp || 1, r: d.r || 5, def: d, alive: true, state: 'attack', timer: 0, cd: rand(0.5, 2), bank: 0, objective: false, fighter: !!d.speed, tgt: null, flashT: 0, ...o };
+  const e = { kind, team: 1, pos: pos.clone(), dir: V(0, 0, 1), vel: V(), speed: d.speed || 0, turn: d.turn || 0, hp: d.hp || 1, maxHp: d.hp || 1, r: d.r || 5, def: d, alive: true, state: 'attack', timer: 0, cd: rand(0.5, 2), bank: 0, objective: false, fighter: !!d.speed && !d.static, tgt: null, flashT: 0, ...o };
   if (!e.mesh) { e.mesh = buildEnemy(kind); }
   e.mesh.position.copy(e.pos); world.add(e.mesh); G.ents.push(e); return e;
 }
@@ -161,11 +163,13 @@ function pickTarget(e) {
 }
 function spawnGroup([kind, n], objective) {
   if (kind === 'cruiser' || kind === 'dread') return spawnCapital(kind === 'dread');
+  if (kind === 'target') { for (let i = 0; i < n; i++) { const e = addEnt('target', t1.copy(P.pos).addScaledVector(P.fwd, 260 + i * 70).addScaledVector(P.right, (i - (n - 1) / 2) * 80).addScaledVector(UP, (i % 2) * 40 - 10), { objective }); e.spin = 0.5; fx.flash(e.pos, 50, [1, 0.8, 0.3], 0.5); } return; }
+  if (kind === 'hauler') { for (let i = 0; i < n; i++) { const p = spawnAround(600, 760, V()), e = addEnt('hauler', p, { objective }); e.dir.copy(P.pos).sub(p).cross(UP).normalize().multiplyScalar(i % 2 ? 1 : -1); e.dir.y = 0; e.dir.normalize(); fx.flash(p, 120, [1.4, 1.0, 0.3], 0.7); fx.ring(p, 160, [1, 0.7, 0.2], 1); } return; }
   if (kind === 'buoy') { for (let i = 0; i < n; i++) { const a = (i / n) * 6.283 + rand(0.6), e = addEnt('buoy', V(Math.cos(a) * rand(300, 620), rand(-120, 120), Math.sin(a) * rand(300, 620) + 250), { objective }); e.spin = rand(0.3, 0.8); } return; }
   const c = spawnAround(560, 820, V());
   for (let i = 0; i < n; i++) {
     const p = c.clone().add(randUnit(t1).multiplyScalar(rand(20, 90))), e = addEnt(kind, p, { objective });
-    e.dir.copy(P.pos).sub(p).normalize(); e.tgt = pickTarget(e); e.breakDist = kind === 'bomber' ? 110 : rand(50, 90);
+    e.dir.copy(P.pos).sub(p).normalize(); e.tgt = pickTarget(e); e.breakDist = kind === 'bomber' ? 110 : kind === 'kami' ? 0 : rand(50, 90); if (kind === 'kami') e.tgt = P;
     if (G.mission.endless) { const k = 1 + G.phase * 0.06; e.hp = e.maxHp = e.hp * k; }
     fx.flash(p, 60, [1.2, 0.4, 0.3], 0.5);
   }
@@ -185,13 +189,13 @@ function clearWorld() {
 
 // ---------- Mission ----------
 function startMission(m) {
-  initAudio(); startMusic(); clearWorld(); setShowcase(null); G.mission = m; G.phase = -1; G.phaseDef = null; G.t = 0; G.endT = 0; G.combo = 0; G.center.set(0, 0, 0);
+  initAudio(); startMusic(); clearWorld(); setShowcase(null); P.man = null; P.flip = 0; P.brake = 0; P.manCd = 0; G.did = {}; G.mission = m; G.phase = -1; G.phaseDef = null; G.t = 0; G.endT = 0; G.combo = 0; G.center.set(0, 0, 0);
   G.stats = { kills: 0, score: 0, credits: 0, respawns: 0, time: 0, wave: 0, convoy: 1 };
   const env = ENVS[m.env]; buildEnv(env);
   P.def = SHIPS.find((s) => s.id === save.ship) || SHIPS[0];
   P.mesh = new THREE.Group(); P.inner = buildPlayerShip(P.def.id); P.mesh.add(P.inner); world.add(P.mesh);
   P.pos.set(0, 0, 0); P.yaw = P.pitch = 0; P.maxShield = Math.round((100 + 25 * up('shield')) * P.def.shield); P.shield = P.maxShield; P.invuln = 2; P.nova = 40; P.rollT = 0; P.weapon = Math.min(P.weapon, 4);
-  if (WEAPONS[P.weapon].unlock > doneCount()) P.weapon = 0;
+  if (!weaponOpen(P.weapon) || m.tutorial) P.weapon = 0;
   camFwd.set(0, 0, 1);
   for (let i = 0; i < 1 + up('wing'); i++) { const e = addEnt('ally', V((i % 2 ? 1 : -1) * (22 + i * 9), 4, -18 - i * 8), { team: 0, mesh: buildPlayerShip(i % 3 === 2 ? 'wespe' : 'pfeil', true), speed: 76, turn: 1.7, r: 5, fighter: true, slot: i, hp: 1e9 }); e.breakDist = 70; }
   for (let i = 0; i < env.asteroids; i++) {
@@ -207,37 +211,40 @@ function nextPhase() {
   const m = G.mission; G.phase++;
   const def = m.endless ? endlessPhase(G.phase + 1) : m.phases[G.phase];
   if (!def) { G.endT = 2.6; G.phaseDef = null; return; }
-  G.phaseDef = def; G.phaseT = 0; G.stats.wave = G.phase + 1;
-  for (const g of def.spawn) spawnGroup(g, !def.goal);
+  G.phaseDef = def; G.phaseT = 0; G.stats.wave = G.phase + 1; G.did = {}; if (def.task === 'nova') P.nova = 100;
+  for (const g of def.spawn || []) spawnGroup(g, !def.goal);
   if (def.goal === 'core' && G.cap) { G.cap.core.shielded = false; G.cap.core.mesh.userData.shield.visible = false; fx.ring(G.cap.core.pos, 160, [0.3, 1, 0.6], 1.2); }
   (def.comms || []).forEach(([n, t], i) => setTimeout(() => G.mode !== 'title' && ui.comms(n, t), 900 + i * 3800));
   if (G.phase > 0) { sfx.phase(); ui.banner(def.label.toUpperCase(), m.endless ? '' : `Phase ${G.phase + 1} von ${m.phases.length}`); }
 }
 function remaining() {
   const d = G.phaseDef; if (!d) return 0;
+  if (d.task) return (d.task === 'speed' ? G.did.boost && G.did.brake : G.did[d.task]) ? 0 : 1;
   if (d.goal) return G.ents.reduce((n, e) => n + (e.alive && e.kind === d.goal ? 1 : 0), 0);
   return G.ents.reduce((n, e) => n + (e.alive && e.objective ? 1 : 0), 0);
 }
 function finishMission(quit) {
-  const m = G.mission, s = G.stats; G.mode = 'result'; sfx.beam(false);
+  const m = G.mission, s = G.stats; G.mode = 'result'; sfx.beam(false); sfx.engine(-1);
   const won = !quit || m.endless; let stars = 0, bonus = 0;
   if (won && !m.endless) {
     stars = s.respawns === 0 ? 3 : s.respawns <= 3 ? 2 : 1; if (m.convoy && s.convoy < 0.5) stars = Math.min(stars, 2);
-    const idx = MISSIONS.indexOf(m), first = !save.done[m.id]; bonus = 500 * (idx + 1) * (first ? 2 : 1); save.done[m.id] = Math.max(save.done[m.id] || 0, stars);
+    const first = !save.done[m.id]; bonus = m.tutorial ? (first ? 500 : 100) : 500 * m.n * (first ? 2 : 1); if (m.tutorial) stars = 3; save.done[m.id] = Math.max(save.done[m.id] || 0, stars);
   }
   if (m.endless) { bonus = (s.wave - 1) * 120; save.bestWave = Math.max(save.bestWave, s.wave - 1); }
   save.bestScore = Math.max(save.bestScore, s.score); save.credits += s.credits + bonus; persist();
   if (won) sfx.win(); setIntensity(0.1);
-  ui.showResult({ m, s, stars, bonus, won, newWeapon: won && !m.endless ? WEAPONS.find((w) => w.unlock === doneCount() && w.unlock > 0 && stars && MISSIONS.indexOf(m) + 1 === w.unlock) : null, newShip: won && !m.endless ? SHIPS.find((x) => x.unlock === MISSIONS.indexOf(m) + 1) : null });
+  ui.showResult({ m, s, stars, bonus, won, newWeapon: won && !m.endless ? WEAPONS.find((w) => w.unlock === doneCount() && w.unlock > 0 && stars && m.n === w.unlock) : null, newShip: won && !m.endless ? SHIPS.find((x) => x.unlock > 0 && x.unlock === m.n) : null });
 }
-function setPause(p) { if (p && G.mode === 'play') { G.mode = 'pause'; sfx.beam(false); ui.showPause(true); } else if (!p && G.mode === 'pause') { G.mode = 'play'; ui.showPause(false); last = performance.now(); } }
+function setPause(p) { if (p && G.mode === 'play') { G.mode = 'pause'; sfx.beam(false); sfx.engine(-1); ui.showPause(true); } else if (!p && G.mode === 'pause') { G.mode = 'play'; ui.showPause(false); last = performance.now(); } }
 
 // ---------- Spieleraktionen ----------
-function roll(dir) { if (G.mode !== 'play' || P.rollCd > 0) return; P.rollT = 0.5; P.rollDir = dir; P.rollCd = 1.1; sfx.roll(); }
-function setWeapon(i) { if (WEAPONS[i] && WEAPONS[i].unlock <= doneCount() && i !== P.weapon) { P.weapon = i; sfx.click(); ui.weaponChanged(); } }
-function cycleWeapon(d) { const n = WEAPONS.filter((w) => w.unlock <= doneCount()).length; setWeapon((P.weapon + d + n) % n); }
+function roll(dir) { if (G.mode !== 'play' || P.rollCd > 0 || P.man) return; P.rollT = 0.5; P.rollDir = dir; P.rollCd = 1.1; sfx.roll(); G.did.roll = true; }
+// Kunstflug: Looping (voller Kreis, danach gleiche Richtung) und Wende (halber Looping mit Rolle, danach Gegenrichtung). Unverwundbar dabei.
+function maneuver(type) { if (G.mode !== 'play' || P.man || P.rollT > 0 || P.manCd > 0) return; P.man = { type, t: 0, dur: type === 'loop' ? 1.7 : 1.2, base: P.quat.clone() }; P.manCd = (type === 'loop' ? 1.7 : 1.2) + 0.3; sfx.loop(); G.did[type] = true; ui.banner(type === 'loop' ? 'LOOPING' : 'WENDE', ''); }
+function setWeapon(i) { if (weaponOpen(i) && i !== P.weapon) { P.weapon = i; sfx.click(); G.did.weapon = true; ui.weaponChanged(); ui.toast(WEAPONS[i].name + ' · Munition ∞'); } }
+function cycleWeapon(d) { const n = WEAPONS.filter((w, i) => weaponOpen(i)).length; setWeapon((P.weapon + d + n) % n); }
 function nova() {
-  if (G.mode !== 'play' || P.nova < 100) return; P.nova = 0; sfx.nova(); G.shake = 2.2; G.slow = 0.7; ui.flash('nova');
+  if (G.mode !== 'play' || P.nova < 100) return; P.nova = 0; G.did.nova = true; sfx.nova(); G.shake = 2.2; G.slow = 0.7; ui.flash('nova');
   const dmg = 380 * (1 + 0.35 * up('nova'));
   fx.ring(P.pos, 520, [0.6, 0.9, 2], 1.1); fx.ring(P.pos, 300, [2, 1.2, 0.5], 0.8); fx.flash(P.pos, 500, [2, 2.4, 4], 0.7); fx.spark(P.pos, 90, 260, 1.0, 2.2, 0.5, 1.0, 2.6);
   for (const e of G.ents) if (e.alive && e.team !== 0 && e.pos.distanceTo(P.pos) < 520) damage(e, e.kind === 'core' || e.kind === 'gen' ? dmg * 0.6 : dmg, true);
@@ -294,7 +301,7 @@ function damage(e, dmg, silent, cont) {
 }
 function kill(e) {
   e.alive = false; world.remove(e.mesh);
-  const size = e.kind === 'rock' ? e.r / 12 : { drone: 1, inter: 0.9, bomber: 1.8, ace: 2.4, turret: 1.6, gen: 3, buoy: 2.2, core: 5 }[e.kind] || 1;
+  const size = e.kind === 'rock' ? e.r / 12 : { drone: 1, inter: 0.9, bomber: 1.8, ace: 2.4, turret: 1.6, gen: 3, buoy: 2.2, core: 5, kami: 1.3, hauler: 4.5, target: 1.6 }[e.kind] || 1;
   fx.explode(e.pos, size, e.kind === 'rock' ? [0.7, 0.6, 0.5] : e.kind === 'ace' ? [0.8, 0.4, 1.4] : e.kind === 'gen' ? [0.3, 1.2, 0.5] : [1, 0.55, 0.2], e.vel);
   const d = e.pos.distanceTo(P.pos), pan = clamp(-t1.copy(e.pos).sub(camera.position).normalize().dot(P.right) * 1.2, -1, 1); sfx.boom(clamp(size, 0.6, 3), pan, clamp(1 - d / 900, 0, 1));
   fx.spark(e.pos, 10 + size * 6, 55 + size * 20, 1.6, 0.9, 2.6, 1.3, 0.3, e.vel);                       // glühende Trümmer
@@ -306,7 +313,7 @@ function kill(e) {
   if (e.kind === 'core') { G.cap.dying = 5; G.slow = 0.8; ui.comms('Verbandschef', G.cap.dread ? 'Die Monopol bricht auseinander! Raus da, Nova Eins!' : 'Kern getroffen! Die Rendite geht hoch!'); }
 }
 function hitPlayer(dmg, pos) {
-  if (P.invuln > 0 || P.rollT > 0 || G.mode !== 'play') return;
+  if (P.invuln > 0 || P.rollT > 0 || P.man || G.mode !== 'play') return;
   P.shield -= dmg; P.regenT = 2.6; G.shake = Math.max(G.shake, 0.5); sfx.shieldHit(); ui.flash('hit'); fx.spark(pos || P.pos, 8, 30, 0.4, 2, 0.5, 1.4, 3);
   if (P.shield <= 0) {   // unendlich Leben: Notsprung statt Game Over
     G.stats.respawns++; G.combo = 0; P.shield = P.maxShield; P.invuln = 3; G.shake = 2; G.slow = 0.6; sfx.down(); ui.flash('down');
@@ -342,7 +349,7 @@ function updateFighter(e, dt) {
   t4.cross(e.dir); e.bank += (clamp(-t4.y * 45, -1.1, 1.1) - e.bank) * Math.min(1, dt * 5);
   e.vel.copy(e.dir).multiplyScalar(e.speed); e.pos.addScaledVector(e.vel, dt);
   e.mesh.position.copy(e.pos); e.mesh.lookAt(t3.copy(e.pos).add(e.dir)); e.mesh.rotateZ(e.bank);
-  if ((e.cd -= dt) < 0 && T && e.state === 'attack' && dist < 460) {
+  if ((e.cd -= dt) < 0 && T && e.state === 'attack' && dist < 460 && e.def.fire !== 0) {
     t2.normalize(); if (t2.dot(e.dir) > 0.975) {
       if (e.team === 0) { newBolt(e.pos, t3.copy(T.pos).addScaledVector(T.vel, dist / 400).sub(e.pos).normalize(), 400, 0, 7, [0.5, 1.6, 4]).r = 1.5; e.cd = 0.22; }
       else if (e.kind === 'bomber') { const b = newBolt(e.pos, t2, 110, 1, e.def.dmg, [0.5, 3.4, 0.9], 2); b.w = b.len = 2.6; b.life = 4.5; b.r = 2; b.target = T; e.cd = e.def.fire * rand(0.8, 1.3); }
@@ -351,16 +358,22 @@ function updateFighter(e, dt) {
   }
   if (e.team === 1 && e.hp < e.maxHp * 0.5 && Math.random() < dt * 30) { fx.p(e.pos.x, e.pos.y, e.pos.z, rand(-4, 4), rand(-4, 4), rand(-4, 4), 0.9, 4.5, 0.22, 0.13, 0.09); if (Math.random() < 0.4) fx.p(e.pos.x, e.pos.y, e.pos.z, rand(-8, 8), rand(-8, 8), rand(-8, 8), 0.35, 2, 2.4, 1.0, 0.2); }   // Rauch und Flammen bei Schaden
   if (e.team === 1 && (e.trailT = (e.trailT || 0) - dt) < 0) { e.trailT = 0.045; fx.p(e.pos.x - e.dir.x * 4, e.pos.y - e.dir.y * 4, e.pos.z - e.dir.z * 4, 0, 0, 0, 0.35, 2.2, e.kind === 'ace' ? 1.2 : 1.6, 0.3, e.kind === 'ace' ? 2 : 0.2); }
-  if (e.pos.distanceToSquared(P.pos) < (e.r + P.r) * (e.r + P.r) && e.team === 1) { hitPlayer(18, e.pos); damage(e, 60, true); }
+  if (e.pos.distanceToSquared(P.pos) < (e.r + P.r) * (e.r + P.r) && e.team === 1) { hitPlayer(e.kind === 'kami' ? 28 : 18, e.pos); damage(e, 60, true); }
 }
 function updateStatic(e, dt) {
   if (e.kind === 'turret') {
     const d = e.pos.distanceTo(P.pos); t2.copy(P.pos).addScaledVector(P.vel, d / 200).sub(e.pos);
     const head = e.mesh.userData.head; t3.copy(t2).normalize(); if (t3.y * e.upSign > -0.15) { head.lookAt(t4.copy(e.pos).add(t2)); }
-    if ((e.cd -= dt) < 0 && d < 720 && t3.y * e.upSign > -0.1) { randUnit(t4); t3.addScaledVector(t4, 0.03).normalize(); const p = t4.copy(e.pos).addScaledVector(t3, 10).addScaledVector(UP, 3 * e.upSign); const b = newBolt(p, t3, 200, 1, e.def.dmg, [4, 1.4, 0.3]); b.len = 10; b.w = 0.8; e.cd = e.def.fire * rand(0.6, 1.3); if (d < 400) sfx.enemyShot(); }
+    if ((e.cd -= dt) < 0 && d < 720 && t3.y * e.upSign > -0.1) { randUnit(t4); t3.addScaledVector(t4, 0.03).normalize(); const p = t4.copy(e.pos).addScaledVector(t3, 10).addScaledVector(UP, 3 * e.upSign); const b = newBolt(p, t3, 200, 1, e.def.dmg, [4, 1.4, 0.3]); b.len = 10; b.w = 0.8; e.cd = e.def.fire * rand(0.6, 1.3); if (d < 400) sfx.heavy(0.16, 1.7); }
   } else if (e.kind === 'buoy') { e.mesh.rotation.y += e.spin * dt; e.mesh.rotation.x += e.spin * 0.3 * dt; }
   else if (e.kind === 'rock') { e.mesh.rotateOnAxis(e.spinAx, e.spin * dt); }
   else if (e.kind === 'core') { e.mesh.rotation.y += dt * 0.6; e.mesh.rotation.x += dt * 0.25; }
+  else if (e.kind === 'hauler') {   // Goldtransporter: zieht stur seine Bahn und wehrt sich mit zwei Bordkanonen
+    e.vel.copy(e.dir).multiplyScalar(e.speed); e.pos.addScaledVector(e.vel, dt); e.mesh.position.copy(e.pos); e.mesh.lookAt(t3.copy(e.pos).add(e.dir));
+    if (Math.random() < 0.5) fx.p(e.pos.x - e.dir.x * 40, e.pos.y, e.pos.z - e.dir.z * 40, 0, 0, 0, 0.6, 6, 2.0, 0.6, 0.2);
+    const d = e.pos.distanceTo(P.pos); if ((e.cd -= dt) < 0 && d < 620) { t3.copy(P.pos).addScaledVector(P.vel, d / 200).sub(e.pos).normalize(); randUnit(t4); t3.addScaledVector(t4, 0.035).normalize(); const b = newBolt(t4.copy(e.pos).addScaledVector(UP, 9), t3, 200, 1, e.def.dmg, [4, 2.4, 0.4]); b.len = 10; b.w = 0.8; e.cd = e.def.fire * rand(0.6, 1.3); if (d < 400) sfx.heavy(0.14, 1.5); }
+  }
+  else if (e.kind === 'target') { e.mesh.rotation.y += dt * 0.6; }
   else if (e.kind === 'transport') { e.pos.z += e.speed * dt; e.vel.set(0, 0, e.speed); e.mesh.position.copy(e.pos); if (Math.random() < 0.5) fx.p(e.pos.x + rand(-5, 5), e.pos.y, e.pos.z - 40, 0, 0, -30, 0.5, 5, 0.4, 1.4, 3); }
   if (e.team !== 0 && e.kind !== 'rock' ? false : false) return;
   if (e.kind !== 'transport' && e.pos.distanceToSquared(P.pos) < (e.r + P.r) * (e.r + P.r) && P.hullCd <= 0) { bounce(e.pos, e.r); if (e.kind === 'rock') damage(e, 40, true); }
@@ -439,20 +452,30 @@ function updatePlayer(dt) {
   // Autopilot zurück ins Kampfgebiet
   const off = t1.copy(P.pos).sub(G.center), od = off.length(); G.outside = od > 2300;
   P.sx += (ix - P.sx) * Math.min(1, dt * 9); P.sy += (iy - P.sy) * Math.min(1, dt * 9);
-  const boosting = (keys.ShiftLeft || keys.ShiftRight || input.boost) && P.rollT <= 0;
+  const boosting = (keys.ShiftLeft || keys.ShiftRight || input.boost) && P.rollT <= 0, braking = (keys.KeyC || keys.ControlLeft || input.brake) && !boosting;
   if (boosting && P.boost < 0.05) sfx.boost();
-  P.boost += ((boosting ? 1 : 0) - P.boost) * Math.min(1, dt * 4);
-  const eng = 1 + 0.08 * up('engine'), turn = 1.55 * P.def.turn * eng * (1 - P.boost * 0.35);
-  P.yaw -= P.sx * turn * dt; P.pitch = clamp(P.pitch + P.sy * turn * 0.85 * dt, -1.35, 1.35);
-  if (G.outside) { const want = Math.atan2(-off.x, -off.z); let d = want - P.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); P.yaw += clamp(d, -1, 1) * dt * 1.2; P.pitch += (Math.asin(clamp(off.y / od, -1, 1)) * 0.5 - P.pitch) * dt; }
-  eul.set(P.pitch, P.yaw, 0); P.quat.setFromEuler(eul); P.fwd.set(0, 0, 1).applyQuaternion(P.quat); P.right.set(-1, 0, 0).applyQuaternion(P.quat);
-  P.speed = 72 * P.def.speed * eng * (1 + P.boost * 0.95);
+  P.boost += ((boosting ? 1 : 0) - P.boost) * Math.min(1, dt * 4); P.brake += ((braking ? 1 : 0) - P.brake) * Math.min(1, dt * 5);
+  if (P.boost > 0.8) G.did.boost = true; if (P.brake > 0.8) G.did.brake = true; P.manCd -= dt;
+  const eng = 1 + 0.08 * up('engine'), turn = 1.55 * P.def.turn * eng * (1 - P.boost * 0.35) * (1 + P.brake * 0.45);
+  if (P.man) {   // Kunstflugfigur: Drehung um die eigene Querachse, Steuerung ruht
+    const m = P.man; m.t += dt; const k = Math.min(1, m.t / m.dur), e = k * k * (3 - 2 * k);
+    P.quat.copy(m.base).multiply(qMan.setFromAxisAngle(XAX, -e * (m.type === 'loop' ? Math.PI * 2 : Math.PI)));
+    if (k >= 1) { if (m.type === 'turn') { P.yaw += Math.PI; P.pitch = -P.pitch; P.flip = Math.PI; } P.man = null; }
+  }
+  if (!P.man) {
+    P.yaw -= P.sx * turn * dt; P.pitch = clamp(P.pitch + P.sy * turn * 0.85 * dt, -1.35, 1.35);
+    if (G.outside) { const want = Math.atan2(-off.x, -off.z); let d = want - P.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); P.yaw += clamp(d, -1, 1) * dt * 1.2; P.pitch += (Math.asin(clamp(off.y / od, -1, 1)) * 0.5 - P.pitch) * dt; }
+    eul.set(P.pitch, P.yaw, 0); P.quat.setFromEuler(eul);
+  }
+  P.flip = Math.max(0, (P.flip || 0) - dt * 5.5);
+  P.fwd.set(0, 0, 1).applyQuaternion(P.quat); P.right.set(-1, 0, 0).applyQuaternion(P.quat);
+  P.speed = 72 * P.def.speed * eng * (1 + P.boost * 0.95) * (1 - P.brake * 0.55) * (P.man ? 1.25 : 1);
   P.vel.copy(P.fwd).multiplyScalar(P.speed);
   let spin = 0;
   if (P.rollT > 0) { P.rollT -= dt; const k = 1 - P.rollT / 0.5; P.vel.addScaledVector(P.right, P.rollDir * 150 * Math.sin(k * Math.PI)); spin = P.rollDir * k * Math.PI * 2; }
   P.rollCd -= dt; P.hullCd -= dt; P.invuln -= dt; P.fireCd -= dt;
   P.pos.addScaledVector(P.vel, dt);
-  P.mesh.position.copy(P.pos); P.mesh.quaternion.copy(P.quat); P.inner.rotation.set(P.sy * 0.12, 0, P.sx * 0.85 + spin);
+  P.mesh.position.copy(P.pos); P.mesh.quaternion.copy(P.quat); P.inner.rotation.set(P.sy * 0.12, 0, P.sx * 0.85 + spin + P.flip);
   P.mesh.visible = P.invuln <= 0 || Math.sin(G.t * 40) > -0.3;
   if ((P.regenT -= dt) < 0 && P.shield < P.maxShield) P.shield = Math.min(P.maxShield, P.shield + (14 + 5 * up('shield')) * dt);
   P.nova = Math.min(100, P.nova + (2.2 + up('nova') * 0.9) * dt);
@@ -469,8 +492,8 @@ function updatePlayer(dt) {
   if (wantFire) fire(dt); if (!wantFire || WEAPONS[P.weapon].id !== 'beam') { beam.visible = false; if (G.beamOn) { G.beamOn = false; sfx.beam(false); } }
 }
 function updateCamera(dt) {
-  camFwd.lerp(P.fwd, 1 - Math.exp(-5.5 * dt)).normalize();
-  const portrait = camera.aspect < 1, dist = (portrait ? 34 : 27) + P.boost * 5;
+  if (!P.man) { if (camFwd.dot(P.fwd) < -0.9) camFwd.addScaledVector(P.right, 0.4).normalize(); camFwd.lerp(P.fwd, 1 - Math.exp(-5.5 * dt)).normalize(); }   // in der Figur bleibt die Kamera stehen und zeigt sie von außen
+  const portrait = camera.aspect < 1, dist = (portrait ? 34 : 27) + P.boost * 5 - P.brake * 4 + (P.man ? 16 : 0);
   camera.position.copy(P.pos).addScaledVector(camFwd, -dist).addScaledVector(UP, portrait ? 10 : 7.5);
   if (G.shake > 0) { camera.position.x += rand(-1, 1) * G.shake * 1.4; camera.position.y += rand(-1, 1) * G.shake * 1.4; G.shake = Math.max(0, G.shake - dt * 2.4); }
   camera.lookAt(t1.copy(P.pos).addScaledVector(camFwd, 70).addScaledVector(UP, 3));
@@ -532,7 +555,7 @@ function frame(now) {
     else if (G.endT > 0 && !(G.cap && !G.cap.dead)) { G.endT -= dt; if (G.endT <= 0) finishMission(false); }
     const threat = G.ents.some((e) => e.team === 1 && e.alive); G.intensity += ((threat ? 1 : 0.4) - G.intensity) * dt; setIntensity(G.intensity);
     updateCamera(dt); fx.update(dt, camera); boltMesh.draw(G.bolts);
-    if ((hudT -= dt) < 0) { hudT = 0.06; ui.hud({ P, G, remaining: remaining(), outside: G.outside }); }
+    if ((hudT -= dt) < 0) { hudT = 0.06; sfx.engine(1 + P.boost - P.brake * 0.7 + (P.man ? 0.6 : 0)); ui.hud({ P, G, remaining: remaining(), outside: G.outside }); }
   } else if (G.mode !== 'pause') {
     // Hangar und Titel: langsamer Kameraschwenk durch den Himmel
     menuYaw += dt * 0.05; const my = menuBase + Math.sin(menuYaw) * 0.35; camera.position.set(0, 0, 0); if (Math.abs(camera.fov - 62) > 0.1) { camera.fov = 62; camera.updateProjectionMatrix(); } camera.lookAt(Math.sin(my) * 10, 0.6 + Math.sin(menuYaw * 0.7) * 0.5, Math.cos(my) * 10); sky.position.set(0, 0, 0); far.position.set(0, 0, 0);
@@ -560,7 +583,8 @@ const ui = createUI({
   toHangar: () => toHangar(),
   settings: () => { audioState.sound = save.set.sound; audioState.music = save.set.music; applyAudioState(); persist(); },
   quality: () => { persist(); setupQuality(); },
-  act: { roll, nova, setWeapon, cycleWeapon, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; } },
+  act: { roll, nova, setWeapon, cycleWeapon, maneuver, fire: (v) => { input.fire = v; }, boost: (v) => { input.boost = v; }, brake: (v) => { input.brake = v; } },
+  weaponOpen,
   audio: () => { initAudio(); startMusic(); },
   getWeapon: () => P.weapon,
   showcase: setShowcase,

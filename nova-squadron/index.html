@@ -77,15 +77,26 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 #stick { position: absolute; left: 0; top: 0; width: 0; height: 0; pointer-events: none; }
 #stick::before { content: ""; position: absolute; left: -62px; top: -62px; width: 124px; height: 124px; border-radius: 50%; border: 2px solid rgba(160, 200, 255, 0.4); background: rgba(90, 140, 255, 0.08); }
 #knob { position: absolute; left: -26px; top: -26px; width: 52px; height: 52px; border-radius: 50%; background: rgba(160, 210, 255, 0.5); }
-#touch { position: absolute; right: var(--gr); bottom: calc(var(--gb) + 56px); width: 190px; height: 190px; font-family: var(--display); }
-#touch button { position: absolute; border-radius: 50%; border: 2px solid var(--line); background: rgba(12, 20, 38, 0.55); font-size: 10px; font-weight: 700; letter-spacing: 0.08em; }
+#touch { position: absolute; right: var(--gr); bottom: calc(var(--gb) + 56px); width: 262px; height: 236px; font-family: var(--display); pointer-events: none; }
+#touch button { position: absolute; pointer-events: auto; border-radius: 50%; border: 2px solid var(--line); background: rgba(12, 20, 38, 0.55); font-size: 10px; font-weight: 700; letter-spacing: 0.06em; width: 58px; height: 58px; padding: 0; }
 #touch button.down { background: rgba(90, 170, 255, 0.4); }
-#t-fire { right: 0; bottom: 0; width: 98px; height: 98px; border-color: rgba(255, 110, 80, 0.7) !important; font-size: 13px !important; }
-#t-boost { right: 108px; bottom: 4px; width: 64px; height: 64px; }
-#t-rr { right: 6px; bottom: 108px; width: 58px; height: 58px; }
-#t-rl { right: 72px; bottom: 82px; width: 58px; height: 58px; }
-#t-nova { right: 124px; bottom: 80px; width: 58px; height: 58px; opacity: 0.4; }
+#t-fire { right: 0; bottom: 0; width: 98px !important; height: 98px !important; border-color: rgba(255, 110, 80, 0.7) !important; font-size: 13px !important; }
+#t-boost { right: 108px; bottom: 2px; width: 64px !important; height: 64px !important; }
+#t-brake { right: 182px; bottom: 6px; }
+#t-rr { right: 4px; bottom: 108px; }
+#t-rl { right: 70px; bottom: 88px; }
+#t-loop { right: 136px; bottom: 78px; border-color: rgba(89, 200, 255, 0.6) !important; }
+#t-turn { right: 200px; bottom: 76px; border-color: rgba(89, 200, 255, 0.6) !important; }
+#t-nova { right: 40px; bottom: 174px; opacity: 0.4; }
 #t-nova.ready { opacity: 1; border-color: var(--gold) !important; color: var(--gold); box-shadow: 0 0 18px rgba(255, 209, 102, 0.6); }
+.spd { color: var(--dim); margin-left: 10px; } .spd b { color: var(--ink); font-variant-numeric: tabular-nums; display: inline-block; min-width: 3ch; }
+#toast { left: 50%; bottom: calc(var(--gb) + 62px); transform: translateX(-50%); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); opacity: 0; white-space: nowrap; text-shadow: 0 1px 8px #000; }
+#toast.show { animation: toast 1.6s ease-out; }
+@keyframes toast { 0% { opacity: 0; transform: translate(-50%, 8px); } 12% { opacity: 1; transform: translate(-50%, 0); } 75% { opacity: 1; } 100% { opacity: 0; } }
+#obj-n { text-wrap: balance; }
+.intro .title-art::after { background: linear-gradient(90deg, rgba(4, 6, 12, 0.96) 0%, rgba(4, 6, 12, 0.72) 52%, rgba(4, 6, 12, 0.25) 100%), linear-gradient(0deg, rgba(4, 6, 12, 0.9), transparent 45%); }
+.story-h { font-size: clamp(30px, 6vw, 60px); letter-spacing: 0.03em; line-height: 1; } .story-p { max-width: 46ch; font-size: clamp(16px, 2.1vw, 20px); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 body.touch #comms { bottom: auto; top: calc(var(--gt) + 92px); }
 body.touch .hint-desktop { display: none; }
 
@@ -165,7 +176,7 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
 }
 /* Tablet: größere Tasten für die Daumen */
 @media (min-width: 700px) and (min-height: 600px) { #touch { transform: scale(1.4); transform-origin: bottom right; right: calc(var(--gr) + 14px); bottom: calc(var(--gb) + 70px); } #stick { transform-origin: 0 0; } #stick::before { left: -80px; top: -80px; width: 160px; height: 160px; } .wchip { padding: 10px 14px 8px; font-size: 13px; } #b-pause { width: 52px; height: 44px; } }
-@media (max-height: 520px) { #touch { bottom: calc(var(--gb) + 46px); transform: scale(0.86); transform-origin: bottom right; } #banner { top: 16%; } }
+@media (max-height: 520px) { body.touch #weapons { left: var(--gl); transform: none; }  #touch { bottom: calc(var(--gb) + 46px); transform: scale(0.86); transform-origin: bottom right; } #banner { top: 16%; } }
 @media (prefers-reduced-motion: reduce) { .title-art, #warn, #nova.ready .lab b { animation: none; } }
 </style>
 <div id="app">
@@ -176,7 +187,7 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
     <div class="status">
       <div id="shield"><div class="lab"><span>Schild</span><b>Leben ∞</b></div><div class="meter"><i id="shield-fill"></i></div></div>
       <button id="nova"><div class="lab"><span>Nova-Welle</span><b class="hint-desktop">F</b></div><div class="meter"><i id="nova-fill"></i></div></button>
-      <div class="inf">Munition ∞</div>
+      <div class="inf">Munition ∞ <span class="spd">Tempo <b id="spd">0</b></span></div>
     </div>
     <div class="objective"><div id="obj"></div><div id="obj-n"></div>
       <div id="boss" hidden><span id="boss-name"></span><div class="meter"><i id="boss-fill"></i></div></div>
@@ -185,12 +196,13 @@ h1, h2 { font-family: var(--display); margin: 0; text-wrap: balance; }
     <div class="score"><b id="score">0</b><small id="cr">+0</small><span id="combo" hidden></span><button id="b-pause" aria-label="Pause">II</button></div>
     <div id="warn" hidden>Kampfgebiet verlassen<br>Autopilot dreht um</div>
     <div id="banner"></div>
+    <div id="toast"></div>
     <div id="comms"></div>
     <div id="weapons"></div>
   </div>
   <div id="stick" hidden><div id="knob"></div></div>
   <div id="touch" hidden>
-    <button id="t-nova">NOVA</button><button id="t-rl">◄ ROLLE</button><button id="t-rr">ROLLE ►</button><button id="t-boost">SCHUB</button><button id="t-fire">FEUER</button>
+    <button id="t-nova">NOVA</button><button id="t-loop">LOOP</button><button id="t-turn">WENDE</button><button id="t-rl">◄ ROLLE</button><button id="t-rr">ROLLE ►</button><button id="t-brake">BREMSE</button><button id="t-boost">SCHUB</button><button id="t-fire">FEUER</button>
   </div>
   <div id="screen" class="screen"></div>
 </div>
