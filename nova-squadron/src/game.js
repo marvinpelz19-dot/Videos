@@ -605,7 +605,7 @@ function frame(now) {
     // Phasenfortschritt
     if (G.phaseDef) { G.phaseT += dt; if (G.phaseT > 1 && remaining() === 0) nextPhase(); }
     else if (G.endT > 0 && !(G.cap && !G.cap.dead)) { G.endT -= dt; if (G.endT <= 0) finishMission(false); }
-    const threat = G.ents.some((e) => e.team === 1 && e.alive); G.intensity += ((threat ? 1 : 0.4) - G.intensity) * dt; setIntensity(G.intensity);
+    const threat = G.ents.some((e) => e.team === 1 && e.alive); G.intensity += ((threat ? 1 : 0.4) - G.intensity) * dt; setIntensity(G.intensity * (G.cap && !G.cap.dead ? 1.25 : G.ents.some((e) => e.def.big && e.alive) ? 1.1 : 0.85));
     updateWave(dt); if (G.hitT > 0) G.hitT -= dt;
     updateCamera(dt); fx.update(dt, camera); blast.update(dt); boltMesh.draw(G.bolts);
     if ((hudT -= dt) < 0) { hudT = 0.06; sfx.engine(1 + P.boost - P.brake * 0.7 + (P.man ? 0.6 : 0)); ui.hud({ P, G, remaining: remaining(), outside: G.outside }); }

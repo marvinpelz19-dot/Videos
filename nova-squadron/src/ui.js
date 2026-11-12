@@ -113,7 +113,7 @@ export function createUI(api) {
   function settings() {
     const s = save.set, tg = (k, n, d) => `<div class="ucard"><div><b>${n}</b><small>${d}</small></div><button class="btn" data-set="${k}">${s[k] ? 'An' : 'Aus'}</button></div>`;
     return `<div class="ups"><div class="ucard"><div><b>Grafik</b><small>Hoch mit Leuchteffekten. Niedrig für ältere Geräte.</small></div><span class="seg">${[['low', 'Niedrig'], ['medium', 'Mittel'], ['high', 'Hoch']].map(([v, n]) => `<button class="btn${s.quality === v ? '' : ' ghost'}" data-set="quality" data-v="${v}">${n}</button>`).join('')}</span></div>
-      ${tg('sound', 'Effekte', 'Waffen, Explosionen, Funk')}${tg('music', 'Musik', 'Der Marsch der Nova Squadron')}${tg('autofire', 'Auto-Feuer', 'Feuert selbst, sobald ein Ziel im Fadenkreuz liegt')}${tg('invertY', 'Höhenruder umkehren', 'Stick nach unten zieht die Nase hoch')}</div>
+      ${tg('sound', 'Effekte', 'Waffen, Explosionen, Funk')}${tg('music', 'Musik', 'Eigene Filmmusik: Hörner, Streicher, Taikos')}${tg('autofire', 'Auto-Feuer', 'Feuert selbst, sobald ein Ziel im Fadenkreuz liegt')}${tg('invertY', 'Höhenruder umkehren', 'Stick nach unten zieht die Nase hoch')}</div>
       <div class="keys"><h2 class="sec">Steuerung</h2><p><b>Tastatur und Maus:</b> Maus oder WASD steuern · Leertaste oder linke Maustaste feuert · Umschalt Schub · Q / E Ausweichrolle · F Nova-Welle · 1–5 oder Mausrad Waffe · Esc Pause</p><p><b>Touch:</b> linker Daumen steuert · rechts Feuer, Schub, Rolle, Nova · Waffe antippen zum Wechseln</p></div>`;
   }
 

@@ -11,7 +11,7 @@ export function initAudio() {
   ctx = new AC();
   master = ctx.createDynamicsCompressor(); master.threshold.value = -14; master.ratio.value = 6; master.connect(ctx.destination);
   sfxBus = ctx.createGain(); sfxBus.gain.value = 0.5; sfxBus.connect(master);
-  musicBus = ctx.createGain(); musicBus.gain.value = 0.34; musicBus.connect(master);
+  musicBus = ctx.createGain(); musicBus.gain.value = 0.5; musicBus.connect(master);
   noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
   const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   // Hall: künstliche Impulsantwort (2,4 s abklingendes Rauschen)
@@ -27,7 +27,7 @@ export function initAudio() {
 const rec = {}; let drive = null, eng = null;
 export function applyAudioState() {
   if (!ctx) return;
-  sfxBus.gain.value = audioState.sound ? 0.5 : 0; musicBus.gain.value = audioState.music ? 0.34 : 0;
+  sfxBus.gain.value = audioState.sound ? 0.5 : 0; musicBus.gain.value = audioState.music ? 0.5 : 0;
 }
 function env(g, t, a, peak, dur) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); }
 function tone(type, f0, f1, dur, vol, bus = sfxBus, when = 0, attack = 0.005) {
@@ -121,29 +121,46 @@ export const sfx = {
   },
 };
 
-// ---- Musik: düsterer Marsch in d-Moll, 16tel-Raster. intensity 0 (Hangar) bis 1 (Kampf). ----
-const ROOTS = [38, 38, 34, 36, 38, 41, 36, 33];           // D D Bb C D F C A
-const CHORD = { 38: [0, 3, 7], 34: [0, 4, 7], 36: [0, 4, 7], 41: [0, 4, 7], 33: [0, 4, 7] };
+// ---- Musik: eigene Filmmusik in d-Moll, live erzeugt. Schichten je nach Lage: Chorfläche und Hornthema (immer),
+// Streicher-Ostinato und Taikos (Gefecht), hohe Spiccato-Streicher (hitziges Gefecht), Blech-„Braam“ (Großkampfschiff).
+const PROG = [[38, 0], [38, 0], [34, 1], [34, 1], [41, 1], [41, 1], [36, 1], [33, 1]];        // Dm Dm B B F F C A  (0 = Moll, 1 = Dur)
+const THEME = [[62, 0, 8], [69, 8, 8], [65, 16, 12], [64, 28, 4], [62, 32, 8], [70, 40, 8], [69, 48, 16], [72, 64, 8], [69, 72, 8], [65, 80, 12], [67, 92, 4], [64, 96, 8], [67, 104, 8], [69, 112, 8], [73, 120, 8]];   // Ton, Start, Länge in Sechzehnteln
+const OST = [0, 0, 7, 0, 12, 0, 7, 0, 0, 0, 7, 0, 12, 7, 3, 7];
 const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+let mVerb = null;
+function voice(type, f, t, dur, vol, cut, att = 0.01, det = 0, wet = 0.3, cutEnd = 0) {
+  const o = ctx.createOscillator(), g = ctx.createGain(), fl = ctx.createBiquadFilter(); o.type = type; o.frequency.value = f; o.detune.value = det;
+  fl.type = 'lowpass'; fl.frequency.setValueAtTime(cut, t); if (cutEnd) fl.frequency.exponentialRampToValueAtTime(cutEnd, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(vol, t + att); g.gain.setValueAtTime(vol, t + Math.max(att, dur * 0.6)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(fl).connect(g).connect(musicBus); if (wet && mVerb) { const w = ctx.createGain(); w.gain.value = wet; g.connect(w).connect(mVerb); }
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function drum(t, vol, f0 = 95, len = 0.5) {   // Taiko: Fell (Sinus mit Tonhöhenfall) plus Schlägel (Rauschen)
+  const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(34, t + len * 0.6); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len); o.connect(g).connect(musicBus); if (mVerb) g.connect(mVerb); o.start(t); o.stop(t + len + 0.05);
+  const n = ctx.createBufferSource(), ng = ctx.createGain(), nf = ctx.createBiquadFilter(); n.buffer = noiseBuf; nf.type = 'lowpass'; nf.frequency.value = 900; ng.gain.setValueAtTime(vol * 0.5, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.09); n.connect(nf).connect(ng).connect(musicBus); n.start(t, Math.random()); n.stop(t + 0.12);
+}
 function musicStep(t) {
-  const bar = Math.floor(step / 16) % ROOTS.length, s = step % 16, root = ROOTS[bar], ch = CHORD[root];
-  if (s === 0) {                                           // Fläche
-    for (const iv of ch) { const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.value = hz(root + 12 + iv); o.detune.value = (Math.random() - 0.5) * 14; f.type = 'lowpass'; f.frequency.value = 500 + intensity * 900; g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.07, t + 0.5); g.gain.linearRampToValueAtTime(0.0001, t + 2.1); o.connect(f).connect(g).connect(musicBus); o.start(t); o.stop(t + 2.2); }
-    tone('sine', hz(root - 12), hz(root - 12), 1.9, 0.3, musicBus, t - ctx.currentTime, 0.05);
+  if (!mVerb) { mVerb = ctx.createConvolver(); mVerb.buffer = reverb.buffer; const g = ctx.createGain(); g.gain.value = 0.7; mVerb.connect(g).connect(musicBus); }
+  const I = intensity, bar = Math.floor(step / 16) % 8, s = step % 16, [root, maj] = PROG[bar], third = maj ? 4 : 3, ch = [0, third, 7], sp = 60 / (84 + Math.min(1, I) * 30) / 4;
+  if (s === 0) {   // Chorfläche: Akkord in zwei Oktaven, leicht verstimmt
+    for (const iv of ch) for (const oc of [12, 24]) voice('sawtooth', hz(root + oc + iv), t, sp * 17, 0.035, 420 + I * 500, sp * 5, (Math.random() - 0.5) * 16, 0.6);
+    voice('sine', hz(root - 12), t, sp * 17, 0.22, 200, 0.2, 0, 0);
+    if (I > 0.9 && bar % 4 === 0) for (const d of [-14, -5, 6, 13]) voice('sawtooth', hz(root - 12), t, sp * 30, 0.085, 150, 0.12, d, 0.5, 1300);   // Braam
   }
-  if (intensity > 0.3) {
-    if (s % 4 === 0 || (s === 14 && bar % 2)) tone('sine', 110, 38, 0.22, 0.55 * intensity, musicBus, t - ctx.currentTime);   // Trommel
-    if (s % 2 === 0) tone('sawtooth', hz(root), hz(root), 0.11, 0.1 * intensity, musicBus, t - ctx.currentTime);               // Bass-Ostinato
-    if (s === 4 || s === 12) { const g = ctx.createGain(), n = ctx.createBufferSource(), f = ctx.createBiquadFilter(); n.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = 2500; env(g, t, 0.002, 0.12 * intensity, 0.12); n.connect(f).connect(g).connect(musicBus); n.start(t, Math.random()); n.stop(t + 0.15); }
+  for (const [note, st, len] of THEME) if (st === bar * 16 + s) { const v = 0.05 + (1 - Math.min(1, I)) * 0.05; voice('sawtooth', hz(note - 12), t, sp * len * 1.05, v, 950, 0.07, -6, 0.7); voice('sawtooth', hz(note - 12), t, sp * len * 1.05, v, 950, 0.07, 7, 0.7); voice('triangle', hz(note), t, sp * len, v * 0.5, 1800, 0.09, 0, 0.7); }   // Hörner
+  if (I > 0.25) {
+    if (s % 2 === 0 || I > 0.75) { const n = root + (OST[s] === 3 ? third : OST[s]); voice('sawtooth', hz(n), t, sp * 1.5, (s % 4 === 0 ? 0.11 : 0.07) * Math.min(1, I + 0.3), 500 + I * 900, 0.004, 0, 0.15, 220); voice('sawtooth', hz(n + 12), t, sp * 1.2, 0.03 * I, 1400, 0.004, 9, 0.15, 300); }   // tiefe Streicher
+    if (s === 0) drum(t, 0.7 * Math.min(1, I + 0.2), 105, 0.7); else if (s === 8) drum(t, 0.5 * I, 90, 0.5);
+    if (bar % 2 === 1 && s >= 12) drum(t, (0.2 + (s - 12) * 0.09) * I, 120 + (s - 12) * 8, 0.25);                       // Auftakt-Wirbel
+    if (I > 0.6 && (s === 6 || s === 14)) drum(t, 0.3 * I, 150, 0.2);
   }
-  const arp = [0, 2, 1, 2, 0, 2, 1, 2, 0, 1, 2, 1, 0, 2, 1, 0][s];
-  if (s % 2 === 0 || intensity > 0.6) tone('triangle', hz(root + 24 + ch[arp]), hz(root + 24 + ch[arp]), 0.16, 0.05 + 0.04 * intensity, musicBus, t - ctx.currentTime);
-  if (s === 0 && bar % 4 === 0) { [0, 7, 12].forEach((iv, i) => tone('square', hz(62 + iv), hz(62 + iv), 0.5, 0.035 + intensity * 0.03, musicBus, t - ctx.currentTime + i * 0.25, 0.03)); }   // Fanfare
+  if (I > 0.55) { const iv = ch[[0, 1, 2, 1, 2, 1, 0, 1, 2, 0, 1, 2, 1, 0, 2, 1][s]]; voice('sawtooth', hz(root + 36 + iv), t, sp * 0.9, 0.028 * I, 2600, 0.003, 0, 0.35, 700); }   // hohe Spiccato-Streicher
+  if (bar === 7 && s === 8) { const n = ctx.createBufferSource(), g = ctx.createGain(), f = ctx.createBiquadFilter(); n.buffer = noiseBuf; f.type = 'bandpass'; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(5000, t + sp * 8); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.09 + I * 0.1, t + sp * 7.6); g.gain.exponentialRampToValueAtTime(0.0001, t + sp * 8.4); n.connect(f).connect(g).connect(musicBus); if (mVerb) g.connect(mVerb); n.start(t, 0); n.stop(t + sp * 9); }   // Anschwellen vor der Eins
   step++;
 }
 export function setIntensity(v) { intensity = v; }
 export function startMusic() {
   if (!ctx || musicOn) return; musicOn = true; nextT = ctx.currentTime + 0.1;
-  musicTimer = setInterval(() => { if (!ctx || ctx.state !== 'running') return; const sp = 60 / (96 + intensity * 30) / 4; if (nextT < ctx.currentTime) nextT = ctx.currentTime + 0.05; while (nextT < ctx.currentTime + 0.25) { musicStep(nextT); nextT += sp; } }, 60);
+  musicTimer = setInterval(() => { if (!ctx || ctx.state !== 'running') return; const sp = 60 / (84 + Math.min(1, intensity) * 30) / 4; if (nextT < ctx.currentTime) nextT = ctx.currentTime + 0.05; while (nextT < ctx.currentTime + 0.25) { musicStep(nextT); nextT += sp; } }, 60);
 }
 export function suspendAudio(s) { if (ctx) (s ? ctx.suspend() : ctx.resume()); }
