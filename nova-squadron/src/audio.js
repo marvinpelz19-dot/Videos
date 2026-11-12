@@ -102,6 +102,17 @@ export const sfx = {
     if (!eng) { const o = ctx.createOscillator(), o2 = ctx.createOscillator(), n = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain(), ng = ctx.createGain(); o.type = 'sawtooth'; o2.type = 'triangle'; n.buffer = noiseBuf; n.loop = true; f.type = 'lowpass'; ng.gain.value = 0.5; g.gain.value = 0; o.connect(f); o2.connect(f); n.connect(ng).connect(f); f.connect(g).connect(sfxBus); o.start(); o2.start(); n.start(); eng = { o, o2, f, g }; }
     const tt = ctx.currentTime; eng.o.frequency.setTargetAtTime(38 + k * 26, tt, 0.15); eng.o2.frequency.setTargetAtTime(77 + k * 55, tt, 0.15); eng.f.frequency.setTargetAtTime(160 + k * 520, tt, 0.15); eng.g.gain.setTargetAtTime(0.035 + k * 0.05, tt, 0.15);
   },
+  // Erfolgsfanfare: Blechbläser in D-Dur, Pauke, Becken. big = Bosssieg (länger, mit Schlussakkord)
+  fanfare(big) {
+    if (!ctx) return; duck(big ? 4.5 : 3); const t0 = ctx.currentTime + 0.05, seq = big ? [[62, 0, 0.22], [66, 0.22, 0.22], [69, 0.44, 0.22], [74, 0.66, 0.5], [71, 1.16, 0.22], [74, 1.38, 0.22], [78, 1.6, 1.6]] : [[62, 0, 0.16], [66, 0.16, 0.16], [69, 0.32, 0.16], [74, 0.48, 1.1]];
+    const brass = (m, t, d, v) => { for (const [det, oc] of [[-7, 0], [6, 0], [0, -12], [3, 12]]) { const o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.value = 440 * Math.pow(2, (m + oc - 69) / 12); o.detune.value = det; f.type = 'lowpass'; f.frequency.setValueAtTime(700, t); f.frequency.linearRampToValueAtTime(2600, t + 0.06); f.frequency.linearRampToValueAtTime(1500, t + d); g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v * (oc === 12 ? 0.4 : 1), t + 0.03); g.gain.setValueAtTime(v * (oc === 12 ? 0.4 : 1), t + d * 0.75); g.gain.exponentialRampToValueAtTime(0.0001, t + d + 0.12); o.connect(f).connect(g).connect(sfxBus); g.connect(reverb); o.start(t); o.stop(t + d + 0.2); } };
+    for (const [m, at, d] of seq) brass(m, t0 + at, d, 0.07);
+    const last = seq[seq.length - 1]; for (const iv of [4, 7]) brass(last[0] - 12 + iv, t0 + last[1], last[2], 0.045);        // Schlussakkord
+    for (const at of big ? [0, 0.66, 1.6] : [0, 0.48]) setTimeout(() => { tone('sine', 110, 40, 0.6, 0.7); noise(0.08, 0.3, 900, 300); }, (at + 0.05) * 1000);   // Pauke
+    setTimeout(() => noise(big ? 2.4 : 1.4, 0.22, 9000, 5000, 0.5, 'highpass'), (last[1] + 0.05) * 1000);                         // Becken
+  },
+  jam() { tone('square', 1400, 200, 0.35, 0.16); tone('sawtooth', 90, 60, 0.4, 0.2); noise(0.3, 0.25, 4000, 500, 3, 'bandpass'); },
+  pick() { tone('triangle', 587, 587, 0.12, 0.2); tone('triangle', 880, 880, 0.16, 0.2, sfxBus, 0.1); tone('triangle', 1175, 1175, 0.4, 0.2, sfxBus, 0.2); },
   loop() { noise(1.3, 0.3, 300, 2600, 1.1, 'bandpass'); tone('sawtooth', 90, 240, 0.7, 0.14, sfxBus, 0, 0.1); tone('sawtooth', 240, 80, 0.7, 0.12, sfxBus, 0.7, 0.05); },
   nova() { play(rec.crunch, 1, 0.35, 0, 0.9); play(rec.heavy, 0.6, 0.4, 0, 0.6); noise(1.8, 0.9, 160, 7000, 0.7); tone('sine', 55, 28, 1.8, 1); tone('sawtooth', 180, 1900, 0.8, 0.2); play(bank?.boom, 1, 0.5, 0, 0.8); },
   down() { tone('sawtooth', 600, 80, 0.7, 0.35); noise(0.9, 0.6, 3000, 80); play(bank?.boom, 0.8, 0.8, 0, 0.6); },
@@ -140,6 +151,7 @@ function drum(t, vol, f0 = 95, len = 0.5) {   // Taiko: Fell (Sinus mit Tonhöhe
   const n = ctx.createBufferSource(), ng = ctx.createGain(), nf = ctx.createBiquadFilter(); n.buffer = noiseBuf; nf.type = 'lowpass'; nf.frequency.value = 900; ng.gain.setValueAtTime(vol * 0.5, t); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.09); n.connect(nf).connect(ng).connect(musicBus); n.start(t, Math.random()); n.stop(t + 0.12);
 }
 function musicStep(t) {
+  if (orchestra()) { step++; return; }
   if (!mVerb) { mVerb = ctx.createConvolver(); mVerb.buffer = reverb.buffer; const g = ctx.createGain(); g.gain.value = 0.7; mVerb.connect(g).connect(musicBus); }
   const I = intensity, bar = Math.floor(step / 16) % 8, s = step % 16, [root, maj] = PROG[bar], third = maj ? 4 : 3, ch = [0, third, 7], sp = 60 / (84 + Math.min(1, I) * 30) / 4;
   if (s === 0) {   // Chorfläche: Akkord in zwei Oktaven, leicht verstimmt
@@ -159,6 +171,24 @@ function musicStep(t) {
   step++;
 }
 export function setIntensity(v) { intensity = v; }
+// Orchesterstücke (Dateien in assets/, Lizenz siehe README). Läuft eines, schweigt die erzeugte Musik; sie bleibt als Ersatz.
+const tracks = {}; let scene = '';
+function track(name) {
+  if (!tracks[name]) {
+    const el = new Audio(); el.loop = true; el.preload = 'auto'; el.src = globalThis.NOVA_MUSIC?.[name] || `./assets/${name}.mp3`;
+    const tr = (tracks[name] = { el, g: ctx.createGain(), ok: true }); tr.g.gain.value = 0; el.addEventListener('error', () => { tr.ok = false; });
+    try { ctx.createMediaElementSource(el).connect(tr.g).connect(musicBus); } catch { tr.ok = false; }
+  }
+  return tracks[name];
+}
+const orchestra = () => { const t = tracks[scene]; return !!(t && t.ok && !t.el.paused && t.el.readyState >= 2); };
+export function setScene(name) {   // 'music_hangar' oder 'music_battle'
+  if (!ctx || scene === name) return; scene = name; const now = ctx.currentTime;
+  for (const k in tracks) { tracks[k].g.gain.setTargetAtTime(0, now, 0.5); const el = tracks[k].el; if (k !== name) setTimeout(() => { if (scene !== k) el.pause(); }, 2500); }
+  const t = track(name); t.g.gain.setTargetAtTime(name === 'music_battle' ? 0.8 : 0.6, now, 0.8); t.el.play().catch(() => { t.ok = t.ok && true; });
+}
+export const musicInfo = () => { const t = tracks[scene]; return { scene, ok: !!t?.ok, paused: t?.el.paused, time: +(t?.el.currentTime || 0).toFixed(1), orchestra: orchestra() }; };
+export function duck(sec = 3) { const t = tracks[scene]; if (!t || !ctx) return; const now = ctx.currentTime, v = scene === 'music_battle' ? 0.8 : 0.6; t.g.gain.cancelScheduledValues(now); t.g.gain.setTargetAtTime(0.18, now, 0.15); t.g.gain.setTargetAtTime(v, now + sec, 0.7); }
 export function startMusic() {
   if (!ctx || musicOn) return; musicOn = true; nextT = ctx.currentTime + 0.1;
   musicTimer = setInterval(() => { if (!ctx || ctx.state !== 'running') return; const sp = 60 / (84 + Math.min(1, intensity) * 30) / 4; if (nextT < ctx.currentTime) nextT = ctx.currentTime + 0.05; while (nextT < ctx.currentTime + 0.25) { musicStep(nextT); nextT += sp; } }, 60);

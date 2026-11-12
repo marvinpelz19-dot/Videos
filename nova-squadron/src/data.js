@@ -1,9 +1,9 @@
 // Spieldaten: Waffen, Upgrades, Schiffe, Gegner, Missionen. Eigenes Universum: Handelsverband gegen Unternehmerverband.
 
 export const WEAPONS = [
-  { id: 'laser', name: 'Zwillingslaser', short: 'LASER', color: [4.0, 0.5, 0.35], rate: 10, dmg: 10, speed: 460, desc: 'Schnelle Salven aus beiden Flügelkanonen.', unlock: 0 },
-  { id: 'spread', name: 'Ionenfächer', short: 'FÄCHER', color: [0.4, 3.2, 1.2], rate: 3.2, dmg: 8, speed: 400, desc: 'Sieben Bolzen im Fächer. Stark auf kurze Distanz.', unlock: 1 },
-  { id: 'missile', name: 'Schwarmraketen', short: 'RAKETEN', color: [4.0, 2.2, 0.4], rate: 2.4, dmg: 34, speed: 210, desc: 'Zielsuchend. Zwei Raketen pro Salve.', unlock: 2 },
+  { id: 'laser', name: 'Zwillingslaser', short: 'LASER', color: [0.5, 1.7, 4.6], rate: 10, dmg: 10, speed: 460, desc: 'Schnelle Salven aus beiden Flügelkanonen.', unlock: 0 },
+  { id: 'spread', name: 'Ionenfächer', short: 'FÄCHER', color: [0.7, 2.9, 3.4], rate: 3.2, dmg: 8, speed: 400, desc: 'Sieben Bolzen im Fächer. Stark auf kurze Distanz.', unlock: 1 },
+  { id: 'missile', name: 'Schwarmraketen', short: 'RAKETEN', color: [4.0, 2.2, 0.4], rate: 2.4, dmg: 34, speed: 210, desc: 'Suchen nur Ziele, die du im Visier hast. Zwei Raketen pro Salve.', unlock: 2 },
   { id: 'beam', name: 'Plasmalanze', short: 'LANZE', color: [1.0, 2.2, 5.0], rate: 0, dmg: 150, speed: 0, desc: 'Dauerstrahl, der alles auf der Ziellinie durchschneidet.', unlock: 3 },
   { id: 'orb', name: 'Nova-Kanone', short: 'NOVA-K.', color: [3.4, 0.8, 4.2], rate: 1.1, dmg: 90, speed: 240, desc: 'Schwere Plasmakugel mit Flächenschaden.', unlock: 4 },
 ];
@@ -27,15 +27,17 @@ export const SHIPS = [
 
 // hp, Tempo, Wenderate (rad/s), Radius, Credits, Punkte
 export const ENEMIES = {
-  drone: { name: 'Heuschrecke', hp: 55, speed: 62, turn: 1.5, r: 5, credit: 25, score: 100, fire: 1.5, dmg: 5 },
-  inter: { name: 'Kurshai', hp: 40, speed: 92, turn: 2.1, r: 4.5, credit: 40, score: 150, fire: 1.1, dmg: 4 },
+  drone: { name: 'Heuschrecke', hp: 55, speed: 54, turn: 1.5, r: 5, credit: 25, score: 100, fire: 1.5, dmg: 5 },
+  inter: { name: 'Kurshai', hp: 40, speed: 84, turn: 2.1, r: 4.5, credit: 40, score: 150, fire: 1.1, dmg: 4 },
   bomber: { name: 'Abmahner', hp: 230, speed: 40, turn: 0.9, r: 8, credit: 70, score: 250, fire: 2.6, dmg: 14 },
-  ace: { name: 'Liquidator', hp: 900, speed: 84, turn: 2.0, r: 6.5, credit: 350, score: 1500, fire: 0.5, dmg: 6 },
+  ace: { name: 'Liquidator', hp: 900, speed: 78, turn: 2.0, r: 6.5, credit: 350, score: 1500, fire: 0.5, dmg: 6 },
   turret: { name: 'Geschützturm', hp: 170, speed: 0, turn: 0, r: 8, credit: 50, score: 200, fire: 1.5, dmg: 6 },
   gen: { name: 'Schildgenerator', hp: 600, speed: 0, turn: 0, r: 14, credit: 200, score: 800, fire: 0, dmg: 0 },
   buoy: { name: 'Werbeboje', hp: 240, speed: 0, turn: 0, r: 10, credit: 150, score: 600, fire: 0, dmg: 0 },
   corvette: { name: 'Korvette Vollstrecker', hp: 2400, speed: 30, turn: 0.32, r: 26, credit: 500, score: 3500, fire: 0.3, dmg: 6, big: true },
-  kami: { name: 'Spekulant', hp: 14, speed: 108, turn: 2.3, r: 4, credit: 30, score: 120, fire: 0, dmg: 0 },
+  jammer: { name: 'Störer', hp: 70, speed: 66, turn: 1.6, r: 5, credit: 90, score: 400, fire: 3.4, dmg: 0 },
+  shielder: { name: 'Schildträger', hp: 170, speed: 46, turn: 1.0, r: 7, credit: 110, score: 500, fire: 0, dmg: 0 },
+  kami: { name: 'Spekulant', hp: 14, speed: 98, turn: 2.3, r: 4, credit: 30, score: 120, fire: 0, dmg: 0 },
   hauler: { name: 'Goldtransporter', big: true, hp: 1500, speed: 24, turn: 0, r: 24, credit: 600, score: 2500, fire: 0.9, dmg: 6, static: true },
   target: { name: 'Übungsziel', hp: 40, speed: 0, turn: 0, r: 10, credit: 10, score: 50, fire: 0, dmg: 0 },
   core: { name: 'Tresorkern', hp: 3000, speed: 0, turn: 0, r: 20, credit: 1500, score: 6000, fire: 0, dmg: 0 },
@@ -134,16 +136,50 @@ export const MISSIONS = [
   },
 ];
 
-export const ENDLESS = { station: true, aim: 'Halte so viele Wellen durch wie möglich', why: 'Jede Welle, die hier scheitert, erreicht die Handelsstationen nicht.', id: 'endless', name: 'Endlos-Gefecht', place: 'Baldeney-Nebel', env: 'nebula', endless: true,
-  brief: 'Der Unternehmerverband gibt nicht auf. Welle um Welle, ohne Ende. Jede fünfte Welle führt ein Liquidator an. Wie weit kommst du?' };
-
-export function endlessPhase(n) {
-  const spawn = [['drone', 4 + Math.min(10, n)]];
-  if (n >= 2) spawn.push(['inter', Math.min(8, 1 + (n >> 1))]);
-  if (n >= 2 && n % 2 === 0) spawn.push(['kami', Math.min(10, 2 + n)]);
-  if (n % 4 === 0) spawn.push(['hauler', 1]);
-  if (n % 3 === 0) spawn.push(['corvette', Math.min(3, n / 3)]);
-  if (n >= 3 && n % 2 === 1) spawn.push(['bomber', Math.min(5, 1 + (n >> 2))]);
-  if (n % 5 === 0) spawn.push(['ace', Math.min(3, n / 5)]);
-  return { label: `Welle ${n} zerstören`, spawn, comms: n % 5 === 0 ? [['Verbandschef', 'Liquidator im Anflug!']] : [] };
+// ---------- Wellen-Gefecht: Welle um Welle, nach jeder Welle eines von zwei Upgrades, jede fünfte Welle ein Boss ----------
+export const ENDLESS = { id: 'endless', waves: true, endless: true, station: true, name: 'Wellen-Gefecht', place: 'Freier Raum über Essen', env: 'nebula',
+  aim: 'Überstehe Welle um Welle und baue dein Schiff aus', why: 'Nach jeder Welle wählst du eines von zwei Upgrades. Jede fünfte Welle wartet ein Boss mit Sonderbelohnung.',
+  brief: 'Der Unternehmerverband schickt alles, was er hat. Du startest nur mit dem Zwillingslaser. Nach jeder geschafften Welle wählst du eines von zwei Upgrades: Partnerschiff, neue Waffe, Schnellfeuer, Kettenblitz und mehr. Jede fünfte Welle führt ein Boss an, der mehr aushält und ein Sonder-Upgrade freischaltet.' };
+export const RUN_UPS = [
+  { id: 'weapon', name: 'Neue Waffe', desc: 'Schaltet die nächste Waffe frei', max: 4, icon: 'missile' },
+  { id: 'wing', name: 'Partnerschiff', desc: 'Ein weiterer Jäger fliegt an deiner Seite', max: 4, icon: 'wing' },
+  { id: 'rate', name: 'Schnellfeuer', desc: '+12 % Feuerrate für alle Waffen', max: 6, icon: 'laser' },
+  { id: 'dmg', name: 'Fokuskristalle', desc: '+20 % Schaden für alle Waffen', max: 8, icon: 'orb' },
+  { id: 'multi', name: 'Zusatzläufe', desc: 'Mehr Bolzen und Raketen pro Salve', max: 3, icon: 'spread' },
+  { id: 'engine', name: 'Nachbrenner', desc: '+8 % Tempo und Wendigkeit', max: 5, icon: 'boost' },
+  { id: 'shield', name: 'Schildgenerator', desc: '+25 Schild, lädt schneller', max: 5, icon: 'shield' },
+  { id: 'nova', name: 'Nova-Kern', desc: 'Nova-Welle lädt schneller und trifft härter', max: 3, icon: 'nova' },
+  { id: 'chain', name: 'Kettenblitz', desc: 'Lasertreffer springen auf einen zweiten Gegner über', max: 3, icon: 'chain' },
+  { id: 'shrap', name: 'Splitterladung', desc: 'Zerstörte Gegner schleudern Bolzen in alle Richtungen', max: 3, icon: 'shrap' },
+  { id: 'tail', name: 'Heckgeschütz', desc: 'Feuert selbstständig auf Verfolger', max: 3, icon: 'turn' },
+  { id: 'lock', name: 'Zielcomputer', desc: 'Raketen erfassen zwei Ziele mehr im Visier', max: 2, icon: 'fire' },
+  { id: 'stab', name: 'Trägheitsdämpfer', desc: 'Treffer bremsen dich deutlich weniger', max: 2, icon: 'brake' },
+];
+export const BOSS_UPS = [
+  { id: 'over', name: 'Überladung', desc: '+60 % Schaden für alle Waffen', icon: 'orb' },
+  { id: 'squad', name: 'Geschwader', desc: 'Zwei Partnerschiffe auf einmal', icon: 'wing' },
+  { id: 'super', name: 'Supernova', desc: 'Nova-Welle reicht doppelt so weit und lädt doppelt so schnell', icon: 'nova' },
+  { id: 'aegis', name: 'Aegis-Schild', desc: '+100 Schild, jeder Abschuss lädt ihn sofort nach', icon: 'shield' },
+  { id: 'arsenal', name: 'Arsenal', desc: 'Alle fünf Waffen sofort freigeschaltet', icon: 'missile' },
+];
+export function wavePhase(n) {
+  const k = 1 + n * 0.09, c = (x) => Math.max(1, Math.round(x * k));
+  if (n % 5 === 0) {
+    const b = (n / 5 - 1) % 4, tier = Math.floor(n / 20);
+    if (b === 0) return { boss: true, label: 'Boss: Korvette Vollstrecker', spawn: [['corvette', 1 + tier], ['drone', c(3)]], comms: [['Verbandschef', 'Bosswelle! Eine Korvette führt sie an. Sechs Geschütze, bleib in Bewegung.']] };
+    if (b === 1) return { boss: true, label: 'Boss: Die Liquidatoren', spawn: [['ace', 2 + tier], ['jammer', 1], ['inter', c(2)]], comms: [['Liquidator', 'Du hast genug Wellen überlebt. Jetzt wickeln wir dich persönlich ab.']] };
+    if (b === 2) return { boss: true, goal: 'core', label: 'Boss: Kreuzer Rendite · Generatoren, dann Kern', spawn: [['cruiser', 1], ['drone', c(3)]], comms: [['Verbandschef', 'Ein Kreuzer! Zerstöre die Schildgeneratoren auf dem Rücken, dann den Kern am Heck.']] };
+    return { boss: true, goal: 'core', label: 'Boss: Flaggschiff Monopol · Generatoren, dann Kern', spawn: [['dread', 1], ['inter', c(3)]], comms: [['Generaldirektor Kord', 'Genug gespielt. Die Monopol beendet das.']] };
+  }
+  const themes = [
+    ['Heuschrecken-Schwarm', [['drone', c(4)]], 'Langsam, aber viele. Gute Übung.'],
+    ['Schnelle Kurshaie', [['inter', c(3)], ['drone', c(2)]], 'Die Kurshaie sind schnell. Nutz die Bremse, um hinter sie zu kommen.'],
+    ['Spekulanten im Sturzflug', [['kami', c(5)], ['drone', c(2)]], 'Rammdrohnen! Schieß sie ab, bevor sie dich erreichen, oder roll weg.'],
+    ['Abmahner mit Schildträger', [['bomber', c(2)], ['shielder', 1], ['drone', c(2)]], 'Der Schildträger schützt alle um sich herum. Nimm ihn zuerst.'],
+    ['Störer und Eskorte', [['jammer', c(1)], ['inter', c(3)]], 'Die violetten Kugeln der Störer legen deine Waffe lahm. Ausweichen oder Waffe wechseln.'],
+    ['Goldtransporter abfangen', [['hauler', 1], ['drone', c(3)], ['kami', c(2)]], 'Ein Goldtransporter. Zäh, aber fette Prämie.'],
+    ['Gemischter Verband', [['drone', c(3)], ['inter', c(2)], ['shielder', 1], ['jammer', 1]], 'Von allem etwas. Schildträger und Störer zuerst.'],
+  ];
+  const [name, spawn, tip] = themes[n <= 4 ? n - 1 : (n * 3 + (n >> 2)) % themes.length];
+  return { label: `Welle ${n}: ${name}`, spawn, comms: n <= 9 || n % 3 === 0 ? [['Vex', tip]] : [] };
 }

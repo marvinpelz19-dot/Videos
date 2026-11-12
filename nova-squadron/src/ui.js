@@ -1,5 +1,5 @@
 // Oberfläche: Titel, Hangar (Einsätze, Schiff, Upgrades, Einstellungen), HUD, Pause, Ergebnis.
-import { WEAPONS, UPGRADES, SHIPS, MISSIONS, ENDLESS, STORY, upgradeCost } from './data.js';
+import { WEAPONS, UPGRADES, SHIPS, MISSIONS, ENDLESS, STORY, RUN_UPS, BOSS_UPS, upgradeCost } from './data.js';
 import { sfx } from './audio.js';
 
 const $ = (id) => document.getElementById(id);
@@ -11,6 +11,10 @@ const ICON = {
   missile: svg('<path d="M12 2c2.4 2.6 3 5.6 3 9v6H9v-6c0-3.4.6-6.4 3-9z"/><path d="M9 14l-3 4v2l3-1.6M15 14l3 4v2l-3-1.6M11 20.5 12 23l1-2.5"/>'),
   beam: svg('<path d="M3 12h18" stroke-width="3.4"/><path d="M3 7.5h4M3 16.5h4M17 7.5h4M17 16.5h4"/>'),
   orb: svg('<circle cx="12" cy="12" r="4.6"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>'),
+  wing: svg('<path d="M12 3l2 7 7 5v2l-7-2-.6 4 2.100 1.600V22l-3.500-1-3.500 1v-1.400l2.100-1.600L10 15l-7 2v-2l7-5z"/>'),
+  shield: svg('<path d="M12 2.500l8 3v6c0 5-3.400 8.600-8 10-4.600-1.400-8-5-8-10v-6z"/><path d="M9 12l2.200 2.200L15.500 10"/>'),
+  chain: svg('<path d="M13 2 5 13h5l-1.500 9L18 10h-5.500z"/>'),
+  shrap: svg('<circle cx="12" cy="12" r="2" fill="currentColor"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.600 5.600l2.800 2.800M15.600 15.600l2.800 2.800M18.400 5.600l-2.800 2.800M8.400 15.600l-2.800 2.800"/>'),
   fire: svg('<circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/>', '<circle cx="12" cy="12" r="1.3" fill="currentColor"/>'),
   boost: svg('<path d="M5 13l7-7 7 7M5 19l7-7 7 7"/>'), brake: svg('<path d="M5 5l7 7 7-7M5 11l7 7 7-7"/>'),
   roll: svg('<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20.5 3.5v4.2h-4.2"/>'),
@@ -55,8 +59,8 @@ export function createUI(api) {
 
   function showHangar() {
     hud.hidden = touch.hidden = true; screen.hidden = false; screen.className = 'screen hangar' + (tab === 'ship' ? ' view' : ''); api.showcase(tab === 'ship' ? save.ship : null);
-    if (!sel) sel = MISSIONS.find((m, i) => missionOpen(i) && !save.done[m.id]) || MISSIONS[0];
-    const tabs = [['missions', 'Einsätze'], ['ship', 'Schiff & Waffen'], ['upgrades', 'Upgrades'], ['settings', 'Einstellungen']];
+    if (!sel) sel = save.done.m0 ? ENDLESS : MISSIONS[0];
+    const tabs = [['missions', 'Spielen'], ['ship', 'Schiff & Waffen'], ['upgrades', 'Upgrades'], ['settings', 'Einstellungen']];
     screen.innerHTML = `<header class="bar"><div class="brand">NOVA SQUADRON</div>
       <div class="credits"><span>Credits</span><b>${fmt(save.credits)}</b></div></header>
       <nav class="tabs">${tabs.map(([k, n]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${n}</button>`).join('')}</nav>
@@ -69,7 +73,7 @@ export function createUI(api) {
     }));
     screen.querySelectorAll('[data-ship]').forEach((b) => (b.onclick = () => { save.ship = b.dataset.ship; api.persist(); sfx.click(); showHangar(); }));
     screen.querySelectorAll('[data-set]').forEach((b) => (b.onclick = () => {
-      const k = b.dataset.set; if (k === 'quality') { save.set.quality = b.dataset.v; api.quality(); } else { save.set[k] = !save.set[k]; api.settings(); } sfx.click(); showHangar();
+      const k = b.dataset.set; if (k === 'quality') { save.set.quality = b.dataset.v; api.quality(); } else if (k === 'pace') { save.set.pace = +b.dataset.v; api.settings(); } else { save.set[k] = !save.set[k]; api.settings(); } sfx.click(); showHangar();
     }));
     const go = $('b-go'); if (go) go.onclick = () => { sfx.click(); api.start(sel); };
   }
@@ -79,11 +83,11 @@ export function createUI(api) {
       return `<button class="mcard${sel === m ? ' on' : ''}${open ? '' : ' locked'}" data-m="${i}" ${open ? '' : 'disabled'}>
         <span class="num">${m.tutorial ? 'T' : m.n}</span><span class="mt"><b>${esc(m.name)}</b><small>${open ? esc(m.place) : 'Gesperrt · vorherigen Einsatz abschließen'}</small></span>${open ? stars(st) : '<span class="lock">▣</span>'}</button>`;
     }).join('');
-    const eOpen = !!save.done.m1;
-    const endless = `<button class="mcard endless${sel === ENDLESS ? ' on' : ''}${eOpen ? '' : ' locked'}" data-m="endless" ${eOpen ? '' : 'disabled'}><span class="num">∞</span><span class="mt"><b>${ENDLESS.name}</b><small>${eOpen ? (save.bestWave ? `Rekord: Welle ${save.bestWave}` : ENDLESS.place) : 'Gesperrt · Einsatz 1 abschließen'}</small></span></button>`;
+    const eOpen = true;
+    const endless = `<button class="mcard endless${sel === ENDLESS ? ' on' : ''}${eOpen ? '' : ' locked'}" data-m="endless" ${eOpen ? '' : 'disabled'}><span class="num">∞</span><span class="mt"><b>${ENDLESS.name}</b><small>${save.bestWave ? `Rekord: Welle ${save.bestWave}` : 'Wellen, Upgrades, Bosse'}</small></span></button>`;
     const m = sel, i = m.n, w = WEAPONS.find((x) => x.unlock > 0 && x.unlock === i), s = SHIPS.find((x) => x.unlock > 0 && x.unlock === i);
-    const reward = m.endless ? 'Credits je Welle' : [w && !save.done[m.id] ? `Neue Waffe: ${w.name}` : '', s && !save.done[m.id] ? `Neues Schiff: ${s.name}` : '', `${fmt(m.tutorial ? (save.done[m.id] ? 100 : 500) : 500 * i * (save.done[m.id] ? 1 : 2))} Credits`].filter(Boolean).join(' · ');
-    return `<div class="mgrid"><div class="mlist">${cards}${endless}</div>
+    const reward = m.endless ? 'Nach jeder Welle eines von zwei Upgrades · nach jedem Boss ein Sonder-Upgrade · Credits je Welle' : [w && !save.done[m.id] ? `Neue Waffe: ${w.name}` : '', s && !save.done[m.id] ? `Neues Schiff: ${s.name}` : '', `${fmt(m.tutorial ? (save.done[m.id] ? 100 : 500) : 500 * i * (save.done[m.id] ? 1 : 2))} Credits`].filter(Boolean).join(' · ');
+    return `<div class="mgrid"><div class="mlist"><p class="listh">Hauptspiel</p>${endless}<p class="listh">Story-Einsätze</p>${cards}</div>
       <section class="brief"><p class="eyebrow">${m.endless ? 'Dauergefecht' : m.tutorial ? 'Ausbildung' : `Einsatz ${i} von ${MISSIONS.length - 1}`} · ${esc(m.place)}</p><h2>${esc(m.name)}</h2><p>${esc(m.brief)}</p>
       <p class="reward aim"><span>Dein Ziel</span> ${esc(m.aim || '')}</p><p class="reward"><span>Warum</span> ${esc(m.why || '')}</p>
       ${m.phases ? `<p class="reward"><span>Meilensteine</span></p><ol class="phases">${m.phases.map((p) => `<li>${esc(p.label)}</li>`).join('')}</ol>` : ''}
@@ -113,7 +117,8 @@ export function createUI(api) {
   function settings() {
     const s = save.set, tg = (k, n, d) => `<div class="ucard"><div><b>${n}</b><small>${d}</small></div><button class="btn" data-set="${k}">${s[k] ? 'An' : 'Aus'}</button></div>`;
     return `<div class="ups"><div class="ucard"><div><b>Grafik</b><small>Hoch mit Leuchteffekten. Niedrig für ältere Geräte.</small></div><span class="seg">${[['low', 'Niedrig'], ['medium', 'Mittel'], ['high', 'Hoch']].map(([v, n]) => `<button class="btn${s.quality === v ? '' : ' ghost'}" data-set="quality" data-v="${v}">${n}</button>`).join('')}</span></div>
-      ${tg('sound', 'Effekte', 'Waffen, Explosionen, Funk')}${tg('music', 'Musik', 'Eigene Filmmusik: Hörner, Streicher, Taikos')}${tg('autofire', 'Auto-Feuer', 'Feuert selbst, sobald ein Ziel im Fadenkreuz liegt')}${tg('invertY', 'Höhenruder umkehren', 'Stick nach unten zieht die Nase hoch')}</div>
+      ${tg('sound', 'Effekte', 'Waffen, Explosionen, Funk')}${tg('music', 'Musik', 'Eigene Filmmusik: Hörner, Streicher, Taikos')}${tg('autofire', 'Auto-Feuer', 'Feuert selbst, sobald ein Ziel im Fadenkreuz liegt')}<div class="ucard"><div><b>Spieltempo</b><small>Wie schnell alles abläuft. Dein Schub bleibt immer stark.</small></div><span class="seg">${[[0.75, 'Ruhig'], [0.88, 'Normal'], [1, 'Schnell']].map(([v, n]) => `<button class="btn${s.pace === v ? '' : ' ghost'}" data-set="pace" data-v="${v}">${n}</button>`).join('')}</span></div>${tg('invertY', 'Höhenruder umkehren', 'Stick nach unten zieht die Nase hoch')}</div>
+      <div class="keys"><h2 class="sec">Musik</h2><p>Gefecht: „Imminent Threat“ von Matthew Pablo (matthewpablo.com), Lizenz CC BY 3.0. Hangar: „Dark Orchestra“ von szegvari, Lizenz CC0. Beide aus dem quelloffenen Spiel Naev. Fanfare und Ersatzmusik: eigens für dieses Spiel.</p></div>
       <div class="keys"><h2 class="sec">Steuerung</h2><p><b>Tastatur und Maus:</b> Maus oder WASD steuern · Leertaste oder linke Maustaste feuert · Umschalt Schub · Q / E Ausweichrolle · F Nova-Welle · 1–5 oder Mausrad Waffe · Esc Pause</p><p><b>Touch:</b> linker Daumen steuert · rechts Feuer, Schub, Rolle, Nova · Waffe antippen zum Wechseln</p></div>`;
   }
 
@@ -122,13 +127,13 @@ export function createUI(api) {
   function pips(done) { $('pips').innerHTML = pipsTotal ? Array.from({ length: pipsTotal }, (_, i) => `<i class="${i < done ? 'on' : i === done ? 'cur' : ''}"></i>`).join('') : ''; }
   function milestone(n, total, bonus) { pips(n); goalT = 0; $('goal').classList.remove('show'); banner(total ? `MEILENSTEIN ${n} VON ${total} ERREICHT` : `WELLE ${n} ÜBERSTANDEN`, `+${fmt(bonus)} Credits`); }
   function showGame(m, total = 0) {
-    pipsTotal = total; pips(0); const gc = $('goal'); gc.innerHTML = `<em>${esc(m.name)} · ${esc(m.place)}</em><span>Dein Ziel</span><b>${esc(m.aim || m.name)}</b><p>${esc(m.why || '')}</p><small>${total ? total + ' Meilensteine' : 'Ohne Ende'} · Leben ∞ · Munition ∞</small>`; gc.classList.add('show'); goalT = 5.5;
+    pipsTotal = total; pips(0); const gc = $('goal'); gc.innerHTML = `<em>${esc(m.name)} · ${esc(m.place)}</em><span>Dein Ziel</span><b>${esc(m.aim || m.name)}</b><p>${esc(m.why || '')}</p><small>${total ? total + ' Meilensteine' : 'Ohne Ende'} · Leben ∞ · Munition ∞</small>`; gc.classList.add('show'); goalT = m.waves ? 3.5 : 5.5;
     screen.hidden = true; hud.hidden = false; touch.hidden = !api.isTouch; lastWeaponKey = ''; $('comms').classList.remove('show'); $('banner').classList.remove('show');
-    $('boss').hidden = !(m.boss || m.id === 'm4'); $('convoy').hidden = !m.convoy; weaponChanged();
+    $('boss').hidden = true; $('convoy').hidden = !m.convoy; weaponChanged(true);
   }
-  function weaponChanged() {
-    const cur = api.getWeapon(), list = unlockedW(), key = cur + ':' + list.length; if (key === lastWeaponKey) return; lastWeaponKey = key;
-    $('weapons').innerHTML = list.length < 2 ? '' : list.map((w, i) => `<button class="wchip${i === cur ? ' on' : ''}" data-w="${i}" aria-label="${w.name}" title="${w.name}" style="--wc:rgb(${w.color.map((c) => Math.min(255, 70 + c * 60) | 0).join(',')})">${ICON[w.id]}<span>${i + 1}</span></button>`).join('');
+  function weaponChanged(force) {
+    const cur = api.getWeapon(), list = WEAPONS.map((w, i) => i).filter((i) => api.weaponOpen(i)), jam = api.getJam(), key = cur + ':' + list.join('') + ':' + jam; if (key === lastWeaponKey && !force) return; lastWeaponKey = key;
+    $('weapons').innerHTML = list.length < 2 ? '' : list.map((i) => { const w = WEAPONS[i]; return `<button class="wchip${i === cur ? ' on' : ''}${i === jam ? ' jam' : ''}" data-w="${i}" aria-label="${w.name}" title="${w.name}" style="--wc:rgb(${w.color.map((c) => Math.min(255, 70 + c * 60) | 0).join(',')})">${ICON[w.id]}<span>${i + 1}</span></button>`; }).join('');
     $('weapons').querySelectorAll('[data-w]').forEach((b) => (b.onclick = () => api.act.setWeapon(+b.dataset.w)));
   }
   const set = (el, k, v) => { if (el[k] !== v) el[k] = v; };
@@ -140,6 +145,7 @@ export function createUI(api) {
     const d = G.phaseDef; set($('obj'), 'textContent', d ? d.label : G.endT > 0 ? 'Einsatz erfüllt' : ''); const hint = d && (api.isTouch ? d.hintTouch : d.hint); set($('obj-n'), 'textContent', d && remaining ? (hint ? hint : 'Noch ' + remaining) : '');
     set($('spd'), 'textContent', String(Math.round(P.speed * 3.6)));
     set($('warn'), 'hidden', !outside);
+    set($('boss'), 'hidden', !(G.cap && !G.cap.dead));
     if (G.cap) { const c = G.cap.core; $('boss-fill').style.transform = `scaleX(${Math.max(0, c.hp / c.maxHp)})`; set($('boss-name'), 'textContent', (G.cap.dread ? 'Flaggschiff Monopol' : 'Kreuzer Rendite') + (c.shielded ? ' · Kern abgeschirmt' : ' · Kern')); }
     if (G.mission.convoy) { $('convoy-fill').style.transform = `scaleX(${G.stats.convoy})`; }
     weaponChanged();
@@ -153,6 +159,15 @@ export function createUI(api) {
   function comms(name, text) { $('comms').innerHTML = `<b>${esc(name)}</b><span>${esc(text)}</span>`; $('comms').classList.add('show'); commsT = 4.6; sfx.radio(); }
   function flash(type) { const f = $('flash'); f.className = ''; void f.offsetWidth; f.className = 'f-' + type; }
 
+  // Upgrade-Auswahl nach jeder Welle: zwei Karten, antippen oder Taste 1 / 2
+  let choiceCb = null;
+  function showChoice({ boss, wave, opts }, cb) {
+    const el = $('choice'); choiceCb = cb; el.hidden = false; goalT = 0; bannerT = 0; $('goal').classList.remove('show'); $('banner').classList.remove('show'); el.className = boss ? 'boss' : '';
+    el.innerHTML = `<p class="eyebrow">${boss ? 'Boss besiegt · Sonder-Upgrade' : `Welle ${wave} geschafft`}</p><h2>${boss ? 'Wähle deine Belohnung' : 'Wähle ein Upgrade'}</h2><div class="cards">${opts.map((o, i) => `<button class="ccard" data-c="${i}">${ICON[o.icon] || ICON.orb}<b>${esc(o.name)}</b><span>${esc(o.desc)}</span>${o.max ? `<i class="pips">${Array.from({ length: o.max }, (_, k) => `<i class="${k < o.lvl ? 'on' : k === o.lvl ? 'new' : ''}"></i>`).join('')}</i>` : '<i class="once">Einmalig</i>'}<em>${i + 1}</em></button>`).join('')}</div>`;
+    el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => { const c = choiceCb; choiceCb = null; if (c) c(opts[+b.dataset.c]); }));
+  }
+  function hideChoice() { $('choice').hidden = true; choiceCb = null; }
+  addEventListener('keydown', (e) => { if (!choiceCb) return; const b = $('choice').querySelector(`[data-c="${e.code === 'Digit1' ? 0 : e.code === 'Digit2' ? 1 : -1}"]`); if (b) b.click(); });
   function showPause(on) {
     if (!on) { screen.hidden = true; return; }
     screen.hidden = false; screen.className = 'screen pause';
@@ -183,5 +198,5 @@ export function createUI(api) {
   tap('t-rr', () => api.act.rollAuto()); tap('goal', () => { goalT = 0.01; });
   for (const [id, ic] of [['t-fire', 'fire'], ['t-boost', 'boost'], ['t-brake', 'brake'], ['t-rr', 'roll'], ['t-loop', 'loop'], ['t-turn', 'turn'], ['t-nova', 'nova']]) $(id).innerHTML = ICON[ic]; tap('t-nova', () => api.act.nova()); tap('nova', () => api.act.nova()); tap('b-pause', () => api.pause());
 
-  return { milestone, toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
+  return { showChoice, hideChoice, milestone, toast, showTitle, showHangar, showGame, showPause, showResult, hud: hudUpdate, banner, comms, flash, weaponChanged };
 }

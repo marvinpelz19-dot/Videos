@@ -52,7 +52,7 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 #obj-n { font-size: 12px; color: var(--gold); letter-spacing: 0.1em; }
 #boss, #convoy { display: grid; gap: 3px; margin-top: 4px; }
 #boss .meter i { background: var(--danger); box-shadow: 0 0 12px var(--danger); }
-#convoy .meter i { background: var(--ok); box-shadow: 0 0 10px var(--ok); }
+#convoy .meter i { background: var(--ion); box-shadow: 0 0 10px var(--ion); }
 #boss-name, #convoy span { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
 #warn { left: 50%; top: 32%; transform: translateX(-50%); color: var(--danger); font-weight: 700; letter-spacing: 0.14em; font-size: 14px; text-align: center; animation: pulse 0.5s infinite alternate; }
 #weapons { left: 50%; bottom: var(--gb); transform: translateX(-50%); display: flex; gap: 6px; pointer-events: auto; max-width: calc(100% - 32px); }
@@ -61,20 +61,36 @@ button:focus-visible { outline: 2px solid var(--ion); outline-offset: 2px; }
 .wchip.on { color: var(--wc); border-color: var(--wc); box-shadow: 0 0 16px -4px var(--wc), inset 0 0 10px -6px var(--wc); }
 body.touch .wchip span { display: none; }
 #pips { display: flex; gap: 5px; justify-content: center; } #pips i { width: 22px; height: 4px; background: rgba(140, 180, 255, 0.2); transform: skewX(-18deg); } #pips i.on { background: var(--gold); box-shadow: 0 0 8px var(--gold); } #pips i.cur { background: var(--ink); animation: pulse 0.7s infinite alternate; }
-#goal { left: 50%; top: 22%; transform: translate(-50%, 10px); width: min(92%, 520px); pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 14px 18px; text-align: left; display: grid; gap: 5px; font-family: var(--body); color: var(--ink); }
+#goal { left: 50%; top: calc(var(--gt) + 64px); transform: translate(-50%, 10px); width: min(92%, 520px); pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s; background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--gold); padding: 14px 18px; text-align: left; display: grid; gap: 5px; font-family: var(--body); color: var(--ink); }
 #goal.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 #goal em { font-style: normal; font-family: var(--display); font-weight: 700; font-size: clamp(18px, 3vw, 26px); letter-spacing: 0.08em; text-transform: uppercase; text-wrap: balance; margin-bottom: 4px; }
 #goal span { font-family: var(--display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); } #goal b { font-family: var(--display); font-size: clamp(16px, 2.4vw, 21px); line-height: 1.2; text-wrap: balance; }
 #goal p { margin: 0; font-size: 14px; line-height: 1.4; color: var(--dim); } #goal small { font-family: var(--display); font-size: 11px; letter-spacing: 0.1em; color: var(--ok); }
 .spd.stun, .spd.stun b { color: var(--danger); }
+.wchip.jam { color: var(--danger); border-color: var(--danger); opacity: 0.55; } .wchip.jam::after { content: ""; position: absolute; left: 6px; right: 6px; top: 50%; height: 2px; background: var(--danger); transform: rotate(-45deg); }
+.listh { margin: 6px 0 0; font-family: var(--display); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+.mcard.endless { border-color: rgba(255, 209, 102, 0.5); } .mcard.endless .num { color: var(--gold); }
+#choice { position: absolute; inset: 0; display: grid; align-content: center; justify-items: center; gap: 12px; padding: var(--gt) var(--gr) var(--gb) var(--gl); background: radial-gradient(ellipse at center, rgba(4, 6, 12, 0.5), rgba(4, 6, 12, 0.86)); text-align: center; overflow-y: auto; animation: rise 0.35s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+#choice h2 { font-size: clamp(24px, 4.6vw, 44px); letter-spacing: 0.06em; text-shadow: 0 0 30px rgba(255, 138, 42, 0.6); }
+#choice.boss h2 { color: var(--gold); text-shadow: 0 0 30px rgba(255, 209, 102, 0.7); } #choice.boss .eyebrow { color: var(--gold); }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 300px)); gap: 14px; width: min(100%, 640px); margin-top: 8px; }
+.ccard { position: relative; display: grid; gap: 8px; justify-items: center; align-content: start; padding: 22px 16px 18px; background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--ember); color: var(--ink); font-family: var(--body); transition: transform 0.14s, border-color 0.14s, box-shadow 0.14s; }
+.ccard:hover, .ccard:focus-visible { transform: translateY(-4px); border-color: var(--ember); box-shadow: 0 10px 40px -12px rgba(255, 138, 42, 0.7); }
+#choice.boss .ccard { border-top-color: var(--gold); } #choice.boss .ccard:hover { border-color: var(--gold); box-shadow: 0 10px 40px -12px rgba(255, 209, 102, 0.8); }
+.ccard svg { width: 46px; height: 46px; color: var(--ember); } #choice.boss .ccard svg { color: var(--gold); }
+.ccard b { font-family: var(--display); font-size: clamp(16px, 2.4vw, 20px); letter-spacing: 0.04em; text-wrap: balance; } .ccard span { font-size: 14px; line-height: 1.4; color: var(--dim); text-wrap: balance; }
+.ccard .pips { margin-top: 4px; } .ccard .pips i.new { background: var(--ink); animation: pulse 0.6s infinite alternate; } .ccard .once { font-style: normal; font-family: var(--display); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+.ccard em { position: absolute; left: 8px; top: 6px; font-style: normal; font-family: var(--display); font-size: 12px; color: var(--dim); border: 1px solid var(--line); padding: 0 6px; } body.touch .ccard em { display: none; }
+@media (max-width: 520px) { .cards { grid-template-columns: 1fr; } .ccard { grid-template-columns: auto 1fr; justify-items: start; text-align: left; padding: 14px; column-gap: 14px; } .ccard svg { grid-row: 1 / span 3; align-self: center; } }
 .reward.aim { font-size: 16px; color: var(--ink); font-weight: 600; }
 #comms { left: var(--gl); bottom: calc(var(--gb) + 8px); width: min(330px, 60vw); background: var(--panel); border-left: 3px solid var(--ion); padding: 9px 12px; display: grid; gap: 2px; opacity: 0; transform: translateX(-14px); transition: opacity 0.25s, transform 0.25s; font-family: var(--body); }
 #comms.show { opacity: 1; transform: none; }
 #comms b { font-family: var(--display); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ion); }
 #comms span { font-size: 14px; line-height: 1.35; }
-#banner { left: 50%; top: 22%; transform: translate(-50%, 8px); text-align: center; opacity: 0; transition: opacity 0.3s, transform 0.3s; width: min(90%, 640px); display: grid; gap: 4px; }
+#banner { left: 50%; top: calc(var(--gt) + 62px); transform: translate(-50%, 8px); text-align: center; opacity: 0; transition: opacity 0.3s, transform 0.3s; width: min(90%, 640px); display: grid; gap: 4px; }
 #banner.show { opacity: 1; transform: translate(-50%, 0); }
-#banner b { font-size: clamp(20px, 4.4vw, 38px); font-weight: 700; letter-spacing: 0.16em; text-shadow: 0 0 24px rgba(255, 138, 42, 0.8), 0 2px 10px #000; text-wrap: balance; }
+#banner b { font-size: clamp(16px, 2.8vw, 26px); font-weight: 700; letter-spacing: 0.16em; text-shadow: 0 0 24px rgba(255, 138, 42, 0.8), 0 2px 10px #000; text-wrap: balance; }
 #banner small { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
 #flash { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
 #flash.f-hit { box-shadow: inset 0 0 120px 30px rgba(255, 60, 60, 0.55); animation: fl 0.35s ease-out; }
@@ -216,6 +232,7 @@ body.touch #weapons { left: var(--gl); transform: none; }
   <div id="touch" hidden>
     <button id="t-nova" aria-label="Nova-Welle"></button><button id="t-loop" aria-label="Looping"></button><button id="t-turn" aria-label="Wende"></button><button id="t-rr" aria-label="Ausweichrolle"></button><button id="t-brake" aria-label="Bremse"></button><button id="t-boost" aria-label="Schub"></button><button id="t-fire" aria-label="Feuer"></button>
   </div>
+  <div id="choice" hidden></div>
   <div id="screen" class="screen"></div>
 </div>
 <script src="./vendor/jsfxr/riffwave.js"></script>

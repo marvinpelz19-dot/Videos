@@ -57,11 +57,11 @@ export class Blast {
   }
   // Explosion: Kernblitz kommt vom Aufrufer; hier Feuerball, Feuerring in einer Ebene, Rauch, Trümmer
   explode(pos, size, inherit, o = {}) {
-    const sq = Math.sqrt(size), ix = inherit ? inherit.x * 0.35 : 0, iy = inherit ? inherit.y * 0.35 : 0, iz = inherit ? inherit.z * 0.35 : 0, pl = o.plasma || 0;
+    const sq = Math.sqrt(size), ix = inherit ? inherit.x * 0.35 : 0, iy = inherit ? inherit.y * 0.35 : 0, iz = inherit ? inherit.z * 0.35 : 0, pl = o.plasma || 0, hm = o.heat ?? 1;
     const n = Math.min(16, 4 + Math.round(size * 3.2));
-    for (let i = 0; i < n; i++) { _v.set(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize(); const sp = rnd(3, 13) * sq; this.puff(pos.x + _v.x * size * 1.4, pos.y + _v.y * size * 1.4, pos.z + _v.z * size * 1.4, _v.x * sp + ix, _v.y * sp + iy, _v.z * sp + iz, rnd(7, 12) * sq, rnd(0.7, 1.25) * (0.7 + sq * 0.4), rnd(1.1, 1.7), 0.9, rnd(1.2, 2.0), pl); }
-    this.puff(pos.x, pos.y, pos.z, ix, iy, iz, 13 * sq, 0.5 + sq * 0.15, 1.7, 0.3, 1.2, pl);                    // heller Kern
-    if (size >= 1.2) {   // Feuerring: breitet sich in einer zufällig geneigten Ebene kreisförmig aus
+    for (let i = 0; i < n; i++) { _v.set(rnd(-1, 1), rnd(-1, 1), rnd(-1, 1)).normalize(); const sp = rnd(3, 13) * sq; this.puff(pos.x + _v.x * size * 1.4, pos.y + _v.y * size * 1.4, pos.z + _v.z * size * 1.4, _v.x * sp + ix, _v.y * sp + iy, _v.z * sp + iz, rnd(7, 12) * sq, rnd(0.7, 1.25) * (0.7 + sq * 0.4), rnd(1.1, 1.7) * hm, 0.9, rnd(1.2, 2.0), pl); }
+    this.puff(pos.x, pos.y, pos.z, ix, iy, iz, 13 * sq, 0.5 + sq * 0.15, 1.7 * hm, 0.3, 1.2, pl);                    // heller Kern
+    if (size >= 1.2 && hm > 0.6) {   // Feuerring: breitet sich in einer zufällig geneigten Ebene kreisförmig aus
       _ax.set(rnd(-1, 1), rnd(0.3, 1), rnd(-1, 1)).normalize(); _q.setFromUnitVectors(_s.set(0, 1, 0), _ax); const m = Math.min(18, 8 + Math.round(size * 3));
       for (let i = 0; i < m; i++) { const a = (i / m) * 6.283 + rnd(-0.1, 0.1); _v.set(Math.cos(a), 0, Math.sin(a)).applyQuaternion(_q); const sp = rnd(24, 34) * sq; this.puff(pos.x, pos.y, pos.z, _v.x * sp + ix, _v.y * sp + iy, _v.z * sp + iz, rnd(4, 6.5) * sq, rnd(0.55, 0.85), 1.25, 0.45, 1.3, pl); }
     }

@@ -30,7 +30,7 @@ function windowCanvas(seed) {
   for (let row = 0; row < 26; row++) { if (r() < 0.45) continue; const y = 8 + row * 19.5; let x = r() * 30; while (x < 500) { const w = 3 + r() * 5; if (r() < 0.55) { g.fillStyle = r() < 0.85 ? `rgba(255,${200 + r() * 40},${130 + r() * 60},${0.5 + r() * 0.5})` : 'rgba(120,200,255,0.9)'; g.fillRect(x, y, w, 3); } x += w + 3 + r() * (r() < 0.2 ? 60 : 8); } }
   return c;
 }
-const cLight = panelCanvas(7, 208, 34, 0.5, 'rgba(255,120,20,0.9)'), cDark = panelCanvas(23, 96, 40, 0.75, 'rgba(230,180,70,0.9)'), cHuge = panelCanvas(51, 110, 46, 0.8, 'rgba(230,180,70,0.8)');
+const cLight = panelCanvas(7, 208, 34, 0.5, 'rgba(255,120,20,0.9)'), cDark = panelCanvas(23, 150, 44, 0.8, 'rgba(170,30,40,0.9)'), cHuge = panelCanvas(51, 150, 50, 0.85, 'rgba(30,32,38,0.9)');
 const tLight = texFrom(cLight), tDark = texFrom(cDark), tHuge = texFrom(cHuge), bLight = texFrom(cLight, false), bDark = texFrom(cDark, false), bHuge = texFrom(cHuge, false), tWin = texFrom(windowCanvas(5));
 
 const M = (color, map, bump, o = {}) => new THREE.MeshPhysicalMaterial({ color, map, bumpMap: bump, bumpScale: 1.4, metalness: 0.55, roughness: 0.42, clearcoat: 0.8, clearcoatRoughness: 0.22, envMapIntensity: 1.15, ...o });
@@ -41,13 +41,13 @@ export const MATS = {
   hull: M(0xf2f4f8, tLight, bLight), hullDark: M(0x6a7286, tLight, bLight), stripe: M(0xff7a1a, tLight, bLight, { emissive: 0x4a1500 }), glass: M(0x0b1826, null, null, { metalness: 1, roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 2.2 }),
   ally: M(0xdfe6f2, tLight, bLight), allyStripe: M(0x2f8dff, tLight, bLight, { emissive: 0x06224a }), metal: M(0x3a3f4c, null, null, { metalness: 1, roughness: 0.26, clearcoat: 0.3 }), red: M(0xc8281e, null, null, { emissive: 0x300400 }),
   // Unternehmerverband: Anthrazit mit Gold
-  dom: M(0x8a8d99, tDark, bDark, { metalness: 0.75, roughness: 0.4 }), domLight: M(0xb9bcc8, tDark, bDark, { metalness: 0.7 }), gold: M(0xd9a441, tDark, bDark, { metalness: 0.9, roughness: 0.28, emissive: 0x2a1a02 }),
-  domRed: M(0xb02030, tDark, bDark, { emissive: 0x3a0508 }), ace: M(0x3a3348, tDark, bDark, { metalness: 0.85, roughness: 0.28 }), acePurple: M(0x7a2ab8, tDark, bDark, { emissive: 0x2a0850 }),
-  cap: M(0xa6a9b6, tHuge, bHuge, { metalness: 0.7, roughness: 0.5, emissiveMap: tWin, emissive: 0xffffff, emissiveIntensity: 2.4, bumpScale: 2 }), capLight: M(0xcfd2dc, tHuge, bHuge, { metalness: 0.65, roughness: 0.5, bumpScale: 2 }), capDark: M(0x4d505c, tHuge, bHuge, { metalness: 0.8, roughness: 0.45 }),
+  dom: M(0xc4cbd6, tDark, bDark, { metalness: 0.6, roughness: 0.42 }), domLight: M(0xe6eaf0, tDark, bDark, { metalness: 0.55 }), gold: M(0x30333b, tDark, bDark, { metalness: 0.85, roughness: 0.35 }), bullion: M(0xd9a441, tDark, bDark, { metalness: 0.9, roughness: 0.28, emissive: 0x2a1a02 }),
+  domRed: M(0xb02030, tDark, bDark, { emissive: 0x3a0508 }), ace: M(0x2b2d36, tDark, bDark, { metalness: 0.85, roughness: 0.28 }), acePurple: M(0x7a2ab8, tDark, bDark, { emissive: 0x2a0850 }),
+  cap: M(0xc2c8d2, tHuge, bHuge, { metalness: 0.7, roughness: 0.5, emissiveMap: tWin, emissive: 0xffffff, emissiveIntensity: 2.4, bumpScale: 2 }), capLight: M(0xe8ecf2, tHuge, bHuge, { metalness: 0.65, roughness: 0.5, bumpScale: 2 }), capDark: M(0x373a42, tHuge, bHuge, { metalness: 0.8, roughness: 0.45 }),
   cargo: M(0xa8ad98, tLight, bLight), cargoBox: M(0xd98a35, tLight, bLight), cargoBlue: M(0x3f78c9, tLight, bLight), rock: new THREE.MeshStandardMaterial({ color: 0x8d8377, roughness: 0.95, metalness: 0.05, flatShading: true }),
   white: M(0xf4f4f0, null, null, { metalness: 0.2, roughness: 0.5, side: THREE.DoubleSide }), goldFoil: M(0xd8a23a, null, null, { metalness: 1, roughness: 0.32, clearcoat: 0 }), solar: M(0xffffff, null, null, { metalness: 0.9, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08, envMapIntensity: 1.8 }),
   engine: GLOW(0.35, 1.3, 3.0), engineRed: GLOW(2.6, 0.5, 0.18), engineBig: GLOW(1.7, 0.42, 0.14), eye: GLOW(4.5, 0.5, 0.25), purple: GLOW(2.6, 0.5, 4.2),
-  green: GLOW(0.4, 2.6, 0.8), core: GLOW(4.5, 2.0, 0.5), windows: GLOW(2.2, 1.8, 1.1), blueLight: GLOW(0.5, 1.6, 3.2), goldLight: GLOW(3.0, 2.0, 0.6),
+  green: GLOW(0.4, 2.6, 0.8), core: GLOW(4.5, 2.0, 0.5), windows: GLOW(2.2, 1.8, 1.1), blueLight: GLOW(0.5, 1.6, 3.2), goldLight: GLOW(2.6, 0.5, 0.3),
 };
 
 // ---------- Bauhilfen ----------
@@ -245,7 +245,7 @@ function buildBuoy() {    // „Werbeboje“ mit vier Leuchttafeln
 function buildCore() {
   const g = new THREE.Group();
   part(g, new THREE.IcosahedronGeometry(13, 1), MATS.core);
-  const sh = new THREE.Mesh(new THREE.SphereGeometry(21, 20, 14), new THREE.MeshBasicMaterial({ color: 0x33ff99, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+  const sh = new THREE.Mesh(new THREE.SphereGeometry(21, 20, 14), new THREE.MeshBasicMaterial({ color: 0x3a8cff, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
   sh.userData.keep = true; g.add(sh); g.userData.shield = sh;
   part(g, new THREE.TorusGeometry(17, 1.4, 6, 20).rotateX(Math.PI / 2), MATS.gold); part(g, new THREE.TorusGeometry(17, 1.4, 6, 20), MATS.domLight, 0, 0, 0, 0, Math.PI / 2);
   part(g, new THREE.TorusGeometry(17, 1.0, 6, 20), MATS.domLight);
@@ -273,7 +273,7 @@ function buildHauler() {  // „Goldtransporter“: gepanzerter Frachter mit Gol
   const g = new THREE.Group();
   part(g, box(10, 9, 64), MATS.dom); part(g, box(14, 11, 12), MATS.domLight, 0, 1, 34); part(g, tube(3, 7.5, 9, 4), MATS.dom, 0, 1, 44.5, 0, 0, Math.PI / 4, 1, 0.75, 1);
   part(g, box(10, 1.6, 0.5), MATS.eye, 0, 4.4, 40.2); part(g, box(6, 2.4, 60), MATS.domLight, 0, 5.6, -2);
-  for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { part(g, box(8, 8, 12), MATS.gold, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 0.6, 12.4), MATS.metal, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 8.4, 0.6), MATS.metal, s * 9.4, 0, -24 + i * 14); }
+  for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { part(g, box(8, 8, 12), MATS.bullion, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 0.6, 12.4), MATS.metal, s * 9.4, 0, -24 + i * 14); part(g, box(8.4, 8.4, 0.6), MATS.metal, s * 9.4, 0, -24 + i * 14); }
   for (const s of [-1, 1]) { nacelle(g, s * 5.4, 0, -37, 4.4, 13, MATS.metal, MATS.engineRed); cannon(g, s * 3, 8, 20, 12, 0.5); }
   part(g, new THREE.CylinderGeometry(4, 5, 2.4, 10), MATS.domLight, 0, 7.6, 16);
   return g;
@@ -290,6 +290,24 @@ function buildCorvette() { // „Vollstrecker“: Kanonenboot mit sechs Geschüt
     part(g, box(2.4, 2.4, 6), MATS.domRed, s * 20, -0.4, -9); for (let i = 0; i < 3; i++) part(g, box(0.5, 1.6, 2), MATS.eye, s * 6.8, 0, -16 + i * 12);
   }
   nacelle(g, 0, 1, -31, 5, 12, MATS.dom, MATS.engineRed); part(g, new THREE.SphereGeometry(2.6, 10, 6, 0, 6.283, 0, 1.571), MATS.metal, 0, 8, 10); part(g, box(5, 0.4, 5), MATS.goldLight, 0, -7.3, 14);
+  return g;
+}
+
+function buildJammer() {   // „Störer“: Pfeilrumpf mit großer Störschüssel
+  const g = new THREE.Group();
+  part(g, tube(0.2, 1.1, 8, 6), MATS.dom, 0, 0, 0.5); part(g, box(5.4, 0.3, 2.6), MATS.domLight, 0, 0, -1.6); part(g, box(0.3, 2.6, 2.2), MATS.gold, 0, 1.2, -2.4);
+  for (const s of [-1, 1]) { part(g, box(0.3, 2.4, 3.4), MATS.gold, s * 2.7, 0, -1.6); part(g, tube(0.1, 0.1, 3, 5), MATS.metal, s * 2.7, 1.4, -0.6); }
+  const d = new THREE.Mesh(new THREE.SphereGeometry(2.2, 14, 8, 0, 6.283, 0, 0.9).rotateX(-Math.PI / 2), MATS.domLight); d.position.set(0, 1.3, 1.2); d.material = MATS.white; g.add(d);
+  part(g, new THREE.SphereGeometry(0.5, 8, 6), MATS.purple, 0, 1.3, 2.4); part(g, tube(0.06, 0.06, 2.4, 4), MATS.metal, 0, 1.3, 1.2);
+  part(g, disc(0.8, 8), MATS.purple, 0, 0, -3.52); part(g, tube(1.0, 0.8, 1.0, 8), MATS.metal, 0, 0, -3);
+  return g;
+}
+function buildShielder() { // „Schildträger“: Kern in drei Projektorringen
+  const g = new THREE.Group();
+  part(g, new THREE.OctahedronGeometry(2.6, 1), MATS.dom); part(g, new THREE.SphereGeometry(1.5, 10, 8), MATS.blueLight);
+  for (let i = 0; i < 3; i++) part(g, new THREE.TorusGeometry(5, 0.35, 6, 28), i ? MATS.domLight : MATS.gold, 0, 0, 0, i * 1.047, i * 0.7, 0);
+  for (let i = 0; i < 4; i++) { const a = i * 1.571; part(g, box(0.5, 0.5, 3.4), MATS.metal, Math.cos(a) * 3.6, Math.sin(a) * 3.6, 0, 0, 0, a); part(g, new THREE.SphereGeometry(0.5, 6, 4), MATS.blueLight, Math.cos(a) * 5, Math.sin(a) * 5, 0); }
+  part(g, tube(1.4, 1.1, 1.6, 8), MATS.metal, 0, 0, -3.2); part(g, disc(0.9, 8), MATS.engineRed, 0, 0, -4.02);
   return g;
 }
 
@@ -349,7 +367,7 @@ export function buildCapital(dread) {
 }
 
 // ---------- Fabrik: einmal bauen, verschmelzen, dann klonen ----------
-const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy, corvette: buildCorvette };
+const BUILD = { drone: buildDrone, inter: buildInter, bomber: buildBomber, ace: buildAce, turret: buildTurret, gen: buildGen, buoy: buildBuoy, core: buildCore, transport: buildTransport, kami: buildKami, hauler: buildHauler, target: buildBuoy, corvette: buildCorvette, jammer: buildJammer, shielder: buildShielder };
 const protos = {};
 function fromProto(key, make) {
   if (!protos[key]) { UVS = key === 'transport' || key === 'hauler' || key === 'corvette' ? 14 : ['gen', 'turret', 'core', 'buoy'].includes(key) ? 10 : 7; const g = make(), ud = g.userData; bake(g); g.userData = ud; protos[key] = g; UVS = 7; }
