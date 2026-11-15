@@ -101,7 +101,7 @@ export const COMICS = {
   ] },
   m3: { title: 'Kapitel 4 · Geleit auf dem Hellweg', pre: [
     { img: 'c_m3_1', cap: 'Der Hellweg, älteste Handelsroute des Systems. Drei Frachter mit Ware für die Läden von Essen.', lines: [['Astrid', 'Konvoi vollzählig. Baustelle umflogen. Ein Wunder.']] },
-    { img: 'n_m3_mid', cap: 'Brücke der „Ruhrperle“. Am Steuer: Oma Helga, Marcs Mutter. Vierzig Dienstjahre, kein einziger Strafzettel.', fx: 'KLICKER-KLACKER', lines: [['Oma Helga', 'Bomber auf dem Schirm, mein Junge. Mach hin, ich bin gleich an der Ferse.'], ['Opa Hans', 'Früher hat man sich einfach zusammengesetzt. Bei Kaffee. Ohne Laser.'], ['Oma Helga', 'Hans, du strickst nicht, also redest du auch nicht.']] },
+    { img: 'n_m3_mid', cap: 'Brücke der „Ruhrperle“. Am Steuer: Oma Helga, Marcs Mutter. Vierzig Dienstjahre, kein einziger Strafzettel.', fx: 'KLICKER-KLACKER', lines: [['Oma Helga', 'Bomber auf dem Schirm, mein Junge. Mach hin, ich bin gleich an der Ferse.'], ['Opa Hans', 'Früher hat man sich einfach zusammengesetzt. Bei Kaffee. Ohne Laser.']] },
     { img: 'c_m3_2', cap: 'Kanders schickt seine Abmahner.', lines: [['Marc Heistermann', 'Niemand mahnt meine Frachter ab!'], ['Marina', 'Juristisch ist das Unsinn, Papa. Aber es klingt gut.']] },
   ], post: [
     { img: 'x_m3_post', cap: 'Sprungtor Kettwig. Die Regale füllen sich.', lines: [['Oma Helga', 'Der Schal ist für Charlie. Im All zieht’s.'], ['Marc Heistermann', 'Und ich, Mama?'], ['Oma Helga', 'Du kriegst Kaffee, mein Junge. Und die gesunden Duplos.'], ['Opa Hans', 'Jetzt wird er auch noch belohnt! Für diesen ganzen unnötigen Streit!'], ['Oma Helga', 'Hans. Iss dein Duplo.']] },
