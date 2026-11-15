@@ -70,7 +70,7 @@ export const COMICS = {
     { img: 'n_sunday', cap: 'Und trotzdem: An einem verkaufsoffenen Sonntag war Essen der schönste Ort der Galaxis.', lines: [['Marc Heistermann', 'Dafür mache ich das alles.']] },
     { img: 'n_kord_screen', cap: 'Dann kam Gegner Nummer vier.', lines: [['Hauptgeschäftsführer Kanders', 'Bürger von Essen! Der Unternehmerverband hat eine frohe Botschaft: Ich kaufe alles.'], ['Hauptgeschäftsführer Kanders', 'Auch das, was nicht zu verkaufen ist.']] },
     { img: 'n_baker', cap: 'Kanders’ Heuschrecken-Drohnen arbeiteten schnell.', fx: 'RATSCH!', lines: [['Bäcker Bolle', 'Der hat meinen Stand gekauft, während ich noch Brötchen verkauft habe!'], ['Kunde', 'Darf ich das hier noch aufessen?']] },
-    { img: 'x_coffee', cap: 'Am Abend kam Post.', fx: 'PRUUUST!', lines: [['Marc Heistermann', '„Wettbewerb wird zum Monatsende abgeschafft. Mit freundlichen Grüßen, Kanders.“'], ['Marc Heistermann', 'MIT FREUNDLICHEN GRÜSSEN?!'], ['Charlie', 'WAFF?!']] },
+    { img: 'x_coffee', cap: 'Am Abend kam Post.', fx: 'PRUUUST!', lines: [['Marc Heistermann', '„Wettbewerb wird zum Monatsende abgeschafft. Mit freundlichen kollegialen Grüßen, Kanders.“'], ['Marc Heistermann', 'MIT FREUNDLICHEN KOLLEGIALEN GRÜSSEN?!'], ['Charlie', 'WAFF?!']] },
     { img: 'f_dinner', cap: 'Noch am selben Abend: Krisensitzung. Am Küchentisch, wo bei Heistermanns alles Wichtige entschieden wird.', lines: [['Astrid', 'Kanders will den Wettbewerb abschaffen? Nicht mit mir und nicht mit uns.'], ['Nick', 'Ich fliege mit. Linker Flügel.'], ['Marina', 'Dann nehme ich den rechten. Einer muss ja treffen.'], ['Jan', 'Ich schraube. Paula navigiert.'], ['Paula', 'Sonst landet ihr am Ende noch in Bottrop.']] },
     { img: 'f_dinner', cap: 'Bleibt noch ein Tagesordnungspunkt.', lines: [['Marvin', 'Ich hätte da eine Idee …'], ['Marina', 'Marvin, dein Kanu, dein Paddel und dein Ball helfen uns hier im Weltraum nicht.'], ['Marc Heistermann', 'Einstimmig. Charlie kriegt ein Käseleckerli. Und dann fliegen wir los.']] },
     { img: 'f_astrid', cap: 'Astrid Heistermann übernimmt die Leitstelle. Ab jetzt hört die ganze Staffel auf ihr Kommando. Marc übrigens auch.', lines: [['Astrid', 'Leitstelle an alle: Wer zu spät zum Start kommt, räumt die Spülmaschine aus.'], ['Charlie', 'Wuff.'], ['Astrid', 'Du nicht, Charlie. Du hast Bereitschaft.']] },
@@ -101,10 +101,10 @@ export const COMICS = {
   ] },
   m3: { title: 'Kapitel 4 · Geleit auf dem Hellweg', pre: [
     { img: 'c_m3_1', cap: 'Der Hellweg, älteste Handelsroute des Systems. Drei Frachter mit Ware für die Läden von Essen.', lines: [['Astrid', 'Konvoi vollzählig. Baustelle umflogen. Ein Wunder.']] },
-    { img: 'n_m3_mid', cap: 'Brücke der „Ruhrperle“. Kapitänin Erna Kowalski, vierzig Dienstjahre.', fx: 'KLICKER-KLACKER', lines: [['Käpt’n Erna', 'Bomber auf dem Schirm, Jungchen. Mach hin, ich bin gleich an der Ferse.']] },
+    { img: 'n_m3_mid', cap: 'Brücke der „Ruhrperle“. Am Steuer: Oma Helga, Marcs Mutter. Vierzig Dienstjahre, kein einziger Strafzettel.', fx: 'KLICKER-KLACKER', lines: [['Oma Helga', 'Bomber auf dem Schirm, mein Junge. Mach hin, ich bin gleich an der Ferse.'], ['Opa Hans', 'Früher hat man sich einfach zusammengesetzt. Bei Kaffee. Ohne Laser.'], ['Oma Helga', 'Hans, du strickst nicht, also redest du auch nicht.']] },
     { img: 'c_m3_2', cap: 'Kanders schickt seine Abmahner.', lines: [['Marc Heistermann', 'Niemand mahnt meine Frachter ab!'], ['Marina', 'Juristisch ist das Unsinn, Papa. Aber es klingt gut.']] },
   ], post: [
-    { img: 'x_m3_post', cap: 'Sprungtor Kettwig. Die Regale füllen sich.', lines: [['Käpt’n Erna', 'Der Schal ist für Charlie. Im All zieht’s.'], ['Marc Heistermann', 'Und ich, Erna?'], ['Käpt’n Erna', 'Du kriegst Kaffee, Jungchen.']] },
+    { img: 'x_m3_post', cap: 'Sprungtor Kettwig. Die Regale füllen sich.', lines: [['Oma Helga', 'Der Schal ist für Charlie. Im All zieht’s.'], ['Marc Heistermann', 'Und ich, Mama?'], ['Oma Helga', 'Du kriegst Kaffee, mein Junge. Und die gesunden Duplos.'], ['Opa Hans', 'Jetzt wird er auch noch belohnt! Für diesen ganzen unnötigen Streit!'], ['Oma Helga', 'Hans. Iss dein Duplo.']] },
   ] },
   m3b: { title: 'Kapitel 5 · Die Geisterarkaden', pre: [
     { img: 'c_m4_1', cap: 'Limbecker Ring. Das größte Kaufhaus des Systems treibt dunkel im All.', lines: [['Mini', 'Früher hat man hier einen ganzen Tag verbummelt.']] },
@@ -129,14 +129,15 @@ export const COMICS = {
     { img: 'n_m6_post', cap: 'Die Elite. Ordentlich verschnürt.', lines: [['Mini', 'Drei Stück, frisch abgewickelt. Mit Schleife.'], ['Liquidator', 'Das wird ein Nachspiel haben. Schriftlich.'], ['Marina', 'Gern. Frist zwei Wochen, dreifache Ausfertigung.']] },
   ] },
   m6: { title: 'Kapitel 8 · Flaggschiff Monopol', pre: [
+    { img: 'f_marina', cap: 'Im Hangar, kurz vor dem letzten Start.', lines: [['Marina', 'Pass gut auf Papa auf, Charlie. Du bist der Vernünftigere von euch beiden.'], ['Charlie', 'Wuff.'], ['Marc Heistermann', 'Das habe ich gehört.'], ['Marina', 'Das war Absicht.']] },
     { img: 'c_m7_1', cap: 'Über Essen Prime. Das Hauptgeschütz der Monopol lädt.', lines: [['Hauptgeschäftsführer Kanders', 'Ein Markt braucht keinen Wettbewerb. Er braucht einen Besitzer.'], ['Marina', 'Das Kartellamt sieht das anders. Und wir auch.']] },
     { img: 'n_m7_mid', cap: 'Brücke der Monopol.', lines: [['Hauptgeschäftsführer Kanders', 'Noch einen Espresso. Dann drücke ich den Knopf.'], ['Offizier', 'Herr Hauptgeschäftsführer, da kommt ein einzelner Jäger.'], ['Hauptgeschäftsführer Kanders', 'Lassen Sie mich raten.']] },
     { img: 'y_m7_charlie', cap: 'Im Cockpit der Pfeil.', fx: 'WUFF!', lines: [['Charlie', 'WUFF! WUFF! WUFF!'], ['Mini', 'Er sagt: Kern voraus. Oder er will einen Dentalstick. Die Betonung ist dieselbe.']] },
     { img: 'c_m7_2', cap: 'Ein einzelner Jäger unter dem Rumpf.', lines: [['Marc Heistermann', 'Ein Markt braucht Händler, Kanders. Viele. Und jetzt halt dich fest.'], ['Mini', 'Ich halte mich schon seit Kapitel 2 fest!']] },
   ], post: [
     { img: 'c_out_1', cap: 'Die Monopol zerbricht.', fx: 'KAWUMMS!', lines: [['Mini', 'Das war sie, Marc! Die ganze Flotte!']] },
-    { img: 'y_out_mid', cap: 'Kanders kapituliert. Der Handelsverband hat eine Stelle frei.', lines: [['Mini', 'Der Ausstellungsraum muss gefegt werden. Die Schürze steht Ihnen.'], ['Marina', 'Die Kapitulation bitte schriftlich. Mündliche Nebenabreden gelten nicht.'], ['Charlie', 'Grrr.'], ['Hauptgeschäftsführer Kanders', '… mit freundlichen Grüßen.']] },
-    { img: 'x_out_2', cap: 'Alle Verbände wählen den Handelsverband zu ihrem Vorsitz. Die Läden öffnen wieder. Sogar sonntags. Familie Heistermann steht auf dem Balkon. Charlie bekommt einen Orden. Und einen Dentalstick.', lines: [['Marc Heistermann', 'Dann machen wir Essen wieder auf. Alle zusammen.'], ['Astrid', 'Und sonntags wird trotzdem zu Hause gefrühstückt.'], ['Marvin', 'Ich hätte da übrigens noch eine Idee. Mit einem Kajak …'], ['Alle', 'NEIN, MARVIN!'], ['Charlie', 'WUFF!']] },
+    { img: 'y_out_mid', cap: 'Kanders kapituliert. Der Handelsverband hat eine Stelle frei.', lines: [['Mini', 'Der Ausstellungsraum muss gefegt werden. Die Schürze steht Ihnen.'], ['Marina', 'Die Kapitulation bitte schriftlich. Mündliche Nebenabreden gelten nicht.'], ['Charlie', 'Grrr.'], ['Hauptgeschäftsführer Kanders', '… mit freundlichen kollegialen Grüßen.']] },
+    { img: 'x_out_2', cap: 'Alle Verbände wählen den Handelsverband zu ihrem Vorsitz. Die Läden öffnen wieder. Sogar sonntags. Familie Heistermann steht auf dem Balkon. Charlie bekommt einen Orden. Und einen Dentalstick.', lines: [['Marc Heistermann', 'Dann machen wir Essen wieder auf. Alle zusammen.'], ['Astrid', 'Und sonntags wird trotzdem zu Hause gefrühstückt.'], ['Opa Hans', 'Na also. Das hätte man auch gleich beim Kaffee klären können.'], ['Marvin', 'Ich hätte da übrigens noch eine Idee. Mit einem Kajak …'], ['Alle', 'NEIN, MARVIN!'], ['Charlie', 'WUFF!']] },
   ] },
 };
 export const MISSIONS = [
@@ -177,9 +178,9 @@ export const MISSIONS = [
     id: 'm3', aim: 'Bring die drei Frachter heil zum Sprungtor Kettwig', why: 'Ohne diese Lieferung stehen die Märkte von Essen leer, und Kanders verkauft als Einziger.', n: 3, name: 'Geleit auf dem Hellweg', place: 'Handelsroute Hellweg', env: 'nebula', convoy: 3,
     brief: 'Drei Frachter bringen Waren für die Märkte von Essen über den Hellweg. Abmahner-Bomber des Unternehmerverbands wollen die Lieferung stoppen. Je heiler die Frachter ankommen, desto besser die Wertung.',
     phases: [
-      { label: 'Abmahner abfangen', spawn: [['bomber', 4], ['drone', 4]], comms: [['Frachter Ruhrperle', 'Nova Squadron, Bomber auf dem Schirm. Wir haben Ware für halb Essen an Bord.']] },
+      { label: 'Abmahner abfangen', spawn: [['bomber', 4], ['drone', 4]], comms: [['Oma Helga', 'Marc, Bomber auf dem Schirm. Ich habe Ware für halb Essen an Bord.']] },
       { label: 'Zweiten Angriff abwehren', spawn: [['bomber', 5], ['inter', 4], ['kami', 5]], comms: [['Mini', 'Sie kommen von beiden Seiten. Nimm die Abmahner zuerst.']] },
-      { label: 'Korvette und letzte Welle zerstören', spawn: [['corvette', 1], ['bomber', 5], ['drone', 5]], comms: [['Frachter Ruhrperle', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
+      { label: 'Korvette und letzte Welle zerstören', spawn: [['corvette', 1], ['bomber', 5], ['drone', 5]], comms: [['Oma Helga', 'Sprungtor Kettwig in Sicht. Nur noch diese Welle.']] },
     ],
   },
   {
