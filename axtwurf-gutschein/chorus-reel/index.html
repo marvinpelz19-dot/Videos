@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Und du, Paula? – Chorus Reel</title>
+<style>
+  @font-face { font-family: 'Inter'; src: url('assets/InterVariable-latin.woff2') format('woff2'); font-weight: 100 900; }
+  :root {
+    --ground: #160e0a; --ground2: #241510; --cream: #f6f2ec; --ink: #221a16;
+    --muted: #9b8f86; --accent: #e0562a; --mono: 'DejaVu Sans Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--ground); }
+  #stage { position: relative; width: 1080px; height: 1920px; overflow: hidden; font-family: 'Inter', sans-serif; color: var(--cream); }
+  .layer { position: absolute; inset: 0; visibility: hidden; }
+  .label { position: absolute; top: 150px; left: 80px; font: 600 44px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  .label::before { content: ''; display: inline-block; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); margin-right: 20px; vertical-align: 4px; }
+  .caret { display: inline-block; width: 0.08em; height: 1em; background: var(--accent); margin-left: 0.08em; vertical-align: -0.12em; }
+
+  /* I · prompt alone */
+  #m1 { background: radial-gradient(ellipse at 50% 46%, var(--ground2), var(--ground) 70%); }
+  #m1 .line { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font-weight: 650; font-size: 150px; line-height: 1.08; letter-spacing: -0.03em; }
+
+  /* II.1 · full-bleed terminal */
+  #s1 { background: #0d0907; }
+  #s1 .term { position: absolute; left: 80px; right: 80px; top: 820px; font: 400 84px/1.3 var(--mono); color: #f3ebe3; }
+  #s1 .term .ps { color: var(--accent); }
+  #s1 .hist { position: absolute; left: 80px; top: 640px; font: 400 34px/1.6 var(--mono); color: #4f433b; }
+
+  /* II.2 · docked panel */
+  #s2 { background: var(--cream); }
+  #s2 .ghost { position: absolute; left: 80px; right: 80px; height: 34px; border-radius: 17px; background: #e7e0d6; }
+  #s2 .dock { position: absolute; left: 0; right: 0; bottom: 0; height: 620px; background: #ffffff; border-radius: 48px 48px 0 0; box-shadow: 0 -20px 60px rgba(60, 30, 10, 0.12); }
+  #s2 .grip { position: absolute; top: 24px; left: 50%; width: 120px; height: 10px; margin-left: -60px; border-radius: 5px; background: #ddd5ca; }
+  #s2 .field { position: absolute; left: 64px; right: 64px; top: 150px; height: 200px; border: 3px solid #e3dbd0; border-radius: 36px; padding: 52px 150px 0 48px; font-size: 76px; font-weight: 500; color: var(--ink); letter-spacing: -0.015em; }
+  #s2 .send { position: absolute; right: 30px; top: 46px; width: 104px; height: 104px; border-radius: 50%; background: var(--accent); }
+  #s2 .label { color: #a3968b; }
+
+  /* II.3 · inline field in a document */
+  #s3 { background: #e9e2d8; }
+  #s3 .page { position: absolute; left: 90px; right: 90px; top: 360px; bottom: 360px; background: #fffdf9; border-radius: 10px; box-shadow: 0 30px 80px rgba(60, 30, 10, 0.18); padding: 110px 80px; color: var(--ink); }
+  #s3 h2 { font-size: 92px; font-weight: 750; letter-spacing: -0.03em; }
+  #s3 .rule { height: 4px; width: 200px; background: var(--accent); margin: 34px 0 70px; }
+  #s3 .bar { height: 26px; border-radius: 13px; background: #ece5db; margin-bottom: 34px; }
+  #s3 .inline { margin: 70px 0; font-size: 70px; font-weight: 500; letter-spacing: -0.015em; white-space: nowrap; }
+  #s3 .inline .key { color: var(--muted); margin-right: 18px; }
+  #s3 .inline .val { background: rgba(224, 86, 42, 0.12); border-bottom: 5px solid var(--accent); padding: 0 12px; }
+
+  /* II.4 · floating composer */
+  #s4 { background: radial-gradient(circle at 30% 30%, #5a2a17 0, transparent 45%), radial-gradient(circle at 75% 70%, #3c1f12 0, transparent 50%), var(--ground); }
+  #s4 .composer { position: absolute; left: 90px; right: 90px; top: 830px; height: 230px; border-radius: 115px; background: rgba(255, 250, 244, 0.94); box-shadow: 0 40px 120px rgba(0, 0, 0, 0.5); padding: 70px 190px 0 80px; font-size: 80px; font-weight: 550; color: var(--ink); letter-spacing: -0.015em; }
+  #s4 .composer .send { position: absolute; right: 36px; top: 36px; width: 158px; height: 158px; border-radius: 50%; background: var(--accent); }
+
+  /* III · reel */
+  #reel { background: #000; }
+  #reel img { position: absolute; inset: 0; width: 1080px; height: 1920px; object-fit: cover; visibility: hidden; transform-origin: 50% 50%; }
+
+  /* IV · command */
+  #m4 { background: var(--ground); }
+  #m4 .cmd { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; font: 400 66px var(--mono); color: #f3ebe3; white-space: nowrap; }
+  #m4 .cmd .ps { color: var(--accent); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <section class="layer" id="m1"><div class="line" data-prompt="full"></div></section>
+
+  <section class="layer" id="s1">
+    <div class="label">Terminal</div>
+    <div class="hist">~/geburtstag<br>~/geburtstag/paula</div>
+    <div class="term"><span class="ps">›</span> <span data-prompt="type"></span><span class="caret"></span></div>
+  </section>
+
+  <section class="layer" id="s2">
+    <div class="ghost" style="top:300px;width:70%"></div>
+    <div class="ghost" style="top:370px;width:55%"></div>
+    <div class="ghost" style="top:440px;width:62%"></div>
+    <div class="ghost" style="top:620px;width:40%;margin-left:auto"></div>
+    <div class="ghost" style="top:690px;width:48%;margin-left:auto"></div>
+    <div class="label">Panel</div>
+    <div class="dock"><div class="grip"></div>
+      <div class="field"><span data-prompt="type"></span><span class="caret"></span>
+        <svg class="send" viewBox="0 0 104 104"><circle cx="52" cy="52" r="52" fill="#e0562a"/><path d="M52 72V34M36 49l16-16 16 16" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="layer" id="s3">
+    <div class="label">Dokument</div>
+    <div class="page">
+      <h2>Gutschein</h2><div class="rule"></div>
+      <div class="bar" style="width:92%"></div><div class="bar" style="width:78%"></div>
+      <div class="inline"><span class="key">Für:</span><span class="val"><span data-prompt="type"></span></span></div>
+      <div class="bar" style="width:86%"></div><div class="bar" style="width:64%"></div><div class="bar" style="width:72%"></div>
+    </div>
+  </section>
+
+  <section class="layer" id="s4">
+    <div class="label">Chat</div>
+    <div class="composer"><span data-prompt="full"></span>
+      <svg class="send" viewBox="0 0 158 158"><circle cx="79" cy="79" r="79" fill="#e0562a"/><path d="M79 108V52M56 74l23-23 23 23" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </section>
+
+  <section class="layer" id="reel"></section>
+
+  <section class="layer" id="m4"><div class="cmd"><span class="ps">›</span> <span id="command"></span></div></section>
+</div>
+
+<script>
+  // The one prompt, declared once; every surface reads it.
+  const PROMPT = 'Und du, Paula?';
+  const COMMAND = 'axtwerfen --mit paula';
+
+  const FPS = 30;
+  const snap = (t) => Math.round(t * FPS) / FPS;
+  const BEAT = 60 / 105.45;          // from beats.json (105.45 BPM)
+  const DROP = snap(7.467);          // transient where the music opens up
+
+  // Movement timings (seconds, frame-snapped).
+  const T = {
+    m1: [0, snap(2.276)],                       // prompt alone, to the first downbeat
+    s1: [snap(2.276), snap(4.0)],               // terminal: types in full
+    s2: [snap(4.0), snap(5.38)],                // panel: types faster
+    s3: [snap(5.38), snap(6.5)],                // inline: half, then complete
+    s4: [snap(6.5), DROP],                      // composer: appears complete
+  };
+
+  // Reel cut grid in beats after the drop: half-rate, on-beat, double-rate, held final.
+  const OUT = [
+    ['o01', 0], ['o02', 2],
+    ['o05', 4], ['o03', 5], ['o06', 6], ['o04', 7], ['o07', 8], ['o08', 9],
+    ['o10', 10], ['o11', 10.5], ['o12', 11], ['o09', 11.5],
+    ['final', 12],
+  ];
+  const REEL_END = snap(DROP + 15 * BEAT);   // final output holds 3 beats
+  const END = 19.8;
+  const CUTS = OUT.map(([id, b]) => ({ id, at: snap(DROP + b * BEAT) }));
+  CUTS.forEach((c, i) => { c.until = i + 1 < CUTS.length ? CUTS[i + 1].at : REEL_END; });
+
+  const reel = document.getElementById('reel');
+  CUTS.forEach((c) => {
+    const img = document.createElement('img');
+    img.src = `assets/out/${c.id}.jpg`;
+    img.alt = '';
+    reel.appendChild(img);
+    c.el = img;
+  });
+  document.getElementById('command').textContent = COMMAND;
+  document.querySelectorAll('[data-prompt="full"]').forEach((n) => { n.textContent = PROMPT; });
+
+  const layers = Object.fromEntries([...document.querySelectorAll('.layer')].map((n) => [n.id, n]));
+  const show = (n, on) => { n.style.visibility = on ? 'visible' : 'hidden'; };
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const ease = (x) => 1 - Math.pow(1 - clamp(x), 3);
+
+  function typeInto(layer, t0, cps, t) {
+    const n = Math.floor(clamp((t - t0) * cps, 0, PROMPT.length));
+    layer.querySelectorAll('[data-prompt="type"]').forEach((s) => { s.textContent = PROMPT.slice(0, n); });
+    return n;
+  }
+  function caret(layer, t, typing) {
+    const on = typing || Math.floor(t * 2.4) % 2 === 0;
+    layer.querySelectorAll('.caret').forEach((c) => { c.style.opacity = on ? 1 : 0; });
+  }
+  const within = (t, [a, b]) => t >= a && t < b;
+
+  window.seek = function (t) {
+    // I · the line alone
+    show(layers.m1, within(t, T.m1));
+    if (within(t, T.m1)) {
+      const k = ease((t - 0.15) / 0.6);
+      const line = layers.m1.querySelector('.line');
+      line.style.opacity = k;
+      line.style.filter = `blur(${(1 - k) * 18}px)`;
+      line.style.transform = `translateY(-50%) scale(${1.06 - 0.06 * k})`;
+    }
+    // II · chorus, accelerating
+    show(layers.s1, within(t, T.s1));
+    if (within(t, T.s1)) caret(layers.s1, t, typeInto(layers.s1, T.s1[0] + 0.2, 14, t) < PROMPT.length);
+    show(layers.s2, within(t, T.s2));
+    if (within(t, T.s2)) {
+      const k = ease((t - T.s2[0]) / 0.35);
+      layers.s2.querySelector('.dock').style.transform = `translateY(${(1 - k) * 160}px)`;
+      caret(layers.s2, t, typeInto(layers.s2, T.s2[0] + 0.25, 26, t) < PROMPT.length);
+    }
+    show(layers.s3, within(t, T.s3));
+    if (within(t, T.s3)) {
+      const half = PROMPT.indexOf(',') + 1; // "Und du," then the whole line
+      const n = t < T.s3[0] + 0.45 ? half : PROMPT.length;
+      layers.s3.querySelectorAll('[data-prompt="type"]').forEach((s) => { s.textContent = PROMPT.slice(0, n); });
+    }
+    show(layers.s4, within(t, T.s4));
+    // III · reel, hard cuts, one output per frame, slow push inside each cut
+    const inReel = t >= DROP && t < REEL_END;
+    show(layers.reel, inReel);
+    CUTS.forEach((c) => {
+      const on = inReel && t >= c.at && t < c.until;
+      c.el.style.visibility = on ? 'visible' : 'hidden';
+      if (on) {
+        const p = clamp((t - c.at) / Math.max(0.5, c.until - c.at));
+        c.el.style.transform = `scale(${1 + 0.06 * p})`;
+      }
+    });
+    // IV · the command, then stillness
+    show(layers.m4, t >= REEL_END && t <= END + 1);
+  };
+  window.FILM = { END, FPS, DROP, CUTS: CUTS.map(({ id, at, until }) => ({ id, at, until })), T, REEL_END };
+  window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+  window.seek(0);
+</script>
+</body>
+</html>
